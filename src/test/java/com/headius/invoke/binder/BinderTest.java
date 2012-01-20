@@ -5,13 +5,13 @@
 
 package com.headius.invoke.binder;
 
-import java.dyn.MethodHandle;
-import java.dyn.MethodHandles;
-import java.dyn.MethodType;
 import junit.framework.TestCase;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+
 /**
- *
  * @author headius
  */
 public class BinderTest extends TestCase {
@@ -74,7 +74,7 @@ public class BinderTest extends TestCase {
                 .invoke(target);
         
         assertEquals(MethodType.methodType(String.class, Integer.class, Float.class, String.class), handle.type());
-        assertEquals("foofoo", handle.invokeWithArguments((Integer)0, (Float)0.0, "foo"));
+        assertEquals("foofoo", handle.invokeWithArguments((Integer) 0, (Float) 0.0f, "foo"));
     }
     
     public static MethodHandle concatHandle() throws Exception {

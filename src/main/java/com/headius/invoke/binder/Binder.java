@@ -1,8 +1,8 @@
 package com.headius.invoke.binder;
 
-import java.dyn.MethodHandle;
-import java.dyn.MethodHandles;
-import java.dyn.MethodType;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -151,7 +151,7 @@ public class Binder {
         }
         
         public MethodHandle up(MethodHandle target) {
-            return MethodHandles.convertArguments(target, type);
+            return target.asType(type);
         }
         
         public MethodType down(MethodType type) {

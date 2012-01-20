@@ -24,8 +24,6 @@ Status
 ======
 
 This is currently under development. Not all transformations from the MethodHandle
-API are yet supported. I have been developing based on the 20110310 build of
-OpenJDK 7 from http://code.google.com/p/openjdk-osx-build/, which has not yet
-incorporated all API changes including the move to the java.lang.invoke package.
+API are yet supported.
 
 Contributors are welcome :)

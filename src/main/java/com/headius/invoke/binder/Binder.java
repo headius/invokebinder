@@ -370,8 +370,8 @@ public class Binder {
      * match the end signature's return value and the end signature must take
      * the target class or a subclass as its only argument.
      */
-    public MethodHandle getField(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
-        return invoke(lookup.findGetter(target, name, type().returnType()));
+    public MethodHandle getField(MethodHandles.Lookup lookup, String name) throws NoSuchFieldException, IllegalAccessException {
+        return invoke(lookup.findGetter(type().parameterType(0), name, type().returnType()));
     }
 
     /**
@@ -390,8 +390,8 @@ public class Binder {
      * the target class or a subclass and the field's type as its arguments, and its return
      * type must be compatible with void.
      */
-    public MethodHandle setField(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
-        return invoke(lookup.findSetter(target, name, type().returnType()));
+    public MethodHandle setField(MethodHandles.Lookup lookup, String name) throws NoSuchFieldException, IllegalAccessException {
+        return invoke(lookup.findSetter(type().parameterType(0), name, type().parameterType(1)));
     }
 
     /**
@@ -401,7 +401,7 @@ public class Binder {
      * type must be compatible with void.
      */
     public MethodHandle setStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
-        return invoke(lookup.findStaticSetter(target, name, type().returnType()));
+        return invoke(lookup.findStaticSetter(target, name, type().parameterType(0)));
     }
 
 }

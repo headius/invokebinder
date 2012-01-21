@@ -9,7 +9,9 @@ import com.headius.invoke.binder.transform.Spread;
 import com.headius.invoke.binder.transform.Transform;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -229,6 +231,96 @@ public class Binder {
         assert current.type().equals(start) : "incoming " + start + " does not match target " + current.type();
 
         return current;
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a static method specified
+     * using the end signature plus the given class and method. The method will
+     * be retrieved using the given Lookup and must match the end signature
+     * exactly.
+     */
+    public MethodHandle invoke(MethodHandles.Lookup lookup, Method method) throws NoSuchMethodException, IllegalAccessException {
+        return invoke(lookup.unreflect(method));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a static method specified
+     * using the end signature plus the given class and name. The method will
+     * be retrieved using the given Lookup and must match the end signature
+     * exactly.
+     */
+    public MethodHandle invokeStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchMethodException, IllegalAccessException {
+        return invoke(lookup.findStatic(target, name, types.get(0)));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a virtual method specified
+     * using the end signature plus the given class and name. The method will
+     * be retrieved using the given Lookup and must match the end signature
+     * exactly.
+     */
+    public MethodHandle invokeVirtual(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchMethodException, IllegalAccessException {
+        return invoke(lookup.findVirtual(target, name, types.get(0).dropParameterTypes(0, 1)));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a special method specified
+     * using the end signature plus the given class and name. The method will
+     * be retrieved using the given Lookup and must match the end signature
+     * exactly.
+     */
+    public MethodHandle invokeSpecial(MethodHandles.Lookup lookup, Class target, String name, Class caller) throws NoSuchMethodException, IllegalAccessException {
+        return invoke(lookup.findSpecial(target, name, types.get(0).dropParameterTypes(0, 1), caller));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a special method specified
+     * using the end signature plus the given class. The method will
+     * be retrieved using the given Lookup and must match the end signature
+     * exactly.
+     */
+    public MethodHandle invokeConstructor(MethodHandles.Lookup lookup, Class target) throws NoSuchMethodException, IllegalAccessException {
+        return invoke(lookup.findConstructor(target, types.get(0).changeReturnType(void.class)));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to an object field retrieval specified
+     * using the end signature plus the given class and name. The field must
+     * match the end signature's return value and the end signature must take
+     * the target class or a subclass as its only argument.
+     */
+    public MethodHandle getField(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
+        return invoke(lookup.findGetter(target, name, types.get(0).returnType()));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a static field retrieval specified
+     * using the end signature plus the given class and name. The field must
+     * match the end signature's return value and the end signature must take
+     * no arguments.
+     */
+    public MethodHandle getStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
+        return invoke(lookup.findStaticGetter(target, name, types.get(0).returnType()));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to an object field assignment specified
+     * using the end signature plus the given class and name. The end signature must take
+     * the target class or a subclass and the field's type as its arguments, and its return
+     * type must be compatible with void.
+     */
+    public MethodHandle setField(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
+        return invoke(lookup.findSetter(target, name, types.get(0).returnType()));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to an object field assignment specified
+     * using the end signature plus the given class and name. The end signature must take
+     * the target class or a subclass and the field's type as its arguments, and its return
+     * type must be compatible with void.
+     */
+    public MethodHandle setStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
+        return invoke(lookup.findStaticSetter(target, name, types.get(0).returnType()));
     }
 
 }

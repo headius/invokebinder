@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 
 /**
  * @author headius
@@ -28,6 +29,53 @@ public class BinderTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
+    }
+
+    public void testInvoke() throws Throwable {
+        MethodHandle target = concatHandle();
+        MethodHandle handle = Binder
+                .from(String.class, String.class, String.class)
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
+    }
+
+    public void testInvokeReflected() throws Throwable {
+        Method target = BinderTest.class.getMethod("concatStatic", String.class, String.class);
+        MethodHandle handle = Binder
+                .from(String.class, String.class, String.class)
+                .invoke(MethodHandles.lookup(), target);
+
+        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
+    }
+
+    public void testInvokeStatic() throws Throwable {
+        MethodHandle handle = Binder
+                .from(String.class, String.class, String.class)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "concatStatic");
+
+        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
+    }
+
+    public void testInvokeVirtual() throws Throwable {
+        MethodHandle handle = Binder
+                .from(String.class, BinderTest.class, String.class, String.class)
+                .invokeVirtual(MethodHandles.lookup(), BinderTest.class, "concatVirtual");
+
+        assertEquals(MethodType.methodType(String.class, BinderTest.class, String.class, String.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact(this, "Hello, ", "world"));
+    }
+
+    public void testInvokeConstructor() throws Throwable {
+        MethodHandle handle = Binder
+                .from(Constructable.class, String.class, String.class)
+                .invokeConstructor(MethodHandles.lookup(), Constructable.class);
+
+        assertEquals(MethodType.methodType(Constructable.class, String.class, String.class), handle.type());
+        assertEquals(new Constructable("foo", "bar"), (Constructable) handle.invokeExact("foo", "bar"));
     }
 
     public void testInsert() throws Throwable {
@@ -121,11 +169,32 @@ public class BinderTest extends TestCase {
     }
 
     public static MethodHandle concatHandle() throws Exception {
-        return MethodHandles.lookup().findStatic(BinderTest.class, "concat", MethodType.methodType(String.class, String.class, String.class));
+        return MethodHandles.lookup().findStatic(BinderTest.class, "concatStatic", MethodType.methodType(String.class, String.class, String.class));
     }
 
-    public static String concat(String a, String b) {
+    public static String concatStatic(String a, String b) {
         return a + b;
+    }
+
+    public String concatVirtual(String a, String b) {
+        return a + b;
+    }
+
+    /**
+     * Represents a constructable object that's always equal to other constructables.
+     */
+    public static class Constructable {
+        private final String a, b;
+        public Constructable(String a, String b) {
+            this.a = a;
+            this.b = b;
+        }
+
+        public boolean equals(Object other) {
+            if (!(other instanceof Constructable)) return false;
+            Constructable c = (Constructable)other;
+            return a.equals(c.a) && b.equals(c.b);
+        }
     }
 
     public static MethodHandle mixedHandle() throws Exception {

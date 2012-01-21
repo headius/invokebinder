@@ -39,7 +39,7 @@ public class BinderTest extends TestCase {
 
         assertEquals(MethodType.methodType(String.class, String.class, Integer.class), binder.type());
 
-        binder
+        binder = binder
                 .drop(1);
 
         assertEquals(MethodType.methodType(String.class, String.class), binder.type());
@@ -54,7 +54,7 @@ public class BinderTest extends TestCase {
         binder.printType(ps);
         assertEquals("(String,Integer)String\n", baos.toString());
 
-        binder
+        binder = binder
                 .drop(1);
 
         baos = new ByteArrayOutputStream();
@@ -242,6 +242,18 @@ public class BinderTest extends TestCase {
         assertEquals("yahoofoo", (String)handle.invokeExact("foo"));
     }
     
+    public void testFilter() throws Throwable {
+        MethodHandle target = concatHandle();
+        MethodHandle filter = MethodHandles.lookup().findStatic(BinderTest.class, "addBaz", MethodType.methodType(String.class, String.class));
+        MethodHandle handle = Binder
+                .from(String.class, String.class, String.class)
+                .filter(0, filter, filter)
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals("foobazbarbaz", (String)handle.invokeExact("foo", "bar"));
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MethodHandle concatHandle() throws Exception {
@@ -254,6 +266,10 @@ public class BinderTest extends TestCase {
 
     public String concatVirtual(String a, String b) {
         return a + b;
+    }
+
+    public static String addBaz(String a) {
+        return a + "baz";
     }
 
     /**

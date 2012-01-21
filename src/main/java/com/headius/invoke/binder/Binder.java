@@ -3,6 +3,7 @@ package com.headius.invoke.binder;
 import com.headius.invoke.binder.transform.Cast;
 import com.headius.invoke.binder.transform.Convert;
 import com.headius.invoke.binder.transform.Drop;
+import com.headius.invoke.binder.transform.Filter;
 import com.headius.invoke.binder.transform.Fold;
 import com.headius.invoke.binder.transform.Insert;
 import com.headius.invoke.binder.transform.Permute;
@@ -58,6 +59,26 @@ public class Binder {
     public Binder(MethodType start) {
         this.start = start;
         this.types.add(0, start);
+    }
+
+    /**
+     * Construct a new Binder using the given binder plus an additional transform
+     */
+    public Binder(Binder source, Transform transform) {
+        this.start = source.start;
+        this.types.addAll(source.types);
+        this.transforms.addAll(source.transforms);
+        add(transform);
+    }
+
+    /**
+     * Construct a new Binder using the given binder plus an additional transform and current type
+     */
+    public Binder(Binder source, Transform transform, MethodType type) {
+        this.start = source.start;
+        this.types.addAll(source.types);
+        this.transforms.addAll(source.transforms);
+        add(transform, type);
     }
 
     /**
@@ -133,18 +154,17 @@ public class Binder {
      *
      * @param index the index at which to insert the argument value
      * @param values the value(s) to insert
-     * @return this Binder
+     * @return a new Binder
      */
     public Binder insert(int index, Object... values) {
-        add(new Insert(index, values));
-        return this;
+        return new Binder(this, new Insert(index, values));
     }
 
     /**
      * Drop a single argument at the given index.
      *
      * @param index the index at which to drop an argument
-     * @return this Binder
+     * @return a new Binder
      */
     public Binder drop(int index) {
         return drop(index, 1);
@@ -155,11 +175,10 @@ public class Binder {
      *
      * @param index the index at which to start dropping
      * @param count the number of arguments to drop
-     * @return this Binder
+     * @return a new Binder
      */
     public Binder drop(int index, int count) {
-        add(new Drop(index, Arrays.copyOfRange(type().parameterArray(), index, index + count)));
-        return this;
+        return new Binder(this, new Drop(index, Arrays.copyOfRange(type().parameterArray(), index, index + count)));
     }
 
     /**
@@ -167,11 +186,10 @@ public class Binder {
      * applied are equivalent to those in MethodHandle.asType(MethodType).
      *
      * @param target the target MethodType
-     * @return this Binder
+     * @return a new Binder
      */
     public Binder convert(MethodType target) {
-        add(new Convert(type()), target);
-        return this;
+        return new Binder(this, new Convert(type()), target);
     }
 
     /**
@@ -180,11 +198,10 @@ public class Binder {
      *
      * @param returnType the target return type
      * @param argTypes the target argument types
-     * @return this Binder
+     * @return a new Binder
      */
     public Binder convert(Class returnType, Class... argTypes) {
-        add(new Convert(type()), MethodType.methodType(returnType, argTypes));
-        return this;
+        return new Binder(this, new Convert(type()), MethodType.methodType(returnType, argTypes));
     }
 
     /**
@@ -192,11 +209,10 @@ public class Binder {
      * applied are equivalent to those in MethodHandles.explicitCastArguments(mh, MethodType).
      *
      * @param type the target MethodType
-     * @return this Binder
+     * @return a new Binder
      */
     public Binder cast(MethodType type) {
-        add(new Cast(type()), type);
-        return this;
+        return new Binder(this, new Cast(type()), type);
     }
 
     /**
@@ -205,22 +221,20 @@ public class Binder {
      *
      * @param returnType the target return type
      * @param argTypes the target argument types
-     * @return this Binder
+     * @return a new Binder
      */
     public Binder cast(Class returnType, Class... argTypes) {
-        add(new Cast(type()), MethodType.methodType(returnType, argTypes));
-        return this;
+        return new Binder(this, new Cast(type()), MethodType.methodType(returnType, argTypes));
     }
 
     /**
      * Spread a trailing Object[] into the specified argument types.
      *
      * @param spreadTypes the types into which to spread the incoming Object[]
-     * @return this Binder
+     * @return a new Binder
      */
     public Binder spread(Class... spreadTypes) {
-        add(new Spread(type(), spreadTypes));
-        return this;
+        return new Binder(this, new Spread(type(), spreadTypes));
     }
 
     /**
@@ -229,24 +243,34 @@ public class Binder {
      * Arguments may be duplicated or dropped in this sequence.
      *
      * @param reorder the int offsets of the incoming arguments in the desired permutation
-     * @return this Binder
+     * @return a new Binder
      */
     public Binder permute(int... reorder) {
-        add(new Permute(type(), reorder));
-        return this;
+        return new Binder(this, new Permute(type(), reorder));
     }
 
     /**
      * Process the incoming arguments using the given handle, inserting the result
      * as the first argument.
      *
-     * @param foldFunction the function that will process the incoming arguments. Its
+     * @param function the function that will process the incoming arguments. Its
      *                     signature must match the current signature's arguments exactly.
-     * @return this Binder
+     * @return a new Binder
      */
-    public Binder fold(MethodHandle foldFunction) {
-        add(new Fold(foldFunction));
-        return this;
+    public Binder fold(MethodHandle function) {
+        return new Binder(this, new Fold(function));
+    }
+
+    /**
+     * Filter incoming arguments, starting at the given index, replacing each with the
+     * result of calling the associated function in the given list.
+     *
+     * @param index the index of the first argument to filter
+     * @param functions the array of functions to transform the arguments
+     * @return a new Binder
+     */
+    public Binder filter(int index, MethodHandle... functions) {
+        return new Binder(this, new Filter(index, functions));
     }
 
     /**

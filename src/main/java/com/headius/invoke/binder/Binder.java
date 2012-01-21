@@ -229,8 +229,16 @@ public class Binder {
         return this;
     }
 
+    /**
+     * Apply the tranforms, binding them to a constant value that will
+     * propagate back through the chain. The chain's expected return type
+     * at that point must be compatible with the given value's type.
+     *
+     * @param value the constant value to put at the end of the chain
+     * @return a handle that has all transforms applied in sequence up to the constant
+     */
     public MethodHandle constant(Object value) {
-        return invoke(MethodHandles.constant(value.getClass(), value));
+        return invoke(MethodHandles.constant(types.get(0).returnType(), value));
     }
 
     /**

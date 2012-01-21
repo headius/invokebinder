@@ -7,6 +7,8 @@ package com.headius.invoke.binder;
 
 import junit.framework.TestCase;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -29,6 +31,36 @@ public class BinderTest extends TestCase {
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
+    }
+
+    public void testType() throws Throwable {
+        Binder binder = Binder
+                .from(String.class, String.class, Integer.class);
+
+        assertEquals(MethodType.methodType(String.class, String.class, Integer.class), binder.type());
+
+        binder
+                .drop(1);
+
+        assertEquals(MethodType.methodType(String.class, String.class), binder.type());
+    }
+
+    public void testPrintType() throws Throwable {
+        Binder binder = Binder
+                .from(String.class, String.class, Integer.class);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        binder.printType(ps);
+        assertEquals("(String,Integer)String\n", baos.toString());
+
+        binder
+                .drop(1);
+
+        baos = new ByteArrayOutputStream();
+        ps = new PrintStream(baos);
+        binder.printType(ps);
+        assertEquals("(String)String\n", baos.toString());
     }
 
     public void testInvoke() throws Throwable {

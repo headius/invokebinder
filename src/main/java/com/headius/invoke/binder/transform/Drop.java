@@ -25,7 +25,7 @@ public class Drop extends Transform {
     }
 
     public MethodType down(MethodType type) {
-        return type.dropParameterTypes(position, types.length);
+        return type.dropParameterTypes(position, position + types.length);
     }
 
     public String toString() {

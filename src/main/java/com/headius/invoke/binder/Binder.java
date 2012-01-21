@@ -9,6 +9,7 @@ import com.headius.invoke.binder.transform.Permute;
 import com.headius.invoke.binder.transform.Spread;
 import com.headius.invoke.binder.transform.Transform;
 
+import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -104,8 +105,27 @@ public class Binder {
      *
      * @return the current MethodType
      */
-    private MethodType currentType() {
+    public MethodType type() {
         return types.get(0);
+    }
+
+    /**
+     * Println the current MethodType to the given stream.
+     *
+     * @return this Binding
+     */
+    public Binder printType(PrintStream ps) {
+        ps.println(types.get(0));
+        return this;
+    }
+
+    /**
+     * Println the current MethodType to stdout.
+     *
+     * @return this Binding
+     */
+    public Binder printType() {
+        return printType(System.out);
     }
 
     /**
@@ -138,7 +158,7 @@ public class Binder {
      * @return this Binder
      */
     public Binder drop(int index, int count) {
-        add(new Drop(index, Arrays.copyOfRange(currentType().parameterArray(), index, index + count)));
+        add(new Drop(index, Arrays.copyOfRange(type().parameterArray(), index, index + count)));
         return this;
     }
 
@@ -150,7 +170,7 @@ public class Binder {
      * @return this Binder
      */
     public Binder convert(MethodType target) {
-        add(new Convert(types.get(0)), target);
+        add(new Convert(type()), target);
         return this;
     }
 
@@ -163,7 +183,7 @@ public class Binder {
      * @return this Binder
      */
     public Binder convert(Class returnType, Class... argTypes) {
-        add(new Convert(types.get(0)), MethodType.methodType(returnType, argTypes));
+        add(new Convert(type()), MethodType.methodType(returnType, argTypes));
         return this;
     }
 
@@ -175,7 +195,7 @@ public class Binder {
      * @return this Binder
      */
     public Binder cast(MethodType type) {
-        add(new Cast(types.get(0)), type);
+        add(new Cast(type()), type);
         return this;
     }
 
@@ -188,7 +208,7 @@ public class Binder {
      * @return this Binder
      */
     public Binder cast(Class returnType, Class... argTypes) {
-        add(new Cast(types.get(0)), MethodType.methodType(returnType, argTypes));
+        add(new Cast(type()), MethodType.methodType(returnType, argTypes));
         return this;
     }
 
@@ -199,7 +219,7 @@ public class Binder {
      * @return this Binder
      */
     public Binder spread(Class... spreadTypes) {
-        add(new Spread(types.get(0), spreadTypes));
+        add(new Spread(type(), spreadTypes));
         return this;
     }
 
@@ -212,7 +232,7 @@ public class Binder {
      * @return this Binder
      */
     public Binder permute(int... reorder) {
-        add(new Permute(types.get(0), reorder));
+        add(new Permute(type(), reorder));
         return this;
     }
 
@@ -238,7 +258,7 @@ public class Binder {
      * @return a handle that has all transforms applied in sequence up to the constant
      */
     public MethodHandle constant(Object value) {
-        return invoke(MethodHandles.constant(types.get(0).returnType(), value));
+        return invoke(MethodHandles.constant(type().returnType(), value));
     }
 
     /**
@@ -249,7 +269,7 @@ public class Binder {
      * @return a handle that has all transforms applied in sequence
      */
     public MethodHandle identity() {
-        return invoke(MethodHandles.identity(types.get(0).parameterType(0)));
+        return invoke(MethodHandles.identity(type().parameterType(0)));
     }
 
     /**
@@ -287,7 +307,7 @@ public class Binder {
      * exactly.
      */
     public MethodHandle invokeStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchMethodException, IllegalAccessException {
-        return invoke(lookup.findStatic(target, name, types.get(0)));
+        return invoke(lookup.findStatic(target, name, type()));
     }
 
     /**
@@ -297,7 +317,7 @@ public class Binder {
      * exactly.
      */
     public MethodHandle invokeVirtual(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchMethodException, IllegalAccessException {
-        return invoke(lookup.findVirtual(target, name, types.get(0).dropParameterTypes(0, 1)));
+        return invoke(lookup.findVirtual(target, name, type().dropParameterTypes(0, 1)));
     }
 
     /**
@@ -307,7 +327,7 @@ public class Binder {
      * exactly.
      */
     public MethodHandle invokeSpecial(MethodHandles.Lookup lookup, Class target, String name, Class caller) throws NoSuchMethodException, IllegalAccessException {
-        return invoke(lookup.findSpecial(target, name, types.get(0).dropParameterTypes(0, 1), caller));
+        return invoke(lookup.findSpecial(target, name, type().dropParameterTypes(0, 1), caller));
     }
 
     /**
@@ -317,7 +337,7 @@ public class Binder {
      * arguments exactly.
      */
     public MethodHandle invokeConstructor(MethodHandles.Lookup lookup, Class target) throws NoSuchMethodException, IllegalAccessException {
-        return invoke(lookup.findConstructor(target, types.get(0).changeReturnType(void.class)));
+        return invoke(lookup.findConstructor(target, type().changeReturnType(void.class)));
     }
 
     /**
@@ -327,7 +347,7 @@ public class Binder {
      * the target class or a subclass as its only argument.
      */
     public MethodHandle getField(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
-        return invoke(lookup.findGetter(target, name, types.get(0).returnType()));
+        return invoke(lookup.findGetter(target, name, type().returnType()));
     }
 
     /**
@@ -337,7 +357,7 @@ public class Binder {
      * no arguments.
      */
     public MethodHandle getStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
-        return invoke(lookup.findStaticGetter(target, name, types.get(0).returnType()));
+        return invoke(lookup.findStaticGetter(target, name, type().returnType()));
     }
 
     /**
@@ -347,7 +367,7 @@ public class Binder {
      * type must be compatible with void.
      */
     public MethodHandle setField(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
-        return invoke(lookup.findSetter(target, name, types.get(0).returnType()));
+        return invoke(lookup.findSetter(target, name, type().returnType()));
     }
 
     /**
@@ -357,7 +377,7 @@ public class Binder {
      * type must be compatible with void.
      */
     public MethodHandle setStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
-        return invoke(lookup.findStaticSetter(target, name, types.get(0).returnType()));
+        return invoke(lookup.findStaticSetter(target, name, type().returnType()));
     }
 
 }

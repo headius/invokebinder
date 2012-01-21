@@ -38,7 +38,7 @@ public class BinderTest extends TestCase {
                 .invoke(target);
 
         assertEquals(MethodType.methodType(String.class, String.class), handle.type());
-        assertEquals("Hello, world", handle.invokeWithArguments("Hello, "));
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, "));
     }
 
     public void testDropInsert() throws Throwable {
@@ -50,7 +50,7 @@ public class BinderTest extends TestCase {
                 .invoke(target);
 
         assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
-        assertEquals("Hello, world", handle.invokeWithArguments("Hello, ", new Object()));
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
     }
 
     public void testConvert() throws Throwable {
@@ -61,8 +61,40 @@ public class BinderTest extends TestCase {
                 .invoke(target);
 
         assertEquals(MethodType.methodType(String.class, Object.class, Integer.class, Float.class), handle.type());
-        // does not seem to be doing JLS conversion from float to double; see below
-        assertEquals(null, handle.invokeWithArguments("foo", 5, 5.0f));
+        assertEquals(null, (String) handle.invokeExact((Object) "foo", (Integer) 5, (Float) 5.0f));
+    }
+
+    public void testConvert2() throws Throwable {
+        MethodHandle target = mixedHandle();
+        MethodHandle handle = Binder
+                .from(String.class, Object.class, Integer.class, Float.class)
+                .convert(target.type().returnType(), target.type().parameterArray())
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, Object.class, Integer.class, Float.class), handle.type());
+        assertEquals(null, (String)handle.invokeExact((Object)"foo", (Integer)5, (Float)5.0f));
+    }
+
+    public void testCast() throws Throwable {
+        MethodHandle target = mixedHandle();
+        MethodHandle handle = Binder
+                .from(String.class, Object.class, byte.class, int.class)
+                .cast(target.type())
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, Object.class, byte.class, int.class), handle.type());
+        assertEquals(null, (String)handle.invokeExact((Object)"foo", (byte)5, 5));
+    }
+
+    public void testCast2() throws Throwable {
+        MethodHandle target = mixedHandle();
+        MethodHandle handle = Binder
+                .from(String.class, Object.class, byte.class, int.class)
+                .cast(target.type().returnType(), target.type().parameterArray())
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, Object.class, byte.class, int.class), handle.type());
+        assertEquals(null, (String)handle.invokeExact((Object)"foo", (byte)5, 5));
     }
 
     public void testDropReorder() throws Throwable {
@@ -70,11 +102,22 @@ public class BinderTest extends TestCase {
         MethodHandle handle = Binder
                 .from(String.class, Integer.class, Float.class, String.class)
                 .drop(0, 2)
-                .reorder(0, 0)
+                .permute(0, 0)
                 .invoke(target);
 
         assertEquals(MethodType.methodType(String.class, Integer.class, Float.class, String.class), handle.type());
-        assertEquals("foofoo", handle.invokeWithArguments((Integer) 0, (Float) 0.0f, "foo"));
+        assertEquals("foofoo", (String)handle.invokeExact((Integer) 0, (Float) 0.0f, "foo"));
+    }
+    
+    public void testSpread() throws Throwable {
+        MethodHandle target = concatHandle();
+        MethodHandle handle = Binder
+                .from(String.class, Object[].class)
+                .spread(String.class, String.class)
+                .invoke(target);
+        
+        assertEquals(MethodType.methodType(String.class, Object[].class), handle.type());
+        assertEquals("foobar", (String)handle.invokeExact(new Object[] {"foo", "bar"}));
     }
 
     public static MethodHandle concatHandle() throws Exception {
@@ -86,12 +129,8 @@ public class BinderTest extends TestCase {
     }
 
     public static MethodHandle mixedHandle() throws Exception {
-//        return MethodHandles.lookup().findStatic(BinderTest.class, "mixed", MethodType.methodType(void.class, String.class, int.class, double.class));
         return MethodHandles.lookup().findStatic(BinderTest.class, "mixed", MethodType.methodType(void.class, String.class, int.class, float.class));
     }
-
-//    public static void mixed(String a, int b, double c) {
-//    }
 
     public static void mixed(String a, int b, float c) {
     }

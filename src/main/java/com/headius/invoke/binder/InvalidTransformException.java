@@ -1,0 +1,11 @@
+package com.headius.invoke.binder;
+
+/**
+ * Exception raised when a Binder transform is not valid for the current
+ * signature.
+ */
+public class InvalidTransformException extends RuntimeException {
+    public InvalidTransformException(String message) {
+        super(message);
+    }
+}

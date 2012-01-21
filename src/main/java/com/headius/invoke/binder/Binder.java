@@ -3,6 +3,7 @@ package com.headius.invoke.binder;
 import com.headius.invoke.binder.transform.Cast;
 import com.headius.invoke.binder.transform.Convert;
 import com.headius.invoke.binder.transform.Drop;
+import com.headius.invoke.binder.transform.Fold;
 import com.headius.invoke.binder.transform.Insert;
 import com.headius.invoke.binder.transform.Permute;
 import com.headius.invoke.binder.transform.Spread;
@@ -213,6 +214,23 @@ public class Binder {
     public Binder permute(int... reorder) {
         add(new Permute(types.get(0), reorder));
         return this;
+    }
+
+    /**
+     * Process the incoming arguments using the given handle, inserting the result
+     * as the first argument.
+     *
+     * @param foldFunction the function that will process the incoming arguments. Its
+     *                     signature must match the current signature's arguments exactly.
+     * @return this Binder
+     */
+    public Binder fold(MethodHandle foldFunction) {
+        add(new Fold(foldFunction));
+        return this;
+    }
+
+    public MethodHandle constant(Object value) {
+        return invoke(MethodHandles.constant(value.getClass(), value));
     }
 
     /**

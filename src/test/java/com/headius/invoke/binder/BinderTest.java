@@ -167,6 +167,32 @@ public class BinderTest extends TestCase {
         assertEquals(MethodType.methodType(String.class, Object[].class), handle.type());
         assertEquals("foobar", (String)handle.invokeExact(new Object[] {"foo", "bar"}));
     }
+    
+    public void testConstant() throws Throwable {
+        MethodHandle handle = Binder
+                .from(String.class)
+                .constant("hello");
+
+        assertEquals(MethodType.methodType(String.class), handle.type());
+        assertEquals("hello", (String)handle.invokeExact());
+    }
+    
+    public void testFold() throws Throwable {
+        MethodHandle target = concatHandle();
+        MethodHandle fold = Binder
+                .from(String.class, String.class)
+                .drop(0)
+                .constant("yahoo");
+        MethodHandle handle = Binder
+                .from(String.class, String.class)
+                .fold(fold)
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class), handle.type());
+        assertEquals("yahoofoo", (String)handle.invokeExact("foo"));
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MethodHandle concatHandle() throws Exception {
         return MethodHandles.lookup().findStatic(BinderTest.class, "concatStatic", MethodType.methodType(String.class, String.class, String.class));

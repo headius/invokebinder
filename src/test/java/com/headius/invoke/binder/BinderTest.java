@@ -185,6 +185,15 @@ public class BinderTest extends TestCase {
         assertEquals(MethodType.methodType(Object.class), handle.type());
         assertEquals("hello", (Object)handle.invokeExact());
     }
+
+    public void testIdentity() throws Throwable {
+        MethodHandle handle = Binder
+                .from(String.class, String.class)
+                .identity();
+
+        assertEquals(MethodType.methodType(String.class, String.class), handle.type());
+        assertEquals("hello", (String)handle.invokeExact("hello"));
+    }
     
     public void testFold() throws Throwable {
         MethodHandle target = concatHandle();

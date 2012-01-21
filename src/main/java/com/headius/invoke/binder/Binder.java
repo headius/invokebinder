@@ -242,6 +242,17 @@ public class Binder {
     }
 
     /**
+     * Apply the tranforms, binding them to a handle that will simply return its sole
+     * argument as its return value. The endpoint signature must have a single argument
+     * of the same type as its return type.
+     *
+     * @return a handle that has all transforms applied in sequence
+     */
+    public MethodHandle identity() {
+        return invoke(MethodHandles.identity(types.get(0).parameterType(0)));
+    }
+
+    /**
      * Apply the chain of transforms with the target method handle as the final
      * endpoint. Produces a handle that has the transforms in given sequence.
      *

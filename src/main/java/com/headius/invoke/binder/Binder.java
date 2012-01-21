@@ -274,10 +274,10 @@ public class Binder {
     }
 
     /**
-     * Apply the chain of transforms and bind them to a special method specified
-     * using the end signature plus the given class. The method will
-     * be retrieved using the given Lookup and must match the end signature
-     * exactly.
+     * Apply the chain of transforms and bind them to a constructor specified
+     * using the end signature plus the given class. The constructor will
+     * be retrieved using the given Lookup and must match the end signature's
+     * arguments exactly.
      */
     public MethodHandle invokeConstructor(MethodHandles.Lookup lookup, Class target) throws NoSuchMethodException, IllegalAccessException {
         return invoke(lookup.findConstructor(target, types.get(0).changeReturnType(void.class)));

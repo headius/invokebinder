@@ -14,10 +14,10 @@ Transformation calls can be chained. They are not applied until an eventual
 "invoke" is called with the target endpoint MethodHandle.
 
     MethodHandle mh = Binder
-       .from(String.class, String.class, String.class) // (String, String)String
-       .drop(1, String.class) // (String)String
-       .insert(0, 'hello') // (String, String)String
-       .cast(String.class, CharSequence.class, Object.class) // (CharSequence, Object)String
+       .from(String.class, String.class, String.class) // String w(String, String)
+       .drop(1, String.class) // String x(String)
+       .insert(0, 'hello') // String y(String, String)
+       .cast(String.class, CharSequence.class, Object.class) // String z(CharSequence, Object)
        .invoke(someTargetHandle);
 
 Status

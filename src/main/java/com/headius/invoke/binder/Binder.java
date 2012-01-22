@@ -150,6 +150,16 @@ public class Binder {
     }
 
     /**
+     * Log the current MethodType as info.
+     *
+     * @return this Binding
+     */
+    public Binder logType() {
+        logger.info(types.get(0).toString());
+        return this;
+    }
+
+    /**
      * Insert at the given index the given argument value(s).
      *
      * @param index the index at which to insert the argument value

@@ -32,6 +32,14 @@
         <url>https://github.com/headius/invokebinder</url>
     </scm>
 
+    <developers>
+        <developer>
+            <id>headius</id>
+            <name>Charles Nutter</name>
+            <email>headius@headius.com</email>
+        </developer>
+    </developers>
+
     <build>
         <plugins>
             <plugin>

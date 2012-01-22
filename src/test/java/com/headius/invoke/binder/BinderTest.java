@@ -227,6 +227,16 @@ public class BinderTest extends TestCase {
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
+    public void testInvokeReflected2() throws Throwable {
+        Method target = BinderTest.class.getMethod("concatStatic", String.class, String.class);
+        MethodHandle handle = Binder
+                .from(String.class, String.class, String.class)
+                .invokeQuiet(MethodHandles.lookup(), target);
+
+        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
+    }
+
     public void testInvokeStatic() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
@@ -236,10 +246,28 @@ public class BinderTest extends TestCase {
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
+    public void testInvokeStatic2() throws Throwable {
+        MethodHandle handle = Binder
+                .from(String.class, String.class, String.class)
+                .invokeStaticQuiet(MethodHandles.lookup(), BinderTest.class, "concatStatic");
+
+        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
+    }
+
     public void testInvokeVirtual() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, BinderTest.class, String.class, String.class)
-                .invokeVirtual(MethodHandles.lookup(), BinderTest.class, "concatVirtual");
+                .invokeVirtual(MethodHandles.lookup(), "concatVirtual");
+
+        assertEquals(MethodType.methodType(String.class, BinderTest.class, String.class, String.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact(this, "Hello, ", "world"));
+    }
+
+    public void testInvokeVirtual2() throws Throwable {
+        MethodHandle handle = Binder
+                .from(String.class, BinderTest.class, String.class, String.class)
+                .invokeVirtualQuiet(MethodHandles.lookup(), "concatVirtual");
 
         assertEquals(MethodType.methodType(String.class, BinderTest.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact(this, "Hello, ", "world"));
@@ -249,6 +277,15 @@ public class BinderTest extends TestCase {
         MethodHandle handle = Binder
                 .from(Constructable.class, String.class, String.class)
                 .invokeConstructor(MethodHandles.lookup(), Constructable.class);
+
+        assertEquals(MethodType.methodType(Constructable.class, String.class, String.class), handle.type());
+        assertEquals(new Constructable("foo", "bar"), (Constructable) handle.invokeExact("foo", "bar"));
+    }
+
+    public void testInvokeConstructor2() throws Throwable {
+        MethodHandle handle = Binder
+                .from(Constructable.class, String.class, String.class)
+                .invokeConstructorQuiet(MethodHandles.lookup(), Constructable.class);
 
         assertEquals(MethodType.methodType(Constructable.class, String.class, String.class), handle.type());
         assertEquals(new Constructable("foo", "bar"), (Constructable) handle.invokeExact("foo", "bar"));
@@ -264,11 +301,29 @@ public class BinderTest extends TestCase {
         assertEquals("initial", (String)handle.invokeExact(fields));
     }
 
+    public void testGetField2() throws Throwable {
+        Fields fields = new Fields();
+        MethodHandle handle = Binder
+                .from(String.class, Fields.class)
+                .getFieldQuiet(MethodHandles.lookup(), "instanceField");
+
+        assertEquals(MethodType.methodType(String.class, Fields.class), handle.type());
+        assertEquals("initial", (String)handle.invokeExact(fields));
+    }
 
     public void testGetStatic() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class)
                 .getStatic(MethodHandles.lookup(), Fields.class, "staticField");
+
+        assertEquals(MethodType.methodType(String.class), handle.type());
+        assertEquals("initial", (String)handle.invokeExact());
+    }
+
+    public void testGetStatic2() throws Throwable {
+        MethodHandle handle = Binder
+                .from(String.class)
+                .getStaticQuiet(MethodHandles.lookup(), Fields.class, "staticField");
 
         assertEquals(MethodType.methodType(String.class), handle.type());
         assertEquals("initial", (String)handle.invokeExact());
@@ -285,6 +340,16 @@ public class BinderTest extends TestCase {
         assertEquals("modified", fields.instanceField);
     }
 
+    public void testSetField2() throws Throwable {
+        Fields fields = new Fields();
+        MethodHandle handle = Binder
+                .from(void.class, Fields.class, String.class)
+                .setFieldQuiet(MethodHandles.lookup(), "instanceField");
+
+        assertEquals(MethodType.methodType(void.class, Fields.class, String.class), handle.type());
+        handle.invokeExact(fields, "modified");
+        assertEquals("modified", fields.instanceField);
+    }
 
     public void testSetStatic() throws Throwable {
         try {
@@ -299,6 +364,21 @@ public class BinderTest extends TestCase {
             Fields.staticField = "initial";
         }
     }
+
+    public void testSetStatic2() throws Throwable {
+        try {
+            MethodHandle handle = Binder
+                    .from(void.class, String.class)
+                    .setStaticQuiet(MethodHandles.lookup(), Fields.class, "staticField");
+
+            assertEquals(MethodType.methodType(void.class, String.class), handle.type());
+            handle.invokeExact("modified");
+            assertEquals("modified", Fields.staticField);
+        } finally {
+            Fields.staticField = "initial";
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MethodHandle concatHandle() throws Exception {

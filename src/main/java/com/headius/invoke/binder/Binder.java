@@ -319,9 +319,34 @@ public class Binder {
      * using the end signature plus the given class and method. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
+     *
+     * @param lookup the MethodHandles.Lookup to use to unreflect the method
+     * @param method the Method to unreflect
+     * @return the full handle chain, bound to the given method
      */
-    public MethodHandle invoke(MethodHandles.Lookup lookup, Method method) throws NoSuchMethodException, IllegalAccessException {
+    public MethodHandle invoke(MethodHandles.Lookup lookup, Method method) throws IllegalAccessException {
         return invoke(lookup.unreflect(method));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a static method specified
+     * using the end signature plus the given class and method. The method will
+     * be retrieved using the given Lookup and must match the end signature
+     * exactly.
+     *
+     * This version is "quiet" in that it throws an unchecked InvalidTransformException
+     * if the target method does not exist or is inaccessible.
+     *
+     * @param lookup the MethodHandles.Lookup to use to unreflect the method
+     * @param method the Method to unreflect
+     * @return the full handle chain, bound to the given method
+     */
+    public MethodHandle invokeQuiet(MethodHandles.Lookup lookup, Method method) {
+        try {
+            return invoke(lookup, method);
+        } catch (IllegalAccessException iae) {
+            throw new InvalidTransformException(iae);
+        }
     }
 
     /**
@@ -329,9 +354,38 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
+     *
+     * @param lookup the MethodHandles.Lookup to use to unreflect the method
+     * @param target the class in which to find the method
+     * @param name the name of the method to invoke
+     * @return the full handle chain, bound to the given method
      */
     public MethodHandle invokeStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchMethodException, IllegalAccessException {
         return invoke(lookup.findStatic(target, name, type()));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a static method specified
+     * using the end signature plus the given class and name. The method will
+     * be retrieved using the given Lookup and must match the end signature
+     * exactly.
+     *
+     * This version is "quiet" in that it throws an unchecked InvalidTransformException
+     * if the target method does not exist or is inaccessible.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the method
+     * @param target the class in which to find the method
+     * @param name the name of the method to invoke
+     * @return the full handle chain, bound to the given method
+     */
+    public MethodHandle invokeStaticQuiet(MethodHandles.Lookup lookup, Class target, String name) {
+        try {
+            return invokeStatic(lookup, target, name);
+        } catch (IllegalAccessException iae) {
+            throw new InvalidTransformException(iae);
+        } catch (NoSuchMethodException nsme) {
+            throw new InvalidTransformException(nsme);
+        }
     }
 
     /**
@@ -339,9 +393,36 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the method
+     * @param name the name of the method to invoke
+     * @return the full handle chain, bound to the given method
      */
-    public MethodHandle invokeVirtual(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchMethodException, IllegalAccessException {
-        return invoke(lookup.findVirtual(target, name, type().dropParameterTypes(0, 1)));
+    public MethodHandle invokeVirtual(MethodHandles.Lookup lookup, String name) throws NoSuchMethodException, IllegalAccessException {
+        return invoke(lookup.findVirtual(type().parameterType(0), name, type().dropParameterTypes(0, 1)));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a virtual method specified
+     * using the end signature plus the given class and name. The method will
+     * be retrieved using the given Lookup and must match the end signature
+     * exactly.
+     *
+     * This version is "quiet" in that it throws an unchecked InvalidTransformException
+     * if the target method does not exist or is inaccessible.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the method
+     * @param name the name of the method to invoke
+     * @return the full handle chain, bound to the given method
+     */
+    public MethodHandle invokeVirtualQuiet(MethodHandles.Lookup lookup, String name) {
+        try {
+            return invokeVirtual(lookup, name);
+        } catch (IllegalAccessException iae) {
+            throw new InvalidTransformException(iae);
+        } catch (NoSuchMethodException nsme) {
+            throw new InvalidTransformException(nsme);
+        }
     }
 
     /**
@@ -349,9 +430,38 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the method
+     * @param name the name of the method to invoke
+     * @param caller the calling class
+     * @return the full handle chain, bound to the given method
      */
-    public MethodHandle invokeSpecial(MethodHandles.Lookup lookup, Class target, String name, Class caller) throws NoSuchMethodException, IllegalAccessException {
-        return invoke(lookup.findSpecial(target, name, type().dropParameterTypes(0, 1), caller));
+    public MethodHandle invokeSpecial(MethodHandles.Lookup lookup, String name, Class caller) throws NoSuchMethodException, IllegalAccessException {
+        return invoke(lookup.findSpecial(type().parameterType(0), name, type().dropParameterTypes(0, 1), caller));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a special method specified
+     * using the end signature plus the given class and name. The method will
+     * be retrieved using the given Lookup and must match the end signature
+     * exactly.
+     *
+     * This version is "quiet" in that it throws an unchecked InvalidTransformException
+     * if the target method does not exist or is inaccessible.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the method
+     * @param name the name of the method to invoke
+     * @param caller the calling class
+     * @return the full handle chain, bound to the given method
+     */
+    public MethodHandle invokeSpecialQuiet(MethodHandles.Lookup lookup, String name, Class caller) {
+        try {
+            return invokeSpecial(lookup, name, caller);
+        } catch (IllegalAccessException iae) {
+            throw new InvalidTransformException(iae);
+        } catch (NoSuchMethodException nsme) {
+            throw new InvalidTransformException(nsme);
+        }
     }
 
     /**
@@ -359,9 +469,36 @@ public class Binder {
      * using the end signature plus the given class. The constructor will
      * be retrieved using the given Lookup and must match the end signature's
      * arguments exactly.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the constructor
+     * @param target the constructor's class
+     * @return the full handle chain, bound to the given constructor
      */
     public MethodHandle invokeConstructor(MethodHandles.Lookup lookup, Class target) throws NoSuchMethodException, IllegalAccessException {
         return invoke(lookup.findConstructor(target, type().changeReturnType(void.class)));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a constructor specified
+     * using the end signature plus the given class. The constructor will
+     * be retrieved using the given Lookup and must match the end signature's
+     * arguments exactly.
+     *
+     * This version is "quiet" in that it throws an unchecked InvalidTransformException
+     * if the target method does not exist or is inaccessible.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the constructor
+     * @param target the constructor's class
+     * @return the full handle chain, bound to the given constructor
+     */
+    public MethodHandle invokeConstructorQuiet(MethodHandles.Lookup lookup, Class target) {
+        try {
+            return invokeConstructor(lookup, target);
+        } catch (IllegalAccessException iae) {
+            throw new InvalidTransformException(iae);
+        } catch (NoSuchMethodException nsme) {
+            throw new InvalidTransformException(nsme);
+        }
     }
 
     /**
@@ -369,9 +506,36 @@ public class Binder {
      * using the end signature plus the given class and name. The field must
      * match the end signature's return value and the end signature must take
      * the target class or a subclass as its only argument.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the field
+     * @param name the field's name
+     * @return the full handle chain, bound to the given field access
      */
     public MethodHandle getField(MethodHandles.Lookup lookup, String name) throws NoSuchFieldException, IllegalAccessException {
         return invoke(lookup.findGetter(type().parameterType(0), name, type().returnType()));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to an object field retrieval specified
+     * using the end signature plus the given class and name. The field must
+     * match the end signature's return value and the end signature must take
+     * the target class or a subclass as its only argument.
+     *
+     * This version is "quiet" in that it throws an unchecked InvalidTransformException
+     * if the target method does not exist or is inaccessible.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the field
+     * @param name the field's name
+     * @return the full handle chain, bound to the given field access
+     */
+    public MethodHandle getFieldQuiet(MethodHandles.Lookup lookup, String name) {
+        try {
+            return getField(lookup, name);
+        } catch (IllegalAccessException iae) {
+            throw new InvalidTransformException(iae);
+        } catch (NoSuchFieldException nsfe) {
+            throw new InvalidTransformException(nsfe);
+        }
     }
 
     /**
@@ -379,9 +543,38 @@ public class Binder {
      * using the end signature plus the given class and name. The field must
      * match the end signature's return value and the end signature must take
      * no arguments.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the field
+     * @param target the class in which the field is defined
+     * @param name the field's name
+     * @return the full handle chain, bound to the given field access
      */
     public MethodHandle getStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
         return invoke(lookup.findStaticGetter(target, name, type().returnType()));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a static field retrieval specified
+     * using the end signature plus the given class and name. The field must
+     * match the end signature's return value and the end signature must take
+     * no arguments.
+     *
+     * This version is "quiet" in that it throws an unchecked InvalidTransformException
+     * if the target method does not exist or is inaccessible.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the field
+     * @param target the class in which the field is defined
+     * @param name the field's name
+     * @return the full handle chain, bound to the given field access
+     */
+    public MethodHandle getStaticQuiet(MethodHandles.Lookup lookup, Class target, String name) {
+        try {
+            return getStatic(lookup, target, name);
+        } catch (IllegalAccessException iae) {
+            throw new InvalidTransformException(iae);
+        } catch (NoSuchFieldException nsfe) {
+            throw new InvalidTransformException(nsfe);
+        }
     }
 
     /**
@@ -389,6 +582,10 @@ public class Binder {
      * using the end signature plus the given class and name. The end signature must take
      * the target class or a subclass and the field's type as its arguments, and its return
      * type must be compatible with void.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the field
+     * @param name the field's name
+     * @return the full handle chain, bound to the given field assignment
      */
     public MethodHandle setField(MethodHandles.Lookup lookup, String name) throws NoSuchFieldException, IllegalAccessException {
         return invoke(lookup.findSetter(type().parameterType(0), name, type().parameterType(1)));
@@ -399,9 +596,61 @@ public class Binder {
      * using the end signature plus the given class and name. The end signature must take
      * the target class or a subclass and the field's type as its arguments, and its return
      * type must be compatible with void.
+     *
+     * This version is "quiet" in that it throws an unchecked InvalidTransformException
+     * if the target method does not exist or is inaccessible.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the field
+     * @param name the field's name
+     * @return the full handle chain, bound to the given field assignment
+     */
+    public MethodHandle setFieldQuiet(MethodHandles.Lookup lookup, String name) {
+        try {
+            return setField(lookup, name);
+        } catch (IllegalAccessException iae) {
+            throw new InvalidTransformException(iae);
+        } catch (NoSuchFieldException nsfe) {
+            throw new InvalidTransformException(nsfe);
+        }
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to an object field assignment specified
+     * using the end signature plus the given class and name. The end signature must take
+     * the target class or a subclass and the field's type as its arguments, and its return
+     * type must be compatible with void.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the field
+     * @param target the class in which the field is defined
+     * @param name the field's name
+     * @return the full handle chain, bound to the given field assignment
      */
     public MethodHandle setStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
         return invoke(lookup.findStaticSetter(target, name, type().parameterType(0)));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to an object field assignment specified
+     * using the end signature plus the given class and name. The end signature must take
+     * the target class or a subclass and the field's type as its arguments, and its return
+     * type must be compatible with void.
+     *
+     * This version is "quiet" in that it throws an unchecked InvalidTransformException
+     * if the target method does not exist or is inaccessible.
+     *
+     * @param lookup the MethodHandles.Lookup to use to look up the field
+     * @param target the class in which the field is defined
+     * @param name the field's name
+     * @return the full handle chain, bound to the given field assignment
+     */
+    public MethodHandle setStaticQuiet(MethodHandles.Lookup lookup, Class target, String name) {
+        try {
+            return setStatic(lookup, target, name);
+        } catch (IllegalAccessException iae) {
+            throw new InvalidTransformException(iae);
+        } catch (NoSuchFieldException nsfe) {
+            throw new InvalidTransformException(nsfe);
+        }
     }
 
 }

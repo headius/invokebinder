@@ -8,4 +8,8 @@ public class InvalidTransformException extends RuntimeException {
     public InvalidTransformException(String message) {
         super(message);
     }
+
+    public InvalidTransformException(Exception e) {
+        super(e);
+    }
 }

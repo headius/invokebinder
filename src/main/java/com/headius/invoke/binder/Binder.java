@@ -1,9 +1,11 @@
 package com.headius.invoke.binder;
 
 import com.headius.invoke.binder.transform.Cast;
+import com.headius.invoke.binder.transform.Catch;
 import com.headius.invoke.binder.transform.Convert;
 import com.headius.invoke.binder.transform.Drop;
 import com.headius.invoke.binder.transform.Filter;
+import com.headius.invoke.binder.transform.FilterReturn;
 import com.headius.invoke.binder.transform.Fold;
 import com.headius.invoke.binder.transform.Insert;
 import com.headius.invoke.binder.transform.Permute;
@@ -47,8 +49,8 @@ import java.util.logging.Logger;
 public class Binder {
 
     private final Logger logger = Logger.getLogger("Invoke Binder");
-    private final List<Transform> transforms = new ArrayList<>();
-    private final List<MethodType> types = new ArrayList<>();
+    private final List<Transform> transforms = new ArrayList();
+    private final List<MethodType> types = new ArrayList();
     private final MethodType start;
 
     /**
@@ -92,14 +94,36 @@ public class Binder {
     }
 
     /**
+     * Construct a new Binder using a return type.
+     *
+     * @param returnType the return type of the incoming signature
+     * @return the Binder object
+     */
+    public static Binder from(Class returnType) {
+        return from(MethodType.methodType(returnType));
+    }
+
+    /**
      * Construct a new Binder using a return type and argument types.
      *
      * @param returnType the return type of the incoming signature
      * @param argTypes the argument types of the incoming signature
      * @return the Binder object
      */
-    public static Binder from(Class returnType, Class... argTypes) {
+    public static Binder from(Class returnType, Class[] argTypes) {
         return from(MethodType.methodType(returnType, argTypes));
+    }
+
+    /**
+     * Construct a new Binder using a return type and argument types.
+     *
+     * @param returnType the return type of the incoming signature
+     * @param argType0 the first argument type of the incoming signature
+     * @param argTypes the remaining argument types of the incoming signature
+     * @return the Binder object
+     */
+    public static Binder from(Class returnType, Class argType0, Class... argTypes) {
+        return from(MethodType.methodType(returnType, argType0, argTypes));
     }
 
     /**
@@ -284,6 +308,30 @@ public class Binder {
     }
 
     /**
+     * Filter return value, using a function that produces the current return type
+     * from another type. The new endpoint will have the return value that the
+     * filter function accepts as an argument.
+     *
+     * @param function the array of functions to transform the arguments
+     * @return a new Binder
+     */
+    public Binder filterReturn(MethodHandle function) {
+        return new Binder(this, new FilterReturn(function));
+    }
+
+    /**
+     * Catch the given exception type from the downstream chain and handle it with the
+     * given function.
+     *
+     * @param throwable the exception type to catch
+     * @param function the function to use for handling the exception
+     * @return a new Binder
+     */
+    public Binder catchException(Class<Throwable> throwable, MethodHandle function) {
+        return new Binder(this, new Catch(throwable, function));
+    }
+
+    /**
      * Apply the tranforms, binding them to a constant value that will
      * propagate back through the chain. The chain's expected return type
      * at that point must be compatible with the given value's type.
@@ -310,16 +358,20 @@ public class Binder {
      * Apply the chain of transforms with the target method handle as the final
      * endpoint. Produces a handle that has the transforms in given sequence.
      *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
+     *
      * @param target the endpoint handle to bind to
      * @return a handle that has all transforms applied in sequence up to endpoint
      */
     public MethodHandle invoke(MethodHandle target) {
         MethodHandle current = target;
         for (Transform t : transforms) {
-            MethodHandle previous = current;
             current = t.up(current);
         }
-        assert current.type().equals(start) : "incoming " + start + " does not match target " + current.type();
+        
+        // if resulting handle's type does not match start, attempt one more cast
+        current = MethodHandles.explicitCastArguments(current, start);
 
         return current;
     }
@@ -329,6 +381,9 @@ public class Binder {
      * using the end signature plus the given class and method. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
+     *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
      *
      * @param lookup the MethodHandles.Lookup to use to unreflect the method
      * @param method the Method to unreflect
@@ -343,6 +398,9 @@ public class Binder {
      * using the end signature plus the given class and method. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
+     *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
      *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
@@ -365,6 +423,9 @@ public class Binder {
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
      *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
+     *
      * @param lookup the MethodHandles.Lookup to use to unreflect the method
      * @param target the class in which to find the method
      * @param name the name of the method to invoke
@@ -379,6 +440,9 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
+     *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
      *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
@@ -404,6 +468,9 @@ public class Binder {
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
      *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
+     *
      * @param lookup the MethodHandles.Lookup to use to look up the method
      * @param name the name of the method to invoke
      * @return the full handle chain, bound to the given method
@@ -417,6 +484,9 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
+     *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
      *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
@@ -441,6 +511,9 @@ public class Binder {
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
      *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
+     *
      * @param lookup the MethodHandles.Lookup to use to look up the method
      * @param name the name of the method to invoke
      * @param caller the calling class
@@ -455,6 +528,9 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
+     *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
      *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
@@ -480,6 +556,9 @@ public class Binder {
      * be retrieved using the given Lookup and must match the end signature's
      * arguments exactly.
      *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
+     *
      * @param lookup the MethodHandles.Lookup to use to look up the constructor
      * @param target the constructor's class
      * @return the full handle chain, bound to the given constructor
@@ -493,6 +572,9 @@ public class Binder {
      * using the end signature plus the given class. The constructor will
      * be retrieved using the given Lookup and must match the end signature's
      * arguments exactly.
+     *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
      *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
@@ -517,6 +599,9 @@ public class Binder {
      * match the end signature's return value and the end signature must take
      * the target class or a subclass as its only argument.
      *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
+     *
      * @param lookup the MethodHandles.Lookup to use to look up the field
      * @param name the field's name
      * @return the full handle chain, bound to the given field access
@@ -530,6 +615,9 @@ public class Binder {
      * using the end signature plus the given class and name. The field must
      * match the end signature's return value and the end signature must take
      * the target class or a subclass as its only argument.
+     *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
      *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
@@ -554,6 +642,9 @@ public class Binder {
      * match the end signature's return value and the end signature must take
      * no arguments.
      *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
+     *
      * @param lookup the MethodHandles.Lookup to use to look up the field
      * @param target the class in which the field is defined
      * @param name the field's name
@@ -568,6 +659,9 @@ public class Binder {
      * using the end signature plus the given class and name. The field must
      * match the end signature's return value and the end signature must take
      * no arguments.
+     *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
      *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
@@ -593,6 +687,9 @@ public class Binder {
      * the target class or a subclass and the field's type as its arguments, and its return
      * type must be compatible with void.
      *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
+     *
      * @param lookup the MethodHandles.Lookup to use to look up the field
      * @param name the field's name
      * @return the full handle chain, bound to the given field assignment
@@ -606,6 +703,9 @@ public class Binder {
      * using the end signature plus the given class and name. The end signature must take
      * the target class or a subclass and the field's type as its arguments, and its return
      * type must be compatible with void.
+     *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
      *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
@@ -630,6 +730,9 @@ public class Binder {
      * the target class or a subclass and the field's type as its arguments, and its return
      * type must be compatible with void.
      *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
+     *
      * @param lookup the MethodHandles.Lookup to use to look up the field
      * @param target the class in which the field is defined
      * @param name the field's name
@@ -644,6 +747,9 @@ public class Binder {
      * using the end signature plus the given class and name. The end signature must take
      * the target class or a subclass and the field's type as its arguments, and its return
      * type must be compatible with void.
+     *
+     * If the final handle's type does not exactly match the initial type for
+     * this Binder, an additional cast will be attempted.
      *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.

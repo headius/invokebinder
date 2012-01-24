@@ -415,6 +415,31 @@ public class BinderTest extends TestCase {
         assertEquals("foofinally", stringAry[0]);
     }
 
+    public void testTryFinally3() throws Throwable {
+        MethodHandle post = Binder
+                .from(void.class, String[].class)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+        
+        MethodHandle ignoreException = Binder
+                .from(void.class, RuntimeException.class, String[].class)
+                .nop();
+
+        MethodHandle handle = Binder
+                .from(void.class, String[].class)
+                .tryFinally(post)
+                .catchException(RuntimeException.class, ignoreException)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFooAndRaise");
+
+        assertEquals(MethodType.methodType(void.class, String[].class), handle.type());
+        String[] stringAry = new String[1];
+        try {
+            handle.invokeExact(stringAry);
+        } catch (RuntimeException re) {
+            assertTrue("should not have reached here", false);
+        }
+        assertEquals("foofinally", stringAry[0]);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MethodHandle concatHandle() throws Exception {

@@ -350,8 +350,25 @@ public class Binder {
      * @param function the function to use for handling the exception
      * @return a new Binder
      */
-    public Binder catchException(Class<Throwable> throwable, MethodHandle function) {
+    public Binder catchException(Class<? extends Throwable> throwable, MethodHandle function) {
         return new Binder(this, new Catch(throwable, function));
+    }
+
+    /**
+     * Apply all transforms to an endpoint that does absolutely nothing. Useful for
+     * creating exception handlers in void methods that simply ignore the exception.
+     * 
+     * @return a handle that has all transforms applied and does nothing at its endpoint
+     */
+    public MethodHandle nop() {
+        if (type().returnType() != void.class) {
+            throw new InvalidTransformException("must have void return type to nop: " + type());
+        }
+        return invoke(Binder
+                .from(type())
+                .drop(0, type().parameterCount())
+                .cast(Object.class)
+                .constant(null));
     }
 
     /**

@@ -391,6 +391,34 @@ public class BinderTest {
             Fields.staticField = "initial";
         }
     }
+    
+    @Test
+    public void testNop() throws Throwable {
+        MethodHandle handle = Binder
+                .from(void.class, int.class, String.class)
+                .nop();
+        
+        assertEquals(MethodType.methodType(void.class, int.class, String.class), handle.type());
+        try {
+            handle.invokeExact(1, "foo");
+        } catch (Throwable t) {
+            assertTrue("should not reach here", false);
+        }
+    }
+    
+    @Test
+    public void testThrowException() throws Throwable {
+        MethodHandle handle = Binder
+                .from(void.class, BlahException.class)
+                .throwException();
+        
+        assertEquals(MethodType.methodType(void.class, BlahException.class), handle.type());
+        try {
+            handle.invokeExact(new BlahException());
+            assertTrue("should not reach here", false);
+        } catch (BlahException be) {
+        }
+    }
 
     @Test
     public void testTryFinally() throws Throwable {

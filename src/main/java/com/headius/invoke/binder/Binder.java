@@ -11,6 +11,7 @@ import com.headius.invoke.binder.transform.Insert;
 import com.headius.invoke.binder.transform.Permute;
 import com.headius.invoke.binder.transform.Spread;
 import com.headius.invoke.binder.transform.Transform;
+import com.headius.invoke.binder.transform.TryFinally;
 
 import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
@@ -320,6 +321,28 @@ public class Binder {
     }
 
     /**
+     * Apply transforms to run the given handle's logic as a "finally" block.
+     * 
+     * try {
+     *     some_code // your eventual endpoint
+     * } finally {
+     *     finally_logic // the given handle
+     * }
+     * 
+     * The layering uses a combination of catch and fold to reuse the same target
+     * handle for both exceptional and non-exceptional paths. In essence, the
+     * result is equivalent to using the given post logic as both an exception
+     * handler (using catchException) and a "post fold" that runs after the main
+     * downstream handles have run.
+     *
+     * @param post the logic that would live inside the "finally" block
+     * @return a new Binder
+     */
+    public Binder tryFinally(MethodHandle post) {
+        return new Binder(this, new TryFinally(post));
+    }
+
+    /**
      * Catch the given exception type from the downstream chain and handle it with the
      * given function.
      *
@@ -329,6 +352,19 @@ public class Binder {
      */
     public Binder catchException(Class<Throwable> throwable, MethodHandle function) {
         return new Binder(this, new Catch(throwable, function));
+    }
+
+    /**
+     * Throw the current signature's sole Throwable argument. Return type
+     * does not matter, since it will never return.
+     *
+     * @return a handle that has all transforms applied and which will eventually throw an exception
+     */
+    public MethodHandle throwException() {
+        if (type().parameterCount() != 1 || !Throwable.class.isAssignableFrom(type().parameterType(0))) {
+            throw new InvalidTransformException("incoming signature must have one Throwable type as its sole argument: " + type());
+        }
+        return invoke(MethodHandles.throwException(type().returnType(), (Class<Throwable>)type().parameterType(0)));
     }
 
     /**

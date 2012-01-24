@@ -379,6 +379,42 @@ public class BinderTest extends TestCase {
         }
     }
 
+    public void testTryFinally() throws Throwable {
+        MethodHandle post = Binder
+                .from(void.class, String[].class)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+
+        MethodHandle handle = Binder
+                .from(void.class, String[].class)
+                .tryFinally(post)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFoo");
+
+        assertEquals(MethodType.methodType(void.class, String[].class), handle.type());
+        String[] stringAry = new String[1];
+        handle.invokeExact(stringAry);
+        assertEquals("foofinally", stringAry[0]);
+    }
+
+    public void testTryFinally2() throws Throwable {
+        MethodHandle post = Binder
+                .from(void.class, String[].class)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+
+        MethodHandle handle = Binder
+                .from(void.class, String[].class)
+                .tryFinally(post)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFooAndRaise");
+
+        assertEquals(MethodType.methodType(void.class, String[].class), handle.type());
+        String[] stringAry = new String[1];
+        try {
+            handle.invokeExact(stringAry);
+            assertTrue("should not have reached here", false);
+        } catch (RuntimeException re) {
+        }
+        assertEquals("foofinally", stringAry[0]);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MethodHandle concatHandle() throws Exception {
@@ -395,6 +431,19 @@ public class BinderTest extends TestCase {
 
     public static String addBaz(String a) {
         return a + "baz";
+    }
+
+    public static void setZeroToFoo(String[] ary) {
+        ary[0] = "foo";
+    }
+
+    public static void setZeroToFooAndRaise(String[] ary) {
+        ary[0] = "foo";
+        throw new RuntimeException();
+    }
+
+    public static void finallyLogic(String[] ary) {
+        ary[0] = ary[0] + "finally";
     }
 
     public static class Fields {

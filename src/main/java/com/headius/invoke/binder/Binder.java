@@ -342,6 +342,14 @@ public class Binder {
         return new Binder(this, new TryFinally(post));
     }
 
+    public static abstract class _ {
+        public abstract MethodHandle _(Binder binder);
+    }
+    
+    public Binder tryFinally(_ handler) {
+        return new Binder(this, new TryFinally(handler._(Binder.from(type()))));
+    }
+
     /**
      * Catch the given exception type from the downstream chain and handle it with the
      * given function.

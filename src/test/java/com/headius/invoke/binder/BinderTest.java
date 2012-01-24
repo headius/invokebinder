@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package com.headius.invoke.binder;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -17,22 +13,8 @@ import java.lang.reflect.Method;
 /**
  * @author headius
  */
-public class BinderTest extends TestCase {
-
-    public BinderTest(String testName) {
-        super(testName);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+public class BinderTest {
+    @Test
     public void testType() throws Throwable {
         Binder binder = Binder
                 .from(String.class, String.class, Integer.class);
@@ -45,6 +27,7 @@ public class BinderTest extends TestCase {
         assertEquals(MethodType.methodType(String.class, String.class), binder.type());
     }
 
+    @Test
     public void testPrintType() throws Throwable {
         Binder binder = Binder
                 .from(String.class, String.class, Integer.class);
@@ -63,6 +46,7 @@ public class BinderTest extends TestCase {
         assertEquals("(String)String\n", baos.toString());
     }
 
+    @Test
     public void testInsert() throws Throwable {
         MethodHandle target = concatHandle();
         MethodHandle handle = Binder
@@ -74,6 +58,7 @@ public class BinderTest extends TestCase {
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, "));
     }
 
+    @Test
     public void testDropInsert() throws Throwable {
         MethodHandle target = concatHandle();
         MethodHandle handle = Binder
@@ -86,6 +71,7 @@ public class BinderTest extends TestCase {
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
     }
 
+    @Test
     public void testConvert() throws Throwable {
         MethodHandle target = mixedHandle();
         MethodHandle handle = Binder
@@ -97,6 +83,7 @@ public class BinderTest extends TestCase {
         assertEquals(null, (String) handle.invokeExact((Object) "foo", (Integer) 5, (Float) 5.0f));
     }
 
+    @Test
     public void testConvert2() throws Throwable {
         MethodHandle target = mixedHandle();
         MethodHandle handle = Binder
@@ -108,6 +95,7 @@ public class BinderTest extends TestCase {
         assertEquals(null, (String)handle.invokeExact((Object)"foo", (Integer)5, (Float)5.0f));
     }
 
+    @Test
     public void testCast() throws Throwable {
         MethodHandle target = mixedHandle();
         MethodHandle handle = Binder
@@ -119,6 +107,7 @@ public class BinderTest extends TestCase {
         assertEquals(null, (String)handle.invokeExact((Object)"foo", (byte)5, 5));
     }
 
+    @Test
     public void testCast2() throws Throwable {
         MethodHandle target = mixedHandle();
         MethodHandle handle = Binder
@@ -130,6 +119,7 @@ public class BinderTest extends TestCase {
         assertEquals(null, (String)handle.invokeExact((Object)"foo", (byte)5, 5));
     }
 
+    @Test
     public void testDropReorder() throws Throwable {
         MethodHandle target = concatHandle();
         MethodHandle handle = Binder
@@ -141,7 +131,8 @@ public class BinderTest extends TestCase {
         assertEquals(MethodType.methodType(String.class, Integer.class, Float.class, String.class), handle.type());
         assertEquals("foofoo", (String)handle.invokeExact((Integer) 0, (Float) 0.0f, "foo"));
     }
-    
+
+    @Test
     public void testSpread() throws Throwable {
         MethodHandle target = concatHandle();
         MethodHandle handle = Binder
@@ -152,7 +143,8 @@ public class BinderTest extends TestCase {
         assertEquals(MethodType.methodType(String.class, Object[].class), handle.type());
         assertEquals("foobar", (String)handle.invokeExact(new Object[] {"foo", "bar"}));
     }
-    
+
+    @Test
     public void testConstant() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class)
@@ -162,6 +154,7 @@ public class BinderTest extends TestCase {
         assertEquals("hello", (String)handle.invokeExact());
     }
 
+    @Test
     public void testConstant2() throws Throwable {
         MethodHandle handle = Binder
                 .from(Object.class)
@@ -171,6 +164,7 @@ public class BinderTest extends TestCase {
         assertEquals("hello", (Object)handle.invokeExact());
     }
 
+    @Test
     public void testIdentity() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, String.class)
@@ -179,7 +173,8 @@ public class BinderTest extends TestCase {
         assertEquals(MethodType.methodType(String.class, String.class), handle.type());
         assertEquals("hello", (String)handle.invokeExact("hello"));
     }
-    
+
+    @Test
     public void testFold() throws Throwable {
         MethodHandle target = concatHandle();
         MethodHandle fold = Binder
@@ -194,7 +189,8 @@ public class BinderTest extends TestCase {
         assertEquals(MethodType.methodType(String.class, String.class), handle.type());
         assertEquals("yahoofoo", (String)handle.invokeExact("foo"));
     }
-    
+
+    @Test
     public void testFilter() throws Throwable {
         MethodHandle target = concatHandle();
         MethodHandle filter = MethodHandles.lookup().findStatic(BinderTest.class, "addBaz", MethodType.methodType(String.class, String.class));
@@ -207,6 +203,7 @@ public class BinderTest extends TestCase {
         assertEquals("foobazbarbaz", (String)handle.invokeExact("foo", "bar"));
     }
 
+    @Test
     public void testInvoke() throws Throwable {
         MethodHandle target = concatHandle();
         MethodHandle handle = Binder
@@ -217,6 +214,7 @@ public class BinderTest extends TestCase {
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
+    @Test
     public void testInvokeReflected() throws Throwable {
         Method target = BinderTest.class.getMethod("concatStatic", String.class, String.class);
         MethodHandle handle = Binder
@@ -227,6 +225,7 @@ public class BinderTest extends TestCase {
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
+    @Test
     public void testInvokeReflected2() throws Throwable {
         Method target = BinderTest.class.getMethod("concatStatic", String.class, String.class);
         MethodHandle handle = Binder
@@ -237,6 +236,7 @@ public class BinderTest extends TestCase {
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
+    @Test
     public void testInvokeStatic() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
@@ -246,6 +246,7 @@ public class BinderTest extends TestCase {
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
+    @Test
     public void testInvokeStatic2() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
@@ -255,6 +256,7 @@ public class BinderTest extends TestCase {
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
+    @Test
     public void testInvokeVirtual() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, BinderTest.class, String.class, String.class)
@@ -264,6 +266,7 @@ public class BinderTest extends TestCase {
         assertEquals("Hello, world", (String) handle.invokeExact(this, "Hello, ", "world"));
     }
 
+    @Test
     public void testInvokeVirtual2() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, BinderTest.class, String.class, String.class)
@@ -273,6 +276,7 @@ public class BinderTest extends TestCase {
         assertEquals("Hello, world", (String) handle.invokeExact(this, "Hello, ", "world"));
     }
 
+    @Test
     public void testInvokeConstructor() throws Throwable {
         MethodHandle handle = Binder
                 .from(Constructable.class, String.class, String.class)
@@ -282,6 +286,7 @@ public class BinderTest extends TestCase {
         assertEquals(new Constructable("foo", "bar"), (Constructable) handle.invokeExact("foo", "bar"));
     }
 
+    @Test
     public void testInvokeConstructor2() throws Throwable {
         MethodHandle handle = Binder
                 .from(Constructable.class, String.class, String.class)
@@ -291,6 +296,7 @@ public class BinderTest extends TestCase {
         assertEquals(new Constructable("foo", "bar"), (Constructable) handle.invokeExact("foo", "bar"));
     }
 
+    @Test
     public void testGetField() throws Throwable {
         Fields fields = new Fields();
         MethodHandle handle = Binder
@@ -301,6 +307,7 @@ public class BinderTest extends TestCase {
         assertEquals("initial", (String)handle.invokeExact(fields));
     }
 
+    @Test
     public void testGetField2() throws Throwable {
         Fields fields = new Fields();
         MethodHandle handle = Binder
@@ -311,6 +318,7 @@ public class BinderTest extends TestCase {
         assertEquals("initial", (String)handle.invokeExact(fields));
     }
 
+    @Test
     public void testGetStatic() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class)
@@ -320,6 +328,7 @@ public class BinderTest extends TestCase {
         assertEquals("initial", (String)handle.invokeExact());
     }
 
+    @Test
     public void testGetStatic2() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class)
@@ -329,6 +338,7 @@ public class BinderTest extends TestCase {
         assertEquals("initial", (String)handle.invokeExact());
     }
 
+    @Test
     public void testSetField() throws Throwable {
         Fields fields = new Fields();
         MethodHandle handle = Binder
@@ -340,6 +350,7 @@ public class BinderTest extends TestCase {
         assertEquals("modified", fields.instanceField);
     }
 
+    @Test
     public void testSetField2() throws Throwable {
         Fields fields = new Fields();
         MethodHandle handle = Binder
@@ -351,6 +362,7 @@ public class BinderTest extends TestCase {
         assertEquals("modified", fields.instanceField);
     }
 
+    @Test
     public void testSetStatic() throws Throwable {
         try {
             MethodHandle handle = Binder
@@ -365,6 +377,7 @@ public class BinderTest extends TestCase {
         }
     }
 
+    @Test
     public void testSetStatic2() throws Throwable {
         try {
             MethodHandle handle = Binder
@@ -379,6 +392,7 @@ public class BinderTest extends TestCase {
         }
     }
 
+    @Test
     public void testTryFinally() throws Throwable {
         MethodHandle post = Binder
                 .from(void.class, String[].class)
@@ -395,6 +409,7 @@ public class BinderTest extends TestCase {
         assertEquals("foofinally", stringAry[0]);
     }
 
+    @Test
     public void testTryFinally2() throws Throwable {
         MethodHandle post = Binder
                 .from(void.class, String[].class)
@@ -415,6 +430,7 @@ public class BinderTest extends TestCase {
         assertEquals("foofinally", stringAry[0]);
     }
 
+    @Test
     public void testTryFinally3() throws Throwable {
         MethodHandle post = Binder
                 .from(void.class, String[].class)

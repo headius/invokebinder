@@ -425,7 +425,7 @@ public class BinderTest {
         try {
             handle.invokeExact(stringAry);
             assertTrue("should not have reached here", false);
-        } catch (RuntimeException re) {
+        } catch (BlahException re) {
         }
         assertEquals("foofinally", stringAry[0]);
     }
@@ -437,20 +437,85 @@ public class BinderTest {
                 .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
         
         MethodHandle ignoreException = Binder
-                .from(void.class, RuntimeException.class, String[].class)
+                .from(void.class, BlahException.class, String[].class)
                 .nop();
 
         MethodHandle handle = Binder
                 .from(void.class, String[].class)
                 .tryFinally(post)
-                .catchException(RuntimeException.class, ignoreException)
+                .catchException(BlahException.class, ignoreException)
                 .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFooAndRaise");
 
         assertEquals(MethodType.methodType(void.class, String[].class), handle.type());
         String[] stringAry = new String[1];
         try {
             handle.invokeExact(stringAry);
-        } catch (RuntimeException re) {
+        } catch (BlahException re) {
+            assertTrue("should not have reached here", false);
+        }
+        assertEquals("foofinally", stringAry[0]);
+    }
+
+    @Test
+    public void testTryFinallyReturn() throws Throwable {
+        MethodHandle post = Binder
+                .from(void.class, String[].class)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+
+        MethodHandle handle = Binder
+                .from(int.class, String[].class)
+                .tryFinally(post)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFooReturnInt");
+
+        assertEquals(MethodType.methodType(int.class, String[].class), handle.type());
+        String[] stringAry = new String[1];
+        assertEquals(1, (int)handle.invokeExact(stringAry));
+        assertEquals("foofinally", stringAry[0]);
+    }
+
+    @Test
+    public void testTryFinallyReturn2() throws Throwable {
+        MethodHandle post = Binder
+                .from(void.class, String[].class)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+
+        MethodHandle handle = Binder
+                .from(int.class, String[].class)
+                .tryFinally(post)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFooReturnIntAndRaise");
+
+        assertEquals(MethodType.methodType(int.class, String[].class), handle.type());
+        String[] stringAry = new String[1];
+        try {
+            int x = (int)handle.invokeExact(stringAry);
+            assertTrue("should not have reached here", false);
+        } catch (BlahException re) {
+        }
+        assertEquals("foofinally", stringAry[0]);
+    }
+
+    @Test
+    public void testTryFinallyReturn3() throws Throwable {
+        MethodHandle post = Binder
+                .from(void.class, String[].class)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+
+        MethodHandle ignoreException = Binder
+                .from(int.class, BlahException.class, String[].class)
+                .drop(0, 2)
+                .constant(1);
+
+        MethodHandle handle = Binder
+                .from(int.class, String[].class)
+                .tryFinally(post)
+                .catchException(BlahException.class, ignoreException)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFooReturnIntAndRaise");
+
+        assertEquals(MethodType.methodType(int.class, String[].class), handle.type());
+        String[] stringAry = new String[1];
+        try {
+            assertEquals(1, (int)handle.invokeExact(stringAry));
+        } catch (BlahException be) {
             assertTrue("should not have reached here", false);
         }
         assertEquals("foofinally", stringAry[0]);
@@ -478,14 +543,26 @@ public class BinderTest {
         ary[0] = "foo";
     }
 
-    public static void setZeroToFooAndRaise(String[] ary) {
+    public static void setZeroToFooAndRaise(String[] ary) throws BlahException {
         ary[0] = "foo";
-        throw new RuntimeException();
+        throw new BlahException();
+    }
+
+    public static int setZeroToFooReturnInt(String[] ary) {
+        ary[0] = "foo";
+        return 1;
+    }
+
+    public static int setZeroToFooReturnIntAndRaise(String[] ary) throws BlahException {
+        ary[0] = "foo";
+        throw new BlahException();
     }
 
     public static void finallyLogic(String[] ary) {
         ary[0] = ary[0] + "finally";
     }
+    
+    public static class BlahException extends Exception {}
 
     public static class Fields {
         public String instanceField = "initial";

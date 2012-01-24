@@ -22,6 +22,7 @@ public class Fold extends Transform {
     }
 
     public MethodType down(MethodType type) {
+        if (function.type().returnType() == void.class) return type;
         return type.insertParameterTypes(0, function.type().returnType());
     }
 

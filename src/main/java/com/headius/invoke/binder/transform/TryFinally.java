@@ -24,19 +24,37 @@ public class TryFinally extends Transform {
     }
 
     public MethodHandle up(MethodHandle target) {
+        MethodHandle exceptionHandler = Binder
+                .from(target.type().insertParameterTypes(0, Throwable.class).changeReturnType(void.class))
+                .drop(0)
+                .invoke(post);
+
         MethodHandle rethrow = Binder
                 .from(target.type().insertParameterTypes(0, Throwable.class))
+                .fold(exceptionHandler)
                 .drop(1, target.type().parameterCount())
                 .throwException();
 
-        MethodHandle exceptionHandler = Binder
-                .from(target.type().insertParameterTypes(0, Throwable.class))
-                .drop(0)
-                .invoke(post);
-        exceptionHandler = MethodHandles.foldArguments(rethrow, exceptionHandler);
+        target = MethodHandles.catchException(target, Throwable.class, rethrow);
 
-        target = MethodHandles.catchException(target, Throwable.class, exceptionHandler);
-        return  MethodHandles.foldArguments(post, target);
+        // if target returns a value, we must return it regardless of post
+        MethodHandle realPost = post;
+        if (target.type().returnType() != void.class) {
+            // modify post to ignore return value
+            MethodHandle newPost = Binder
+                    .from(target.type().insertParameterTypes(0, target.type().returnType()).changeReturnType(void.class))
+                    .drop(0)
+                    .invoke(post);
+
+            // fold post into an identity chain that only returns the value
+            realPost = Binder
+                    .from(target.type().insertParameterTypes(0, target.type().returnType()))
+                    .fold(newPost)
+                    .drop(1, target.type().parameterCount())
+                    .identity();
+        }
+
+        return MethodHandles.foldArguments(realPost, target);
     }
 
     public MethodType down(MethodType type) {

@@ -65,6 +65,15 @@ public class Binder {
     }
 
     /**
+     * Construct a new Binder using the given binder.
+     */
+    public Binder(Binder source) {
+        this.start = source.start;
+        this.types.addAll(source.types);
+        this.transforms.addAll(source.transforms);
+    }
+
+    /**
      * Construct a new Binder using the given binder plus an additional transform
      */
     public Binder(Binder source, Transform transform) {
@@ -125,6 +134,17 @@ public class Binder {
      */
     public static Binder from(Class returnType, Class argType0, Class... argTypes) {
         return from(MethodType.methodType(returnType, argType0, argTypes));
+    }
+
+    /**
+     * Construct a new Binder, starting from a given binder.
+     *
+     * @param start the starting binder; the new one will start with the current endpoint type
+     *              of the given binder
+     * @return the Binder object
+     */
+    public static Binder from(Binder start) {
+        return new Binder(start);
     }
 
     /**

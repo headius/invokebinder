@@ -15,6 +15,22 @@ import java.lang.reflect.Method;
  */
 public class BinderTest {
     @Test
+    public void testFrom() throws Throwable {
+        MethodHandle target = concatHandle();
+
+        Binder binder1 = Binder
+                .from(String.class, String.class, Object.class)
+                .drop(1);
+
+        MethodHandle handle = Binder
+                .from(binder1)
+                .insert(1, "world")
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
+    }
+    @Test
     public void testType() throws Throwable {
         Binder binder = Binder
                 .from(String.class, String.class, Integer.class);

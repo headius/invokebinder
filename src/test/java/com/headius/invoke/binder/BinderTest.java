@@ -549,6 +549,29 @@ public class BinderTest {
         assertEquals("foofinally", stringAry[0]);
     }
 
+    @Test
+    public void testArraySet() throws Throwable {
+        MethodHandle handle = Binder
+                .from(void.class, Object[].class, int.class, Object.class)
+                .arraySet();
+
+        assertEquals(MethodType.methodType(void.class, Object[].class, int.class, Object.class), handle.type());
+        Object[] ary = new Object[1];
+        handle.invokeExact(ary, 0, (Object)"foo");
+        assertEquals(ary[0], "foo");
+    }
+
+    @Test
+    public void testArrayGet() throws Throwable {
+        MethodHandle handle = Binder
+                .from(Object.class, Object[].class, int.class)
+                .arrayGet();
+
+        assertEquals(MethodType.methodType(Object.class, Object[].class, int.class), handle.type());
+        Object[] ary = new Object[] {"foo"};
+        assertEquals(handle.invokeExact(ary, 0), "foo");
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MethodHandle concatHandle() throws Exception {

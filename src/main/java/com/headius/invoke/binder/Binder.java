@@ -822,4 +822,28 @@ public class Binder {
         }
     }
 
+
+    /**
+     * Apply the chain of transforms and bind them to an array element set. The signature
+     * at the endpoint must return void and receive the array type, int index, and array
+     * element type.
+     *
+     * @return the full handle chain, bound to an array element set.
+     */
+    public MethodHandle arraySet() {
+        return invoke(MethodHandles.arrayElementSetter(type().parameterType(0)));
+    }
+
+
+    /**
+     * Apply the chain of transforms and bind them to an array element get. The signature
+     * at the endpoint must return the array element type and receive the array type and
+     * int index.
+     *
+     * @return the full handle chain, bound to an array element get.
+     */
+    public MethodHandle arrayGet() {
+        return invoke(MethodHandles.arrayElementGetter(type().parameterType(0)));
+    }
+
 }

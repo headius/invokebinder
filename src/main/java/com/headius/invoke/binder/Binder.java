@@ -846,4 +846,18 @@ public class Binder {
         return invoke(MethodHandles.arrayElementGetter(type().parameterType(0)));
     }
 
+    /**
+     * Apply the chain of transforms and bind them to a boolean branch as from
+     * java.lang.invoke.MethodHandles.guardWithTest. As with GWT, the current endpoint
+     * signature must match the given target and fallback signatures.
+     *
+     * @param test the test handle
+     * @param target the target handle
+     * @param fallback the fallback handle
+     * @return the full handle chain bound to a branch
+     */
+    public MethodHandle branch(MethodHandle test, MethodHandle truePath, MethodHandle falsePath) {
+        return invoke(MethodHandles.guardWithTest(test, truePath, falsePath));
+    }
+
 }

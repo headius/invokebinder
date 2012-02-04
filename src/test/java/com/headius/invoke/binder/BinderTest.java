@@ -571,6 +571,27 @@ public class BinderTest {
         Object[] ary = new Object[] {"foo"};
         assertEquals(handle.invokeExact(ary, 0), "foo");
     }
+    
+    @Test
+    public void testBranch() throws Throwable {
+        MethodHandle handle = Binder
+                .from(String.class, String.class)
+                .branch(
+                        Binder
+                                .from(boolean.class, String.class)
+                                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "isStringFoo"),
+                        Binder
+                                .from(String.class, String.class)
+                                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "addBar"),
+                        Binder
+                                .from(String.class, String.class)
+                                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "addBaz")
+                );
+        
+        assertEquals(MethodType.methodType(String.class, String.class), handle.type());
+        assertEquals("foobar", (String)handle.invokeExact("foo"));
+        assertEquals("quuxbaz", (String)handle.invokeExact("quux"));
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -584,6 +605,14 @@ public class BinderTest {
 
     public String concatVirtual(String a, String b) {
         return a + b;
+    }
+
+    public static boolean isStringFoo(String a) {
+        return a.equals("foo");
+    }
+
+    public static String addBar(String a) {
+        return a + "bar";
     }
 
     public static String addBaz(String a) {

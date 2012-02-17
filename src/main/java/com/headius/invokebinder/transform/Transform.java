@@ -1,4 +1,4 @@
-package com.headius.invoke.binder.transform;
+package com.headius.invokebinder.transform;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;

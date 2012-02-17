@@ -1,6 +1,6 @@
-package com.headius.invoke.binder.transform;
+package com.headius.invokebinder.transform;
 
-import com.headius.invoke.binder.InvalidTransformException;
+import com.headius.invokebinder.InvalidTransformException;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

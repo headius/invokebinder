@@ -1,17 +1,17 @@
-package com.headius.invoke.binder;
+package com.headius.invokebinder;
 
-import com.headius.invoke.binder.transform.Cast;
-import com.headius.invoke.binder.transform.Catch;
-import com.headius.invoke.binder.transform.Convert;
-import com.headius.invoke.binder.transform.Drop;
-import com.headius.invoke.binder.transform.Filter;
-import com.headius.invoke.binder.transform.FilterReturn;
-import com.headius.invoke.binder.transform.Fold;
-import com.headius.invoke.binder.transform.Insert;
-import com.headius.invoke.binder.transform.Permute;
-import com.headius.invoke.binder.transform.Spread;
-import com.headius.invoke.binder.transform.Transform;
-import com.headius.invoke.binder.transform.TryFinally;
+import com.headius.invokebinder.transform.Cast;
+import com.headius.invokebinder.transform.Catch;
+import com.headius.invokebinder.transform.Convert;
+import com.headius.invokebinder.transform.Drop;
+import com.headius.invokebinder.transform.Filter;
+import com.headius.invokebinder.transform.FilterReturn;
+import com.headius.invokebinder.transform.Fold;
+import com.headius.invokebinder.transform.Insert;
+import com.headius.invokebinder.transform.Permute;
+import com.headius.invokebinder.transform.Spread;
+import com.headius.invokebinder.transform.Transform;
+import com.headius.invokebinder.transform.TryFinally;
 
 import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
@@ -65,7 +65,7 @@ public class Binder {
     }
 
     /**
-     * Construct a new Binder using the given binder.
+     * Construct a new Binder using the given invokebinder.
      */
     public Binder(Binder source) {
         this.start = source.start;
@@ -74,7 +74,7 @@ public class Binder {
     }
 
     /**
-     * Construct a new Binder using the given binder plus an additional transform
+     * Construct a new Binder using the given invokebinder plus an additional transform
      */
     public Binder(Binder source, Transform transform) {
         this.start = source.start;
@@ -84,7 +84,7 @@ public class Binder {
     }
 
     /**
-     * Construct a new Binder using the given binder plus an additional transform and current type
+     * Construct a new Binder using the given invokebinder plus an additional transform and current type
      */
     public Binder(Binder source, Transform transform, MethodType type) {
         this.start = source.start;
@@ -137,10 +137,10 @@ public class Binder {
     }
 
     /**
-     * Construct a new Binder, starting from a given binder.
+     * Construct a new Binder, starting from a given invokebinder.
      *
-     * @param start the starting binder; the new one will start with the current endpoint type
-     *              of the given binder
+     * @param start the starting invokebinder; the new one will start with the current endpoint type
+     *              of the given invokebinder
      * @return the Binder object
      */
     public static Binder from(Binder start) {

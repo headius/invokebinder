@@ -1,4 +1,4 @@
-package com.headius.invoke.binder;
+package com.headius.invokebinder;
 
 /**
  * Exception raised when a Binder transform is not valid for the current

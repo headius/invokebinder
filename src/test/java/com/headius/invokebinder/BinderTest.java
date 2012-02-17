@@ -1,4 +1,4 @@
-package com.headius.invoke.binder;
+package com.headius.invokebinder;
 
 import org.junit.Test;
 import static org.junit.Assert.*;

@@ -161,6 +161,34 @@ public class BinderTest {
     }
 
     @Test
+    public void testCollect() throws Throwable {
+        MethodHandle handle = Binder
+                .from(String[].class, String.class, String.class, String.class)
+                .collect(1, String[].class)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "varargs");
+
+        assertEquals(MethodType.methodType(String[].class, String.class, String.class, String.class), handle.type());
+        String[] ary = (String[])handle.invokeExact("one", "two", "three");
+        assertEquals(2, ary.length);
+        assertEquals("two", ary[0]);
+        assertEquals("three", ary[1]);
+    }
+
+    @Test
+    public void testVarargs() throws Throwable {
+        MethodHandle handle = Binder
+                .from(String[].class, String.class, String.class, String.class)
+                .varargs(1, String[].class)
+                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "varargs");
+
+        assertEquals(MethodType.methodType(String[].class, String.class, String.class, String.class), handle.type());
+        String[] ary = (String[])handle.invokeExact("one", "two", "three");
+        assertEquals(2, ary.length);
+        assertEquals("two", ary[0]);
+        assertEquals("three", ary[1]);
+    }
+
+    @Test
     public void testConstant() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class)
@@ -656,6 +684,10 @@ public class BinderTest {
 
     public static void finallyLogic(String[] ary) {
         ary[0] = ary[0] + "finally";
+    }
+
+    public static String[] varargs(String arg0, String... args) {
+        return args;
     }
     
     public static class BlahException extends Exception {}

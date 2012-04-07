@@ -2,6 +2,7 @@ package com.headius.invokebinder;
 
 import com.headius.invokebinder.transform.Cast;
 import com.headius.invokebinder.transform.Catch;
+import com.headius.invokebinder.transform.Collect;
 import com.headius.invokebinder.transform.Convert;
 import com.headius.invokebinder.transform.Drop;
 import com.headius.invokebinder.transform.Filter;
@@ -12,6 +13,7 @@ import com.headius.invokebinder.transform.Permute;
 import com.headius.invokebinder.transform.Spread;
 import com.headius.invokebinder.transform.Transform;
 import com.headius.invokebinder.transform.TryFinally;
+import com.headius.invokebinder.transform.Varargs;
 
 import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
@@ -290,6 +292,29 @@ public class Binder {
      */
     public Binder spread(Class... spreadTypes) {
         return new Binder(this, new Spread(type(), spreadTypes));
+    }
+
+    /**
+     * Box all incoming arguments from the given position onward into the given array type.
+     *
+     * @param index the index from which to start boxing args
+     * @param type the array type into which the args will be boxed
+     * @return a new Binder
+     */
+    public Binder collect(int index, Class type) {
+        return new Binder(this, new Collect(type(), index, type));
+    }
+
+    /**
+     * Box all incoming arguments from the given position onward into the given array type.
+     * This version accepts a variable number of incoming arguments.
+     *
+     * @param index the index from which to start boxing args
+     * @param type the array type into which the args will be boxed
+     * @return a new Binder
+     */
+    public Binder varargs(int index, Class type) {
+        return new Binder(this, new Varargs(type(), index, type));
     }
 
     /**

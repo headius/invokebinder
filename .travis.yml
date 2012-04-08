@@ -1,5 +1,4 @@
 before_install:
- - sudo apt-get remove openjdk-6-jre
- - sudo apt-get remove openjdk-6-jdk
  - sudo apt-get install openjdk-7-jdk
+ - update-java-alternatives java-7-openjdk-i386
 language: java

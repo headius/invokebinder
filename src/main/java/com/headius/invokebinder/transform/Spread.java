@@ -29,8 +29,8 @@ public class Spread extends Transform {
 
     public MethodType down(MethodType type) {
         int last = source.parameterCount() - 1;
-        if (source.parameterArray()[last] != Object[].class) {
-            throw new InvalidTransformException("trailing argument is not Object[]: " + source);
+        if (!source.parameterArray()[last].isArray()) {
+            throw new InvalidTransformException("trailing argument is not []: " + source);
         }
 
         type = type.dropParameterTypes(last, last + 1);

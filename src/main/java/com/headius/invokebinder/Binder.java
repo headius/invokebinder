@@ -207,14 +207,91 @@ public class Binder {
     }
 
     /**
-     * Insert at the given index the given argument value(s).
+     * Insert at the given index the given boolean value.
      *
      * @param index the index at which to insert the argument value
-     * @param values the value(s) to insert
+     * @param value the value to insert
      * @return a new Binder
      */
-    public Binder insert(int index, Class[] types, Object... values) {
-        return new Binder(this, new Insert(index, types, values));
+    public Binder insert(int index, boolean value) {
+        return new Binder(this, new Insert(index, value));
+    }
+
+    /**
+     * Insert at the given index the given byte value.
+     *
+     * @param index the index at which to insert the argument value
+     * @param value the value to insert
+     * @return a new Binder
+     */
+    public Binder insert(int index, byte value) {
+        return new Binder(this, new Insert(index, value));
+    }
+
+    /**
+     * Insert at the given index the given short value.
+     *
+     * @param index the index at which to insert the argument value
+     * @param value the value to insert
+     * @return a new Binder
+     */
+    public Binder insert(int index, short value) {
+        return new Binder(this, new Insert(index, value));
+    }
+
+    /**
+     * Insert at the given index the given char value.
+     *
+     * @param index the index at which to insert the argument value
+     * @param value the value to insert
+     * @return a new Binder
+     */
+    public Binder insert(int index, char value) {
+        return new Binder(this, new Insert(index, value));
+    }
+
+    /**
+     * Insert at the given index the given int value.
+     *
+     * @param index the index at which to insert the argument value
+     * @param value the value to insert
+     * @return a new Binder
+     */
+    public Binder insert(int index, int value) {
+        return new Binder(this, new Insert(index, value));
+    }
+
+    /**
+     * Insert at the given index the given long value.
+     *
+     * @param index the index at which to insert the argument value
+     * @param value the value to insert
+     * @return a new Binder
+     */
+    public Binder insert(int index, long value) {
+        return new Binder(this, new Insert(index, value));
+    }
+
+    /**
+     * Insert at the given index the given float value.
+     *
+     * @param index the index at which to insert the argument value
+     * @param value the value to insert
+     * @return a new Binder
+     */
+    public Binder insert(int index, float value) {
+        return new Binder(this, new Insert(index, value));
+    }
+
+    /**
+     * Insert at the given index the given double value.
+     *
+     * @param index the index at which to insert the argument value
+     * @param value the value to insert
+     * @return a new Binder
+     */
+    public Binder insert(int index, double value) {
+        return new Binder(this, new Insert(index, value));
     }
 
     /**
@@ -226,6 +303,18 @@ public class Binder {
      */
     public Binder insert(int index, Object... values) {
         return new Binder(this, new Insert(index, values));
+    }
+
+    /**
+     * Insert at the given index the given argument value(s).
+     *
+     * @param index the index at which to insert the argument value
+     * @param types the actual types to use, rather than getClass
+     * @param values the value(s) to insert
+     * @return a new Binder
+     */
+    public Binder insert(int index, Class[] types, Object... values) {
+        return new Binder(this, new Insert(index, types, values));
     }
 
     /**
@@ -908,8 +997,8 @@ public class Binder {
      * signature must match the given target and fallback signatures.
      *
      * @param test the test handle
-     * @param target the target handle
-     * @param fallback the fallback handle
+     * @param truePath the target handle
+     * @param falsePath the fallback handle
      * @return the full handle chain bound to a branch
      */
     public MethodHandle branch(MethodHandle test, MethodHandle truePath, MethodHandle falsePath) {

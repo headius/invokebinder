@@ -33,6 +33,39 @@ public class BinderTest {
 
     @Test
     public void testInsertPrimitive() throws Throwable {
+        Binder b1 = Binder
+                .from(void.class)
+                .insert(0, true);
+        assertEquals(MethodType.methodType(void.class, boolean.class), b1.type());
+        Binder b2 = Binder
+                .from(void.class)
+                .insert(0, (byte)1);
+        assertEquals(MethodType.methodType(void.class, byte.class), b2.type());
+        Binder b3 = Binder
+                .from(void.class)
+                .insert(0, (short)1);
+        assertEquals(MethodType.methodType(void.class, short.class), b3.type());
+        Binder b4 = Binder
+                .from(void.class)
+                .insert(0, (char)1);
+        assertEquals(MethodType.methodType(void.class, char.class), b4.type());
+        Binder b5 = Binder
+                .from(void.class)
+                .insert(0, 1);
+        assertEquals(MethodType.methodType(void.class, int.class), b5.type());
+        Binder b6 = Binder
+                .from(void.class)
+                .insert(0, 1L);
+        assertEquals(MethodType.methodType(void.class, long.class), b6.type());
+        Binder b7 = Binder
+                .from(void.class)
+                .insert(0, 1.0F);
+        assertEquals(MethodType.methodType(void.class, float.class), b7.type());
+        Binder b8 = Binder
+                .from(void.class)
+                .insert(0, 1.0);
+        assertEquals(MethodType.methodType(void.class, double.class), b8.type());
+
         MethodHandle target = intLongHandle();
 
         MethodHandle handle = Binder

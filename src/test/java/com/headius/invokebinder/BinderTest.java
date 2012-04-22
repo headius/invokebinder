@@ -30,6 +30,21 @@ public class BinderTest {
         assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
     }
+
+    @Test
+    public void testInsertPrimitive() throws Throwable {
+        MethodHandle target = intLongHandle();
+
+        MethodHandle handle = Binder
+                .from(String.class)
+                .insert(0, new Class[]{int.class, long.class}, 1, 1L)
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class), handle.type());
+        assertEquals("intLong ok", (String) handle.invokeExact());
+    }
+
+
     @Test
     public void testType() throws Throwable {
         Binder binder = Binder
@@ -643,6 +658,10 @@ public class BinderTest {
         return MethodHandles.lookup().findStatic(BinderTest.class, "concatStatic", MethodType.methodType(String.class, String.class, String.class));
     }
 
+    public static MethodHandle intLongHandle() throws Exception {
+        return MethodHandles.lookup().findStatic(BinderTest.class, "intLong", MethodType.methodType(String.class, int.class, long.class));
+    }
+
     public static String concatStatic(String a, String b) {
         return a + b;
     }
@@ -688,6 +707,10 @@ public class BinderTest {
 
     public static String[] varargs(String arg0, String... args) {
         return args;
+    }
+
+    public static String intLong(int a, long b) {
+        return "intLong ok";
     }
     
     public static class BlahException extends Exception {}

@@ -1,9 +1,6 @@
 package com.headius.invokebinder.transform;
 
-import com.headius.invokebinder.InvalidTransformException;
-
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 /**
@@ -39,7 +36,7 @@ public class Varargs extends Transform {
         Class componentType = arrayType.getComponentType();
         for (int i = index; i < source.parameterCount(); i++) {
             Class in = source.parameterType(i);
-            assert in.isAssignableFrom(componentType)
+            assert componentType.isAssignableFrom(in)
                     : "incoming type " + in.getName() + " not compatible with " + componentType.getName() + "[]";
         }
     }

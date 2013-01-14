@@ -77,6 +77,28 @@ public class BinderTest {
         assertEquals("intLong ok", (String) handle.invokeExact());
     }
 
+    @Test
+    public void testTo() throws Throwable {
+        Binder otherBinder = Binder
+                .from(String.class, String.class, int.class)
+                .drop(1)
+                .insert(1, ", world");
+        
+        Binder thisBinder = Binder
+                .from(String.class)
+                .insert(0, "Hello")
+                .insert(1, 1);
+        
+        Binder newBinder = thisBinder.to(otherBinder);
+        
+        assertEquals(MethodType.methodType(String.class, String.class, String.class), otherBinder.type());
+        assertEquals(MethodType.methodType(String.class, String.class, int.class), thisBinder.type());
+        assertEquals(MethodType.methodType(String.class, String.class, String.class), newBinder.type());
+        
+        MethodHandle target = newBinder.invoke(concatHandle());
+        
+        assertEquals("Hello, world", (String)target.invokeExact());
+    }
 
     @Test
     public void testType() throws Throwable {
@@ -123,11 +145,37 @@ public class BinderTest {
     }
 
     @Test
+    public void testAppend() throws Throwable {
+        MethodHandle target = concatHandle();
+        MethodHandle handle = Binder
+                .from(String.class, String.class, Object.class)
+                .append("world")
+                .drop(1)
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
+    }
+
+    @Test
     public void testDropInsert() throws Throwable {
         MethodHandle target = concatHandle();
         MethodHandle handle = Binder
                 .from(String.class, String.class, Object.class)
                 .drop(1)
+                .insert(1, "world")
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
+    }
+    
+    @Test
+    public void testDropLast() throws Throwable {
+        MethodHandle target = concatHandle();
+        MethodHandle handle = Binder
+                .from(String.class, String.class, Object.class)
+                .dropLast()
                 .insert(1, "world")
                 .invoke(target);
 

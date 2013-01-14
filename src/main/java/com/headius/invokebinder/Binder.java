@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.logging.Logger;
 
 /**
@@ -147,6 +148,26 @@ public class Binder {
      */
     public static Binder from(Binder start) {
         return new Binder(start);
+    }
+    
+    /**
+     * Join this binder to an existing one by applying its transformations after
+     * this one.
+     * 
+     * @param other the Binder containing the set of transformations to append
+     * @return a new Binder combining this Binder with the target Binder
+     */
+    public Binder to(Binder other) {
+        assert type().equals(other.start);
+        
+        Binder newBinder = new Binder(this);
+        
+        for (ListIterator<Transform> iter = other.transforms.listIterator(other.transforms.size()); iter.hasPrevious();) {
+            Transform t = iter.previous();
+            newBinder.add(t);
+        }
+        
+        return newBinder;
     }
 
     /**
@@ -318,6 +339,107 @@ public class Binder {
     }
 
     /**
+     * Append to the argument list the given boolean value.
+     *
+     * @param value the value to append
+     * @return a new Binder
+     */
+    public Binder append(boolean value) {
+        return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given byte value.
+     *
+     * @param value the value to append
+     * @return a new Binder
+     */
+    public Binder append(byte value) {
+        return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given short value.
+     *
+     * @param value the value to append
+     * @return a new Binder
+     */
+    public Binder append(short value) {
+        return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given char value.
+     *
+     * @param value the value to append
+     * @return a new Binder
+     */
+    public Binder append(char value) {
+        return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given int value.
+     *
+     * @param value the value to append
+     * @return a new Binder
+     */
+    public Binder append(int value) {
+        return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given long value.
+     *
+     * @param value the value to append
+     * @return a new Binder
+     */
+    public Binder append(long value) {
+        return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given float value.
+     *
+     * @param value the value to append
+     * @return a new Binder
+     */
+    public Binder append(float value) {
+        return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given double value.
+     *
+     * @param value the value to append
+     * @return a new Binder
+     */
+    public Binder append(double value) {
+        return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given argument value(s).
+     *
+     * @param values the value(s) to append
+     * @return a new Binder
+     */
+    public Binder append(Object... values) {
+        return new Binder(this, new Insert(type().parameterCount(), values));
+    }
+
+    /**
+     * Append to the argument list the given argument value(s).
+     *
+     * @param types the actual types to use, rather than getClass
+     * @param values the value(s) to append
+     * @return a new Binder
+     */
+    public Binder append(Class[] types, Object... values) {
+        return new Binder(this, new Insert(type().parameterCount(), types, values));
+    }
+
+    /**
      * Drop a single argument at the given index.
      *
      * @param index the index at which to drop an argument
@@ -336,6 +458,27 @@ public class Binder {
      */
     public Binder drop(int index, int count) {
         return new Binder(this, new Drop(index, Arrays.copyOfRange(type().parameterArray(), index, index + count)));
+    }
+
+    /**
+     * Drop a single argument at the end of the argument list.
+     *
+     * @return a new Binder
+     */
+    public Binder dropLast() {
+        return dropLast(1);
+    }
+
+    /**
+     * Drop from the end of the argument list a number of arguments.
+     *
+     * @param count the number of arguments to drop
+     * @return a new Binder
+     */
+    public Binder dropLast(int count) {
+        assert count <= type().parameterCount();
+        
+        return drop(type().parameterCount() - count, count);
     }
 
     /**

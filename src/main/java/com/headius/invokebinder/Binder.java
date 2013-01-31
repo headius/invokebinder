@@ -58,14 +58,15 @@ public class Binder {
     private final MethodHandles.Lookup lookup;
 
     /**
-     * Construct a new Binder, starting from a given MethodType.
+     * Construct a new Binder, starting from a given MethodType. Use a public
+     * java.lang.invoke.MethodHandles.Lookup for retrieving direct handles.
      *
      * @param start the starting MethodType, for calls entering the eventual chain
      */
     public Binder(MethodType start) {
         this.start = start;
         this.types.add(0, start);
-        this.lookup = null;
+        this.lookup = MethodHandles.publicLookup();
     }
 
     /**

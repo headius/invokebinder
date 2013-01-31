@@ -26,8 +26,32 @@ public class SmartBinder {
         return new SmartBinder(inbound, Binder.from(inbound.methodType()));
     }
 
+    public static SmartBinder from(Lookup lookup, Signature inbound) {
+        return new SmartBinder(inbound, Binder.from(lookup, inbound.methodType()));
+    }
+
     public SmartBinder fold(String newName, MethodHandle folder) {
         return new SmartBinder(signature.prependArg(newName, folder.type().returnType()), binder.fold(folder));
+    }
+
+    public SmartBinder foldStatic(String newName, Lookup lookup, Class target, String method) {
+        Binder newBinder = binder.foldStatic(lookup, target, method);
+        return new SmartBinder(signature.prependArg(newName, newBinder.type().parameterType(0)), binder);
+    }
+
+    public SmartBinder foldStatic(String newName, Class target, String method) {
+        Binder newBinder = binder.foldStatic(target, method);
+        return new SmartBinder(signature.prependArg(newName, newBinder.type().parameterType(0)), binder);
+    }
+
+    public SmartBinder foldVirtual(String newName, Lookup lookup, String method) {
+        Binder newBinder = binder.foldVirtual(lookup, method);
+        return new SmartBinder(signature.prependArg(newName, newBinder.type().parameterType(0)), binder);
+    }
+
+    public SmartBinder foldVirtual(String newName, String method) {
+        Binder newBinder = binder.foldVirtual(method);
+        return new SmartBinder(signature.prependArg(newName, newBinder.type().parameterType(0)), binder);
     }
 
     public SmartBinder permute(Signature target) {

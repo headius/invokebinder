@@ -691,11 +691,12 @@ public class Binder {
     }
 
     /**
-     * Process the incoming arguments using the given handle, inserting the result
-     * as the first argument.
+     * Process the incoming arguments by calling the given static method on the
+     * given class, inserting the result as the first argument.
      *
-     * @param function the function that will process the incoming arguments. Its
-     *                     signature must match the current signature's arguments exactly.
+     * @param lookup the java.lang.invoke.MethodHandles.Lookup to use
+     * @param target the class on which the method is defined
+     * @param method the method to invoke on the first argument
      * @return a new Binder
      */
     public Binder foldStatic(MethodHandles.Lookup lookup, Class target, String method) {
@@ -703,11 +704,11 @@ public class Binder {
     }
 
     /**
-     * Process the incoming arguments using the given handle, inserting the result
-     * as the first argument.
+     * Process the incoming arguments by calling the given static method on the
+     * given class, inserting the result as the first argument.
      *
-     * @param function the function that will process the incoming arguments. Its
-     *                     signature must match the current signature's arguments exactly.
+     * @param target the class on which the method is defined
+     * @param method the method to invoke on the first argument
      * @return a new Binder
      */
     public Binder foldStatic(Class target, String method) {
@@ -715,11 +716,11 @@ public class Binder {
     }
 
     /**
-     * Process the incoming arguments using the given handle, inserting the result
-     * as the first argument.
+     * Process the incoming arguments by calling the given method on the first
+     * argument, inserting the result as the first argument.
      *
-     * @param function the function that will process the incoming arguments. Its
-     *                     signature must match the current signature's arguments exactly.
+     * @param lookup the java.lang.invoke.MethodHandles.Lookup to use
+     * @param method the method to invoke on the first argument
      * @return a new Binder
      */
     public Binder foldVirtual(MethodHandles.Lookup lookup, String method) {
@@ -727,11 +728,10 @@ public class Binder {
     }
 
     /**
-     * Process the incoming arguments using the given handle, inserting the result
-     * as the first argument.
+     * Process the incoming arguments by calling the given method on the first
+     * argument, inserting the result as the first argument.
      *
-     * @param function the function that will process the incoming arguments. Its
-     *                     signature must match the current signature's arguments exactly.
+     * @param method the method to invoke on the first argument
      * @return a new Binder
      */
     public Binder foldVirtual(String method) {

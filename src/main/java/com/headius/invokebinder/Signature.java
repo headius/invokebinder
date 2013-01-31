@@ -37,20 +37,46 @@ public class Signature {
     private final MethodType methodType;
     private final String[] argNames;
 
+    /**
+     * Construct a new signature with the given return value.
+     * 
+     * @param retval the return value for the new signature
+     */
     Signature(Class retval) {
         this(MethodType.methodType(retval));
     }
 
+    /**
+     * Construct a new signature with the given return value, argument types,
+     * and argument names.
+     * 
+     * @param retval the return value for the new signature
+     * @param argTypes the argument types for the new signature
+     * @param argNames the argument names for the new signature
+     */
     Signature(Class retval, Class[] argTypes, String... argNames) {
         this(MethodType.methodType(retval, argTypes), argNames);
     }
 
+
+    /**
+     * Construct a new signature with the given method type and argument names.
+     * 
+     * @param methodType the method type for the new signature
+     * @param argNames the argument names for the new signature
+     */
     Signature(MethodType methodType, String... argNames) {
         assert methodType.parameterCount() == argNames.length : "arg name count " + argNames.length + " does not match parameter count " + methodType.parameterCount();
         this.methodType = methodType;
         this.argNames = argNames;
     }
 
+    /**
+     * Produce a human-readable representation of this signature. This
+     * representation uses Class#getSimpleName to improve readability.
+     * 
+     * @return a human-readable representation of the signature
+     */
     public String toString() {
         StringBuilder sb = new StringBuilder("(");
         for (int i = 0; i < argNames.length; i++) {
@@ -63,15 +89,34 @@ public class Signature {
         return sb.toString();
     }
 
+    /**
+     * Create a new signature returning the given type.
+     * 
+     * @param retval the return type for the new signature
+     * @return the new signature
+     */
     public static Signature returning(Class retval) {
         Signature sig = new Signature(retval);
         return sig;
     }
 
+    /**
+     * Produce a new signature based on this one with a different return type.
+     * 
+     * @param retval the new return type for the new signature
+     * @return the new signature
+     */
     public Signature asFold(Class retval) {
         return new Signature(methodType.changeReturnType(retval), argNames);
     }
 
+    /**
+     * Append an argument (name + type) to the signature.
+     * 
+     * @param name the name of the argument
+     * @param type the type of the argument
+     * @return a new signature
+     */
     public Signature appendArg(String name, Class type) {
         String[] newArgNames = new String[argNames.length + 1];
         System.arraycopy(argNames, 0, newArgNames, 0, argNames.length);
@@ -80,6 +125,13 @@ public class Signature {
         return new Signature(newMethodType, newArgNames);
     }
     
+    /**
+     * Prepend an argument (name + type) to the signature.
+     * 
+     * @param name the name of the argument
+     * @param type the type of the argument
+     * @return a new signature
+     */
     public Signature prependArg(String name, Class type) {
         String[] newArgNames = new String[argNames.length + 1];
         System.arraycopy(argNames, 0, newArgNames, 1, argNames.length);
@@ -88,10 +140,26 @@ public class Signature {
         return new Signature(newMethodType, newArgNames);
     }
     
+    /**
+     * Insert an argument (name + type) into the signature.
+     * 
+     * @param index the index at which to insert
+     * @param name the name of the argument
+     * @param type the type of the argument
+     * @return a new signature
+     */
     public Signature insertArg(int index, String name, Class type) {
         return insertArgs(index, new String[]{name}, new Class[]{type});
     }
     
+    /**
+     * Insert arguments (names + types) into the signature.
+     * 
+     * @param index the index at which to insert
+     * @param names the names of the argument
+     * @param types the types of the argument
+     * @return a new signature
+     */
     public Signature insertArgs(int index, String[] names, Class[] types) {
         assert names.length == types.length : "names and types must be of the same length";
         
@@ -100,15 +168,25 @@ public class Signature {
         if (index != 0) System.arraycopy(argNames, 0, newArgNames, 0, index);
         if (argNames.length - index != 0) System.arraycopy(argNames, index, newArgNames, index + names.length, argNames.length - index);
         
-        MethodType newMethodType = methodType.insertParameterTypes(0, types);
+        MethodType newMethodType = methodType.insertParameterTypes(index, types);
         
         return new Signature(newMethodType, newArgNames);
     }
 
+    /**
+     * The current java.lang.invoke.MethodType for this Signature.
+     * 
+     * @return the current method type
+     */
     public MethodType methodType() {
         return methodType;
     }
 
+    /**
+     * The current argument names for this signature.
+     * 
+     * @return the current argument names
+     */
     public String[] argNames() {
         return argNames;
     }
@@ -131,19 +209,52 @@ public class Signature {
         return new Signature(MethodType.methodType(methodType.returnType(), types.toArray(new Class[0])), names.toArray(new String[0]));
     }
     
+    /**
+     * Produce a method handle permuting the arguments in this signature using
+     * the given permute arguments and targeting the given java.lang.invoke.MethodHandle.
+     * 
+     * Example:
+     * 
+     * <pre>
+     * Signature sig = Signature.returning(String.class).appendArg("a", int.class).appendArg("b", int.class);
+     * MethodHandle handle = handleThatTakesOneInt();
+     * MethodHandle newHandle = sig.permuteTo(handle, "b");
+     * </pre>
+     * 
+     * @param target the method handle to target
+     * @param permuteArgs the arguments to permute
+     * @return a new handle that permutes appropriate positions based on the
+     * given permute args
+     */
     public MethodHandle permuteTo(MethodHandle target, String... permuteArgs) {
         return MethodHandles.permuteArguments(target, methodType, to(permute(permuteArgs)));
     }
 
+    /**
+     * Generate an array of argument offsets based on permuting this signature
+     * to the given signature.
+     * 
+     * @param other the signature to target
+     * @return an array of argument offsets that will permute to the given
+     * signature
+     */
     public int[] to(Signature other) {
         return nonMatchingTo(other.argNames);
     }
 
+    /**
+     * Generate an array of argument offsets based on permuting this signature
+     * to the given signature. Repeats are permitted.
+     * 
+     * @param otherArgPatterns the argument names to permute
+     * @return an array of argument offsets that will permute to the given
+     * argument names
+     */
     public int[] to(String... otherArgPatterns) {
         return to(permute(otherArgPatterns));
     }
 
-    public int[] nonMatchingTo(String... otherArgNames) {
+    private int[] nonMatchingTo(String... otherArgNames) {
         int[] offsets = new int[otherArgNames.length];
         int i = 0;
         for (String arg : otherArgNames) {

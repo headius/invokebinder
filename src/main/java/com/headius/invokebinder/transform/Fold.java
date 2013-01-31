@@ -18,6 +18,8 @@ public class Fold extends Transform {
     }
 
     public MethodHandle up(MethodHandle target) {
+        System.out.println(target);
+        System.out.println(function);
         return MethodHandles.foldArguments(target, function);
     }
 

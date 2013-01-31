@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 
@@ -14,6 +15,7 @@ import java.lang.reflect.Method;
  * @author headius
  */
 public class BinderTest {
+    private static final Lookup LOOKUP = MethodHandles.lookup();
     @Test
     public void testFrom() throws Throwable {
         MethodHandle target = concatHandle();
@@ -261,7 +263,7 @@ public class BinderTest {
         MethodHandle handle = Binder
                 .from(String[].class, String.class, String.class, String.class)
                 .collect(1, String[].class)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "varargs");
+                .invokeStatic(LOOKUP, BinderTest.class, "varargs");
 
         assertEquals(MethodType.methodType(String[].class, String.class, String.class, String.class), handle.type());
         String[] ary = (String[])handle.invokeExact("one", "two", "three");
@@ -275,7 +277,7 @@ public class BinderTest {
         MethodHandle handle = Binder
                 .from(String[].class, String.class, String.class, String.class)
                 .varargs(1, String[].class)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "varargs");
+                .invokeStatic(LOOKUP, BinderTest.class, "varargs");
 
         assertEquals(MethodType.methodType(String[].class, String.class, String.class, String.class), handle.type());
         String[] ary = (String[])handle.invokeExact("one", "two", "three");
@@ -331,9 +333,35 @@ public class BinderTest {
     }
 
     @Test
+    public void testFoldStatic() throws Throwable {
+        MethodHandle target = concatHandle();
+        MethodHandle handle = Binder
+                .from(LOOKUP, String.class, String.class)
+                .foldStatic(BinderTest.class, "alwaysYahooStatic")
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class), handle.type());
+        assertEquals("yahoofoo", (String)handle.invokeExact("foo"));
+    }
+
+    @Test
+    public void testFoldVirtual() throws Throwable {
+        MethodHandle target = concatHandle();
+        MethodHandle handle = Binder
+                .from(LOOKUP, String.class, String.class)
+                .insert(0, this)
+                .foldVirtual("alwaysYahooVirtual")
+                .drop(1)
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class), handle.type());
+        assertEquals("yahoofoo", (String)handle.invokeExact("foo"));
+    }
+
+    @Test
     public void testFilter() throws Throwable {
         MethodHandle target = concatHandle();
-        MethodHandle filter = MethodHandles.lookup().findStatic(BinderTest.class, "addBaz", MethodType.methodType(String.class, String.class));
+        MethodHandle filter = LOOKUP.findStatic(BinderTest.class, "addBaz", MethodType.methodType(String.class, String.class));
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
                 .filter(0, filter, filter)
@@ -359,7 +387,7 @@ public class BinderTest {
         Method target = BinderTest.class.getMethod("concatStatic", String.class, String.class);
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
-                .invoke(MethodHandles.lookup(), target);
+                .invoke(LOOKUP, target);
 
         assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
@@ -370,7 +398,7 @@ public class BinderTest {
         Method target = BinderTest.class.getMethod("concatStatic", String.class, String.class);
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
-                .invokeQuiet(MethodHandles.lookup(), target);
+                .invokeQuiet(LOOKUP, target);
 
         assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
@@ -380,7 +408,7 @@ public class BinderTest {
     public void testInvokeStatic() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "concatStatic");
+                .invokeStatic(LOOKUP, BinderTest.class, "concatStatic");
 
         assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
@@ -390,7 +418,7 @@ public class BinderTest {
     public void testInvokeStatic2() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
-                .invokeStaticQuiet(MethodHandles.lookup(), BinderTest.class, "concatStatic");
+                .invokeStaticQuiet(LOOKUP, BinderTest.class, "concatStatic");
 
         assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
@@ -400,7 +428,7 @@ public class BinderTest {
     public void testInvokeVirtual() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, BinderTest.class, String.class, String.class)
-                .invokeVirtual(MethodHandles.lookup(), "concatVirtual");
+                .invokeVirtual(LOOKUP, "concatVirtual");
 
         assertEquals(MethodType.methodType(String.class, BinderTest.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact(this, "Hello, ", "world"));
@@ -410,7 +438,7 @@ public class BinderTest {
     public void testInvokeVirtual2() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, BinderTest.class, String.class, String.class)
-                .invokeVirtualQuiet(MethodHandles.lookup(), "concatVirtual");
+                .invokeVirtualQuiet(LOOKUP, "concatVirtual");
 
         assertEquals(MethodType.methodType(String.class, BinderTest.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact(this, "Hello, ", "world"));
@@ -420,7 +448,7 @@ public class BinderTest {
     public void testInvokeConstructor() throws Throwable {
         MethodHandle handle = Binder
                 .from(Constructable.class, String.class, String.class)
-                .invokeConstructor(MethodHandles.lookup(), Constructable.class);
+                .invokeConstructor(LOOKUP, Constructable.class);
 
         assertEquals(MethodType.methodType(Constructable.class, String.class, String.class), handle.type());
         assertEquals(new Constructable("foo", "bar"), (Constructable) handle.invokeExact("foo", "bar"));
@@ -430,7 +458,7 @@ public class BinderTest {
     public void testInvokeConstructor2() throws Throwable {
         MethodHandle handle = Binder
                 .from(Constructable.class, String.class, String.class)
-                .invokeConstructorQuiet(MethodHandles.lookup(), Constructable.class);
+                .invokeConstructorQuiet(LOOKUP, Constructable.class);
 
         assertEquals(MethodType.methodType(Constructable.class, String.class, String.class), handle.type());
         assertEquals(new Constructable("foo", "bar"), (Constructable) handle.invokeExact("foo", "bar"));
@@ -441,7 +469,7 @@ public class BinderTest {
         Fields fields = new Fields();
         MethodHandle handle = Binder
                 .from(String.class, Fields.class)
-                .getField(MethodHandles.lookup(), "instanceField");
+                .getField(LOOKUP, "instanceField");
         
         assertEquals(MethodType.methodType(String.class, Fields.class), handle.type());
         assertEquals("initial", (String)handle.invokeExact(fields));
@@ -452,7 +480,7 @@ public class BinderTest {
         Fields fields = new Fields();
         MethodHandle handle = Binder
                 .from(String.class, Fields.class)
-                .getFieldQuiet(MethodHandles.lookup(), "instanceField");
+                .getFieldQuiet(LOOKUP, "instanceField");
 
         assertEquals(MethodType.methodType(String.class, Fields.class), handle.type());
         assertEquals("initial", (String)handle.invokeExact(fields));
@@ -462,7 +490,7 @@ public class BinderTest {
     public void testGetStatic() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class)
-                .getStatic(MethodHandles.lookup(), Fields.class, "staticField");
+                .getStatic(LOOKUP, Fields.class, "staticField");
 
         assertEquals(MethodType.methodType(String.class), handle.type());
         assertEquals("initial", (String)handle.invokeExact());
@@ -472,7 +500,7 @@ public class BinderTest {
     public void testGetStatic2() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class)
-                .getStaticQuiet(MethodHandles.lookup(), Fields.class, "staticField");
+                .getStaticQuiet(LOOKUP, Fields.class, "staticField");
 
         assertEquals(MethodType.methodType(String.class), handle.type());
         assertEquals("initial", (String)handle.invokeExact());
@@ -483,7 +511,7 @@ public class BinderTest {
         Fields fields = new Fields();
         MethodHandle handle = Binder
                 .from(void.class, Fields.class, String.class)
-                .setField(MethodHandles.lookup(), "instanceField");
+                .setField(LOOKUP, "instanceField");
 
         assertEquals(MethodType.methodType(void.class, Fields.class, String.class), handle.type());
         handle.invokeExact(fields, "modified");
@@ -495,7 +523,7 @@ public class BinderTest {
         Fields fields = new Fields();
         MethodHandle handle = Binder
                 .from(void.class, Fields.class, String.class)
-                .setFieldQuiet(MethodHandles.lookup(), "instanceField");
+                .setFieldQuiet(LOOKUP, "instanceField");
 
         assertEquals(MethodType.methodType(void.class, Fields.class, String.class), handle.type());
         handle.invokeExact(fields, "modified");
@@ -507,7 +535,7 @@ public class BinderTest {
         try {
             MethodHandle handle = Binder
                     .from(void.class, String.class)
-                    .setStatic(MethodHandles.lookup(), Fields.class, "staticField");
+                    .setStatic(LOOKUP, Fields.class, "staticField");
 
             assertEquals(MethodType.methodType(void.class, String.class), handle.type());
             handle.invokeExact("modified");
@@ -522,7 +550,7 @@ public class BinderTest {
         try {
             MethodHandle handle = Binder
                     .from(void.class, String.class)
-                    .setStaticQuiet(MethodHandles.lookup(), Fields.class, "staticField");
+                    .setStaticQuiet(LOOKUP, Fields.class, "staticField");
 
             assertEquals(MethodType.methodType(void.class, String.class), handle.type());
             handle.invokeExact("modified");
@@ -564,12 +592,12 @@ public class BinderTest {
     public void testTryFinally() throws Throwable {
         MethodHandle post = Binder
                 .from(void.class, String[].class)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+                .invokeStatic(LOOKUP, BinderTest.class, "finallyLogic");
 
         MethodHandle handle = Binder
                 .from(void.class, String[].class)
                 .tryFinally(post)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFoo");
+                .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFoo");
 
         assertEquals(MethodType.methodType(void.class, String[].class), handle.type());
         String[] stringAry = new String[1];
@@ -581,12 +609,12 @@ public class BinderTest {
     public void testTryFinally2() throws Throwable {
         MethodHandle post = Binder
                 .from(void.class, String[].class)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+                .invokeStatic(LOOKUP, BinderTest.class, "finallyLogic");
 
         MethodHandle handle = Binder
                 .from(void.class, String[].class)
                 .tryFinally(post)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFooAndRaise");
+                .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFooAndRaise");
 
         assertEquals(MethodType.methodType(void.class, String[].class), handle.type());
         String[] stringAry = new String[1];
@@ -602,7 +630,7 @@ public class BinderTest {
     public void testTryFinally3() throws Throwable {
         MethodHandle post = Binder
                 .from(void.class, String[].class)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+                .invokeStatic(LOOKUP, BinderTest.class, "finallyLogic");
         
         MethodHandle ignoreException = Binder
                 .from(void.class, BlahException.class, String[].class)
@@ -612,7 +640,7 @@ public class BinderTest {
                 .from(void.class, String[].class)
                 .tryFinally(post)
                 .catchException(BlahException.class, ignoreException)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFooAndRaise");
+                .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFooAndRaise");
 
         assertEquals(MethodType.methodType(void.class, String[].class), handle.type());
         String[] stringAry = new String[1];
@@ -628,12 +656,12 @@ public class BinderTest {
     public void testTryFinallyReturn() throws Throwable {
         MethodHandle post = Binder
                 .from(void.class, String[].class)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+                .invokeStatic(LOOKUP, BinderTest.class, "finallyLogic");
 
         MethodHandle handle = Binder
                 .from(int.class, String[].class)
                 .tryFinally(post)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFooReturnInt");
+                .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFooReturnInt");
 
         assertEquals(MethodType.methodType(int.class, String[].class), handle.type());
         String[] stringAry = new String[1];
@@ -645,12 +673,12 @@ public class BinderTest {
     public void testTryFinallyReturn2() throws Throwable {
         MethodHandle post = Binder
                 .from(void.class, String[].class)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+                .invokeStatic(LOOKUP, BinderTest.class, "finallyLogic");
 
         MethodHandle handle = Binder
                 .from(int.class, String[].class)
                 .tryFinally(post)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFooReturnIntAndRaise");
+                .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFooReturnIntAndRaise");
 
         assertEquals(MethodType.methodType(int.class, String[].class), handle.type());
         String[] stringAry = new String[1];
@@ -666,7 +694,7 @@ public class BinderTest {
     public void testTryFinallyReturn3() throws Throwable {
         MethodHandle post = Binder
                 .from(void.class, String[].class)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "finallyLogic");
+                .invokeStatic(LOOKUP, BinderTest.class, "finallyLogic");
 
         MethodHandle ignoreException = Binder
                 .from(int.class, BlahException.class, String[].class)
@@ -677,7 +705,7 @@ public class BinderTest {
                 .from(int.class, String[].class)
                 .tryFinally(post)
                 .catchException(BlahException.class, ignoreException)
-                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "setZeroToFooReturnIntAndRaise");
+                .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFooReturnIntAndRaise");
 
         assertEquals(MethodType.methodType(int.class, String[].class), handle.type());
         String[] stringAry = new String[1];
@@ -719,13 +747,13 @@ public class BinderTest {
                 .branch(
                         Binder
                                 .from(boolean.class, String.class)
-                                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "isStringFoo"),
+                                .invokeStatic(LOOKUP, BinderTest.class, "isStringFoo"),
                         Binder
                                 .from(String.class, String.class)
-                                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "addBar"),
+                                .invokeStatic(LOOKUP, BinderTest.class, "addBar"),
                         Binder
                                 .from(String.class, String.class)
-                                .invokeStatic(MethodHandles.lookup(), BinderTest.class, "addBaz")
+                                .invokeStatic(LOOKUP, BinderTest.class, "addBaz")
                 );
         
         assertEquals(MethodType.methodType(String.class, String.class), handle.type());
@@ -736,11 +764,11 @@ public class BinderTest {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MethodHandle concatHandle() throws Exception {
-        return MethodHandles.lookup().findStatic(BinderTest.class, "concatStatic", MethodType.methodType(String.class, String.class, String.class));
+        return LOOKUP.findStatic(BinderTest.class, "concatStatic", MethodType.methodType(String.class, String.class, String.class));
     }
 
     public static MethodHandle intLongHandle() throws Exception {
-        return MethodHandles.lookup().findStatic(BinderTest.class, "intLong", MethodType.methodType(String.class, int.class, long.class));
+        return LOOKUP.findStatic(BinderTest.class, "intLong", MethodType.methodType(String.class, int.class, long.class));
     }
 
     public static String concatStatic(String a, String b) {
@@ -819,9 +847,17 @@ public class BinderTest {
     }
 
     public static MethodHandle mixedHandle() throws Exception {
-        return MethodHandles.lookup().findStatic(BinderTest.class, "mixed", MethodType.methodType(void.class, String.class, int.class, float.class));
+        return LOOKUP.findStatic(BinderTest.class, "mixed", MethodType.methodType(void.class, String.class, int.class, float.class));
     }
 
     public static void mixed(String a, int b, float c) {
+    }
+    
+    public static String alwaysYahooStatic(String ignored) {
+        return "yahoo";
+    }
+    
+    public String alwaysYahooVirtual(String ignored) {
+        return "yahoo";
     }
 }

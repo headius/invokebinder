@@ -14,7 +14,6 @@ import com.headius.invokebinder.transform.Spread;
 import com.headius.invokebinder.transform.Transform;
 import com.headius.invokebinder.transform.TryFinally;
 import com.headius.invokebinder.transform.Varargs;
-
 import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -56,6 +55,7 @@ public class Binder {
     private final List<Transform> transforms = new ArrayList();
     private final List<MethodType> types = new ArrayList();
     private final MethodType start;
+    private final MethodHandles.Lookup lookup;
 
     /**
      * Construct a new Binder, starting from a given MethodType.
@@ -65,6 +65,19 @@ public class Binder {
     public Binder(MethodType start) {
         this.start = start;
         this.types.add(0, start);
+        this.lookup = null;
+    }
+
+    /**
+     * Construct a new Binder, starting from a given Lookup and MethodType.
+     *
+     * @param lookup the Lookup context to use for direct handles
+     * @param start the starting MethodType, for calls entering the eventual chain
+     */
+    public Binder(MethodHandles.Lookup lookup, MethodType start) {
+        this.start = start;
+        this.types.add(0, start);
+        this.lookup = lookup;
     }
 
     /**
@@ -74,26 +87,49 @@ public class Binder {
         this.start = source.start;
         this.types.addAll(source.types);
         this.transforms.addAll(source.transforms);
+        this.lookup = source.lookup;
+    }
+
+    /**
+     * Construct a new Binder using the given Lookup and invokebinder.
+     * 
+     * @param lookup the Lookup context to use for direct handles
+     * @param source the source Binder
+     */
+    public Binder(MethodHandles.Lookup lookup, Binder source) {
+        this.start = source.start;
+        this.types.addAll(source.types);
+        this.transforms.addAll(source.transforms);
+        this.lookup = lookup;
     }
 
     /**
      * Construct a new Binder using the given invokebinder plus an additional transform
+     * 
+     * @param source the source Binder
+     * @param transform the additional Transform
      */
     public Binder(Binder source, Transform transform) {
         this.start = source.start;
         this.types.addAll(source.types);
         this.transforms.addAll(source.transforms);
         add(transform);
+        this.lookup = source.lookup;
     }
 
     /**
      * Construct a new Binder using the given invokebinder plus an additional transform and current type
+     * 
+     * @param source the source Binder
+     * @param transform the additional Transform
+     * @param type the new current type resulting from the transform
      */
     public Binder(Binder source, Transform transform, MethodType type) {
         this.start = source.start;
         this.types.addAll(source.types);
         this.transforms.addAll(source.transforms);
         add(transform, type);
+        this.lookup = source.lookup;
     }
 
     /**
@@ -107,6 +143,17 @@ public class Binder {
     }
 
     /**
+     * Construct a new Binder, starting from a given MethodType.
+     *
+     * @param lookup the Lookup context to use for direct handles
+     * @param start the starting MethodType, for calls entering the eventual chain
+     * @return the Binder object
+     */
+    public static Binder from(MethodHandles.Lookup lookup, MethodType start) {
+        return new Binder(lookup, start);
+    }
+
+    /**
      * Construct a new Binder using a return type.
      *
      * @param returnType the return type of the incoming signature
@@ -114,6 +161,17 @@ public class Binder {
      */
     public static Binder from(Class returnType) {
         return from(MethodType.methodType(returnType));
+    }
+
+    /**
+     * Construct a new Binder using a return type.
+     *
+     * @param lookup the Lookup context to use for direct handles
+     * @param returnType the return type of the incoming signature
+     * @return the Binder object
+     */
+    public static Binder from(MethodHandles.Lookup lookup, Class returnType) {
+        return from(lookup, MethodType.methodType(returnType));
     }
 
     /**
@@ -130,6 +188,18 @@ public class Binder {
     /**
      * Construct a new Binder using a return type and argument types.
      *
+     * @param lookup the Lookup context to use for direct handles
+     * @param returnType the return type of the incoming signature
+     * @param argTypes the argument types of the incoming signature
+     * @return the Binder object
+     */
+    public static Binder from(MethodHandles.Lookup lookup, Class returnType, Class[] argTypes) {
+        return from(lookup, MethodType.methodType(returnType, argTypes));
+    }
+
+    /**
+     * Construct a new Binder using a return type and argument types.
+     *
      * @param returnType the return type of the incoming signature
      * @param argType0 the first argument type of the incoming signature
      * @param argTypes the remaining argument types of the incoming signature
@@ -137,6 +207,19 @@ public class Binder {
      */
     public static Binder from(Class returnType, Class argType0, Class... argTypes) {
         return from(MethodType.methodType(returnType, argType0, argTypes));
+    }
+
+    /**
+     * Construct a new Binder using a return type and argument types.
+     *
+     * @param lookup the Lookup context to use for direct handles
+     * @param returnType the return type of the incoming signature
+     * @param argType0 the first argument type of the incoming signature
+     * @param argTypes the remaining argument types of the incoming signature
+     * @return the Binder object
+     */
+    public static Binder from(MethodHandles.Lookup lookup, Class returnType, Class argType0, Class... argTypes) {
+        return from(lookup, MethodType.methodType(returnType, argType0, argTypes));
     }
 
     /**
@@ -148,6 +231,18 @@ public class Binder {
      */
     public static Binder from(Binder start) {
         return new Binder(start);
+    }
+
+    /**
+     * Construct a new Binder, starting from a given invokebinder.
+     *
+     * @param lookup the Lookup context to use for direct handles
+     * @param start the starting invokebinder; the new one will start with the current endpoint type
+     *              of the given invokebinder
+     * @return the Binder object
+     */
+    public static Binder from(MethodHandles.Lookup lookup, Binder start) {
+        return new Binder(lookup, start);
     }
     
     /**
@@ -168,6 +263,17 @@ public class Binder {
         }
         
         return newBinder;
+    }
+    
+    /**
+     * Use an alternate java.lang.invoke.MethodHandles.Lookup as the default for
+     * any direct handles created.
+     * 
+     * @param lookup the new Lookup context to use
+     * @return a new Binder with the given lookup
+     */
+    public Binder withLookup(MethodHandles.Lookup lookup) {
+        return from(lookup, this);
     }
 
     /**
@@ -582,6 +688,54 @@ public class Binder {
      */
     public Binder fold(MethodHandle function) {
         return new Binder(this, new Fold(function));
+    }
+
+    /**
+     * Process the incoming arguments using the given handle, inserting the result
+     * as the first argument.
+     *
+     * @param function the function that will process the incoming arguments. Its
+     *                     signature must match the current signature's arguments exactly.
+     * @return a new Binder
+     */
+    public Binder foldStatic(MethodHandles.Lookup lookup, Class target, String method) {
+        return fold(Binder.from(type()).invokeStaticQuiet(lookup, target, method));
+    }
+
+    /**
+     * Process the incoming arguments using the given handle, inserting the result
+     * as the first argument.
+     *
+     * @param function the function that will process the incoming arguments. Its
+     *                     signature must match the current signature's arguments exactly.
+     * @return a new Binder
+     */
+    public Binder foldStatic(Class target, String method) {
+        return foldStatic(lookup, target, method);
+    }
+
+    /**
+     * Process the incoming arguments using the given handle, inserting the result
+     * as the first argument.
+     *
+     * @param function the function that will process the incoming arguments. Its
+     *                     signature must match the current signature's arguments exactly.
+     * @return a new Binder
+     */
+    public Binder foldVirtual(MethodHandles.Lookup lookup, String method) {
+        return fold(Binder.from(type()).printType().invokeVirtualQuiet(lookup, method));
+    }
+
+    /**
+     * Process the incoming arguments using the given handle, inserting the result
+     * as the first argument.
+     *
+     * @param function the function that will process the incoming arguments. Its
+     *                     signature must match the current signature's arguments exactly.
+     * @return a new Binder
+     */
+    public Binder foldVirtual(String method) {
+        return foldVirtual(lookup, method);
     }
 
     /**

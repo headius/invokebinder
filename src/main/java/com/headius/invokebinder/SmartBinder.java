@@ -21,6 +21,14 @@ public class SmartBinder {
         this.signature = signature;
         this.binder = binder;
     }
+    
+    public Signature getSignature() {
+        return signature;
+    }
+    
+    public Binder getBinder() {
+        return binder;
+    }
 
     public static SmartBinder from(Signature inbound) {
         return new SmartBinder(inbound, Binder.from(inbound.methodType()));

@@ -114,6 +114,10 @@ public class SmartBinder {
         return new SmartHandle(signature, binder.invokeVirtualQuiet(lookup, name));
     }
     
+    public SmartHandle invokeStaticQuiet(Lookup lookup, Class target, String name) {
+        return new SmartHandle(signature, binder.invokeStaticQuiet(lookup, target, name));
+    }
+    
     public SmartHandle invoke(MethodHandle target) {
         return new SmartHandle(signature, binder.invoke(target));
     }

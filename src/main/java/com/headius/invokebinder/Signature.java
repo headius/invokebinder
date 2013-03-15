@@ -160,7 +160,7 @@ public class Signature {
      * @param types the types of the argument
      * @return a new signature
      */
-    public Signature insertArgs(int index, String[] names, Class[] types) {
+    public Signature insertArgs(int index, String[] names, Class... types) {
         assert names.length == types.length : "names and types must be of the same length";
         
         String[] newArgNames = new String[argNames.length + names.length];

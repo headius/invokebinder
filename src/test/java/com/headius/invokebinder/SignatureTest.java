@@ -177,7 +177,7 @@ public class SignatureTest {
         MethodHandle handle = stringObjectInt
                 .appendArg("flo", float.class)
                 .appendArg("dub", double.class)
-                .permuteTo(stringObjectIntTarget, "obj", "num");
+                .permuteWith(stringObjectIntTarget, "obj", "num");
         
         assertEquals(MethodType.methodType(String.class, Object.class, int.class, float.class, double.class), handle.type());
         assertEquals("foo1", (String)handle.invokeExact((Object)"foo", 1, 1.0f, 1.0));

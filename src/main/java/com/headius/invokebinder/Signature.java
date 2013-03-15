@@ -226,7 +226,7 @@ public class Signature {
      * @return a new handle that permutes appropriate positions based on the
      * given permute args
      */
-    public MethodHandle permuteTo(MethodHandle target, String... permuteArgs) {
+    public MethodHandle permuteWith(MethodHandle target, String... permuteArgs) {
         return MethodHandles.permuteArguments(target, methodType, to(permute(permuteArgs)));
     }
 

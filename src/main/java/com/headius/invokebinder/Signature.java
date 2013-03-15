@@ -172,6 +172,23 @@ public class Signature {
         
         return new Signature(newMethodType, newArgNames);
     }
+    
+    /**
+     * Spread the trailing [] argument into the given argument types
+     */
+    public Signature spread(String[] names, Class... types) {
+        assert names.length == types.length : "names and types must be of the same length";
+        
+        String[] newArgNames = new String[argNames.length - 1 + names.length];
+        System.arraycopy(names, 0, newArgNames, newArgNames.length - names.length, names.length);
+        System.arraycopy(argNames, 0, newArgNames, 0, argNames.length - 1);
+        
+        MethodType newMethodType = methodType
+                .dropParameterTypes(methodType.parameterCount() - 1, methodType.parameterCount())
+                .appendParameterTypes(types);
+        
+        return new Signature(newMethodType, newArgNames);
+    }
 
     /**
      * The current java.lang.invoke.MethodType for this Signature.

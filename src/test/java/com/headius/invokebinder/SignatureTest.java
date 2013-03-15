@@ -182,6 +182,14 @@ public class SignatureTest {
         assertEquals(MethodType.methodType(String.class, Object.class, int.class, float.class, double.class), handle.type());
         assertEquals("foo1", (String)handle.invokeExact((Object)"foo", 1, 1.0f, 1.0));
     }
+    
+    @Test
+    public void testSpread() throws Throwable {
+        Signature sig = stringObjectAry
+                .spread(new String[]{"int", "flo"}, Integer.class, Float.class);
+        
+        assertEquals("(Integer int, Float flo)String", sig.toString());
+    }
 
     /**
      * Test of to method, of class Signature.
@@ -213,6 +221,10 @@ public class SignatureTest {
             .returning(String.class)
             .appendArg("obj", Object.class)
             .appendArg("num", int.class);
+    
+    private static final Signature stringObjectAry = Signature
+            .returning(String.class)
+            .appendArg("objs", Object[].class);
     
     private static final MethodHandle stringObjectIntTarget = Binder
             .from(String.class, Object.class, int.class)

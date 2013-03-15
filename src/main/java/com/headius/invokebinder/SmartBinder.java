@@ -61,6 +61,16 @@ public class SmartBinder {
     public SmartBinder permute(String... targetNames) {
         return permute(signature.permute(targetNames));
     }
+
+    /**
+     * Spread a trailing Object[] into the specified argument types.
+     *
+     * @param spreadTypes the types into which to spread the incoming Object[]
+     * @return a new Binder
+     */
+    public SmartBinder spread(String[] names, Class... spreadTypes) {
+        return new SmartBinder(signature.spread(names, spreadTypes), binder.spread(spreadTypes));
+    }
     
     public SmartBinder insert(int index, String name, Object value) {
         return new SmartBinder(signature.insertArg(index, name, value.getClass()), binder.insert(index, value));

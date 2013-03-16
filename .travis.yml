@@ -1,4 +1,4 @@
 before_install:
  - sudo apt-get install openjdk-7-jdk
- - update-java-alternatives java-7-openjdk
+ - update-java-alternatives -s java-7-openjdk
 language: java

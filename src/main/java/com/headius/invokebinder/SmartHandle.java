@@ -24,7 +24,7 @@ public class SmartHandle {
 
     public static SmartHandle findStaticQuiet(Lookup lookup, Class target, String name, Signature signature) {
         try {
-            return new SmartHandle(signature, lookup.findStatic(target, name, signature.methodType()));
+            return new SmartHandle(signature, lookup.findStatic(target, name, signature.type()));
         } catch (NoSuchMethodException nsme) {
             throw new RuntimeException(nsme);
         } catch (IllegalAccessException nae) {
@@ -82,6 +82,10 @@ public class SmartHandle {
     
     public SmartHandle guard(SmartHandle target, SmartHandle fallback) {
         return new SmartHandle(target.signature, MethodHandles.guardWithTest(handle, target.handle, fallback.handle));
+    }
+    
+    public SmartHandle bindTo(Object obj) {
+        return new SmartHandle(signature.dropFirst(), handle.bindTo(obj));
     }
     
 }

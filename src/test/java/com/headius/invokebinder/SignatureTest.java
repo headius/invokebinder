@@ -64,7 +64,7 @@ public class SignatureTest {
     public void testReturning() {
         Signature sig = Signature.returning(String.class);
         
-        assertEquals(String.class, sig.methodType().returnType());
+        assertEquals(String.class, sig.type().returnType());
     }
 
     /**
@@ -75,7 +75,7 @@ public class SignatureTest {
         Signature sig = Signature
                 .returning(String.class)
                 .asFold(Object.class);
-        assertEquals(Object.class, sig.methodType().returnType());
+        assertEquals(Object.class, sig.type().returnType());
     }
 
     /**
@@ -145,7 +145,7 @@ public class SignatureTest {
      */
     @Test
     public void testMethodType() {
-        assertEquals(MethodType.methodType(String.class, Object.class, int.class), stringObjectInt.methodType());
+        assertEquals(MethodType.methodType(String.class, Object.class, int.class), stringObjectInt.type());
     }
 
     /**

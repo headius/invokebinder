@@ -536,6 +536,96 @@ public class Binder {
     }
 
     /**
+     * Prepend to the argument list the given boolean value.
+     *
+     * @param value the value to prepend
+     * @return a new Binder
+     */
+    public Binder prepend(boolean value) {
+        return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given byte value.
+     *
+     * @param value the value to prepend
+     * @return a new Binder
+     */
+    public Binder prepend(byte value) {
+        return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given short value.
+     *
+     * @param value the value to prepend
+     * @return a new Binder
+     */
+    public Binder prepend(short value) {
+        return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given char value.
+     *
+     * @param value the value to prepend
+     * @return a new Binder
+     */
+    public Binder prepend(char value) {
+        return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given int value.
+     *
+     * @param value the value to prepend
+     * @return a new Binder
+     */
+    public Binder prepend(int value) {
+        return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given long value.
+     *
+     * @param value the value to prepend
+     * @return a new Binder
+     */
+    public Binder prepend(long value) {
+        return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given float value.
+     *
+     * @param value the value to prepend
+     * @return a new Binder
+     */
+    public Binder prepend(float value) {
+        return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given double value.
+     *
+     * @param value the value to prepend
+     * @return a new Binder
+     */
+    public Binder prepend(double value) {
+        return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given argument value(s).
+     *
+     * @param values the value(s) to prepend
+     * @return a new Binder
+     */
+    public Binder prepend(Object... values) {
+        return new Binder(this, new Insert(0, values));
+    }
+
+    /**
      * Append to the argument list the given argument value(s).
      *
      * @param types the actual types to use, rather than getClass
@@ -641,7 +731,26 @@ public class Binder {
      * @return a new Binder
      */
     public Binder spread(Class... spreadTypes) {
+        if (spreadTypes.length == 0) {
+            return dropLast();
+        }
+        
         return new Binder(this, new Spread(type(), spreadTypes));
+    }
+    
+    public Binder spread(int count) {
+        if (count == 0) {
+            return dropLast();
+        }
+        
+        Class aryType = type().parameterType(type().parameterCount() - 1);
+        
+        assert aryType.isArray();
+        
+        Class[] spreadTypes = new Class[count];
+        Arrays.fill(spreadTypes, aryType.getComponentType());
+        
+        return spread(spreadTypes);
     }
 
     /**
@@ -689,6 +798,14 @@ public class Binder {
      */
     public Binder fold(MethodHandle function) {
         return new Binder(this, new Fold(function));
+    }
+    
+    public Binder foldVoid(MethodHandle function) {
+        if (type().returnType() == void.class) {
+            return fold(function);
+        } else {
+            return fold(function.asType(function.type().changeReturnType(void.class)));
+        }
     }
 
     /**

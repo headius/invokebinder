@@ -22,9 +22,7 @@ public class Spread extends Transform {
     }
 
     public MethodHandle up(MethodHandle target) {
-        return MethodHandles
-                .spreadInvoker(target.type(), target.type().parameterCount() - spreadTypes.length)
-                .bindTo(target);
+        return target.asSpreader(source.parameterType(source.parameterCount() - 1), spreadTypes.length);
     }
 
     public MethodType down(MethodType type) {

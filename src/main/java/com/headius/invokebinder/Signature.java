@@ -8,6 +8,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -99,6 +100,10 @@ public class Signature {
         Signature sig = new Signature(retval);
         return sig;
     }
+    
+    public Signature changeReturn(Class retval) {
+        return new Signature(methodType.changeReturnType(retval), argNames);
+    }
 
     /**
      * Produce a new signature based on this one with a different return type.
@@ -124,6 +129,23 @@ public class Signature {
         MethodType newMethodType = methodType.appendParameterTypes(type);
         return new Signature(newMethodType, newArgNames);
     }
+
+    /**
+     * Append an argument (name + type) to the signature.
+     * 
+     * @param name the name of the argument
+     * @param type the type of the argument
+     * @return a new signature
+     */
+    public Signature appendArgs(String[] names, Class... types) {
+        assert names.length == types.length : "names and types must be of the same length";
+        
+        String[] newArgNames = new String[argNames.length + names.length];
+        System.arraycopy(argNames, 0, newArgNames, 0, argNames.length);
+        System.arraycopy(names, 0, newArgNames, argNames.length, names.length);
+        MethodType newMethodType = methodType.appendParameterTypes(types);
+        return new Signature(newMethodType, newArgNames);
+    }
     
     /**
      * Prepend an argument (name + type) to the signature.
@@ -137,6 +159,21 @@ public class Signature {
         System.arraycopy(argNames, 0, newArgNames, 1, argNames.length);
         newArgNames[0] = name;
         MethodType newMethodType = methodType.insertParameterTypes(0, type);
+        return new Signature(newMethodType, newArgNames);
+    }
+    
+    /**
+     * Prepend an argument (name + type) to the signature.
+     * 
+     * @param name the name of the argument
+     * @param type the type of the argument
+     * @return a new signature
+     */
+    public Signature prependArgs(String[] names, Class[] types) {
+        String[] newArgNames = new String[argNames.length + names.length];
+        System.arraycopy(argNames, 0, newArgNames, names.length, argNames.length);
+        System.arraycopy(names, 0, newArgNames, 0, names.length);
+        MethodType newMethodType = methodType.insertParameterTypes(0, types);
         return new Signature(newMethodType, newArgNames);
     }
     
@@ -174,6 +211,53 @@ public class Signature {
     }
     
     /**
+     * Drops the first argument with the given name.
+     * 
+     * @param name the name of the argument to drop
+     * @return a new signature
+     */
+    public Signature dropArg(String name) {
+        String[] newArgNames = new String[argNames.length - 1];
+        MethodType newType = null;
+        
+        for (int i = 0, j = 0; i < argNames.length; i++) {
+            if (newArgNames[i].equals(name)) {
+                newType = methodType.dropParameterTypes(i, i+1);
+            }
+            newArgNames[j++] = newArgNames[i];
+        }
+        
+        if (newType == null) {
+            // arg name not found; should we error?
+            return this;
+        }
+        
+        return new Signature(newType, newArgNames);
+    }
+    
+    /**
+     * Drop the last argument from this signature.
+     * 
+     * @return a new signature
+     */
+    public Signature dropLast() {
+        return new Signature(
+                methodType.dropParameterTypes(methodType.parameterCount() - 1, methodType.parameterCount()),
+                Arrays.copyOfRange(argNames, 0, argNames.length - 1));
+    }
+    
+    /**
+     * Drop the first argument from this signature.
+     * 
+     * @return a new signature
+     */
+    public Signature dropFirst() {
+        return new Signature(
+                methodType.dropParameterTypes(0, 1),
+                Arrays.copyOfRange(argNames, 1, argNames.length));
+    }
+    
+    /**
      * Spread the trailing [] argument into the given argument types
      */
     public Signature spread(String[] names, Class... types) {
@@ -189,13 +273,38 @@ public class Signature {
         
         return new Signature(newMethodType, newArgNames);
     }
+    
+    /**
+     * Spread the trailing [] argument into its component type assigning given names.
+     */
+    public Signature spread(String... names) {
+        Class aryType = lastArgType();
+        
+        assert lastArgType().isArray();
+        
+        Class[] newTypes = new Class[names.length];
+        Arrays.fill(newTypes, aryType.getComponentType());
+        
+        return spread(names, newTypes);
+    }
+    
+    /**
+     * Spread the trailing [] argument into its component type assigning given names.
+     */
+    public Signature spread(String baseName, int count) {
+        String[] spreadNames = new String[count];
+        
+        for (int i = 0; i < count; i++) spreadNames[i] = baseName + i;
+        
+        return spread(spreadNames);
+    }
 
     /**
      * The current java.lang.invoke.MethodType for this Signature.
      * 
      * @return the current method type
      */
-    public MethodType methodType() {
+    public MethodType type() {
         return methodType;
     }
 
@@ -207,17 +316,23 @@ public class Signature {
     public String[] argNames() {
         return argNames;
     }
+    
+    public Class argType(int index) {
+        return methodType.parameterType(index);
+    }
+    
+    public Class lastArgType() {
+        return argType(methodType.parameterCount() - 1);
+    }
 
     public Signature permute(String... permuteArgs) {
         List<Class> types = new ArrayList<Class>(argNames.length);
         List<String> names = new ArrayList<String>(argNames.length);
         for (String permuteArg : permuteArgs) {
             Pattern pattern = Pattern.compile(permuteArg);
-            boolean found = false;
             for (int argOffset = 0; argOffset < argNames.length; argOffset++) {
                 String arg = argNames[argOffset];
                 if (pattern.matcher(arg).find()) {
-                    found = true;
                     types.add(methodType.parameterType(argOffset));
                     names.add(argNames[argOffset]);
                 }
@@ -245,6 +360,11 @@ public class Signature {
      */
     public MethodHandle permuteWith(MethodHandle target, String... permuteArgs) {
         return MethodHandles.permuteArguments(target, methodType, to(permute(permuteArgs)));
+    }
+    
+    public SmartHandle permuteWith(SmartHandle target) {
+        String[] argNames = target.signature().argNames();
+        return new SmartHandle(permute(argNames), permuteWith(target.handle(), argNames));
     }
 
     /**

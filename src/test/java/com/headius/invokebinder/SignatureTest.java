@@ -126,6 +126,17 @@ public class SignatureTest {
         assertEquals("(Object obj, float flo, int num)String", sig.toString());
     }
 
+    @Test
+    public void testInsertArgBefore() {
+        Signature sig = Signature
+                .returning(String.class)
+                .appendArg("obj", Object.class)
+                .appendArg("num", int.class)
+                .insertArg("num", "flo", float.class);
+        
+        assertEquals("(Object obj, float flo, int num)String", sig.toString());
+    }
+
     /**
      * Test of insertArgs method, of class Signature.
      */
@@ -136,6 +147,16 @@ public class SignatureTest {
                 .appendArg("obj", Object.class)
                 .appendArg("num", int.class)
                 .insertArgs(1, new String[]{"flo", "dub"}, new Class[] {float.class, double.class});
+        
+        assertEquals("(Object obj, float flo, double dub, int num)String", sig.toString());
+    }
+    @Test
+    public void testInsertArgsBefore() {
+        Signature sig = Signature
+                .returning(String.class)
+                .appendArg("obj", Object.class)
+                .appendArg("num", int.class)
+                .insertArgs("num", new String[]{"flo", "dub"}, new Class[] {float.class, double.class});
         
         assertEquals("(Object obj, float flo, double dub, int num)String", sig.toString());
     }
@@ -169,6 +190,18 @@ public class SignatureTest {
     @Test
     public void testFirstArgName() {
         assertEquals("obj", stringObjectInt.appendArg("flo", float.class).firstArgName());
+    }
+    
+    @Test
+    public void testArgOffset() {
+        assertEquals(1, stringObjectInt.argOffset("num"));
+        assertEquals(-1, stringObjectInt.argOffset("flo"));
+    }
+    
+    @Test
+    public void testArgOffsets() {
+        assertEquals(1, stringObjectInt.argOffsets("nu*"));
+        assertEquals(-1, stringObjectInt.argOffsets("fl."));
     }
     
     @Test
@@ -287,6 +320,15 @@ public class SignatureTest {
         Signature newSig = stringObjectInt
                 .appendArg("flo", float.class)
                 .dropArg("num");
+        
+        assertEquals("(Object obj, float flo)String", newSig.toString());
+    }
+    
+    @Test
+    public void testDropArgIndex() {
+        Signature newSig = stringObjectInt
+                .appendArg("flo", float.class)
+                .dropArg(1);
         
         assertEquals("(Object obj, float flo)String", newSig.toString());
     }

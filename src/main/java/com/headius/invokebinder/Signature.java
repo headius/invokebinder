@@ -198,8 +198,8 @@ public class Signature {
      * Insert an argument (name + type) into the signature.
      * 
      * @param index the index at which to insert
-     * @param name the name of the argument
-     * @param type the type of the argument
+     * @param name the name of the new argument
+     * @param type the type of the new argument
      * @return a new signature
      */
     public Signature insertArg(int index, String name, Class type) {
@@ -207,11 +207,24 @@ public class Signature {
     }
     
     /**
+     * Insert an argument (name + type) into the signature before the argument
+     * with the given name.
+     * 
+     * @param beforeName the name of the argument before which to insert
+     * @param name the name of the new argument
+     * @param type the type of the new argument
+     * @return a new signature
+     */
+    public Signature insertArg(String beforeName, String name, Class type) {
+        return insertArgs(argOffset(beforeName), new String[]{name}, new Class[]{type});
+    }
+    
+    /**
      * Insert arguments (names + types) into the signature.
      * 
      * @param index the index at which to insert
-     * @param names the names of the argument
-     * @param types the types of the argument
+     * @param names the names of the new arguments
+     * @param types the types of the new arguments
      * @return a new signature
      */
     public Signature insertArgs(int index, String[] names, Class... types) {
@@ -225,6 +238,19 @@ public class Signature {
         MethodType newMethodType = methodType.insertParameterTypes(index, types);
         
         return new Signature(newMethodType, newArgNames);
+    }
+    
+    /**
+     * Insert arguments (names + types) into the signature before the argument
+     * with the given name.
+     * 
+     * @param beforeName the name of the argument before which to insert
+     * @param names the names of the new arguments
+     * @param types the types of the new arguments
+     * @return 
+     */
+    public Signature insertArgs(String beforeName, String[] names, Class... types) {
+        return insertArgs(argOffset(beforeName), names, types);
     }
     
     /**
@@ -249,6 +275,24 @@ public class Signature {
             // arg name not found; should we error?
             return this;
         }
+        
+        return new Signature(newType, newArgNames);
+    }
+    
+    /**
+     * Drops the argument at the given index.
+     * 
+     * @param index the index of the argument to drop
+     * @return a new signature
+     */
+    public Signature dropArg(int index) {
+        assert index < argNames.length;
+        
+        String[] newArgNames = new String[argNames.length - 1];
+        if (index > 0) System.arraycopy(argNames, 0, newArgNames, 0, index);
+        if (index < argNames.length - 1) System.arraycopy(argNames, index + 1, newArgNames, index, argNames.length - (index + 1));
+        
+        MethodType newType = methodType.dropParameterTypes(index, index + 1);
         
         return new Signature(newType, newArgNames);
     }
@@ -343,6 +387,34 @@ public class Signature {
      */
     public String argName(int index) {
         return argNames[index];
+    }
+    
+    /**
+     * Retrieve the offset of the given argument name in this signature's
+     * arguments. If the argument name is not in the argument list, returns -1.
+     * 
+     * @param name the argument name to search for
+     * @return the offset at which the argument name was found or -1
+     */
+    public int argOffset(String name) {
+        for (int i = 0; i < argNames.length; i++) {
+            if (argNames[i].equals(name)) return i;
+        }
+        return -1;
+    }
+    
+    /**
+     * Retrieve the offset of the given argument name in this signature's
+     * arguments. If the argument name is not in the argument list, returns -1.
+     * 
+     * @param name the argument name to search for
+     * @return the offset at which the argument name was found or -1
+     */
+    public int argOffsets(String pattern) {
+        for (int i = 0; i < argNames.length; i++) {
+            if (Pattern.compile(pattern).matcher(argNames[i]).find()) return i;
+        }
+        return -1;
     }
     
     /**

@@ -1,6 +1,17 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2013 headius.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.headius.invokebinder;
 
@@ -101,6 +112,12 @@ public class Signature {
         return sig;
     }
     
+    /**
+     * Create a new signature based on this one with a different return type.
+     * 
+     * @param retval the class for the new signature's return type
+     * @return the new signature
+     */
     public Signature changeReturn(Class retval) {
         return new Signature(methodType.changeReturnType(retval), argNames);
     }
@@ -218,13 +235,14 @@ public class Signature {
      */
     public Signature dropArg(String name) {
         String[] newArgNames = new String[argNames.length - 1];
-        MethodType newType = null;
+        MethodType newType = methodType;
         
         for (int i = 0, j = 0; i < argNames.length; i++) {
-            if (newArgNames[i].equals(name)) {
-                newType = methodType.dropParameterTypes(i, i+1);
+            if (argNames[i].equals(name)) {
+                newType = newType.dropParameterTypes(j, j+1);
+                continue;
             }
-            newArgNames[j++] = newArgNames[i];
+            newArgNames[j++] = argNames[i];
         }
         
         if (newType == null) {
@@ -317,14 +335,69 @@ public class Signature {
         return argNames;
     }
     
+    /**
+     * Retrieve the name of the argument at the given index.
+     * 
+     * @param index the index from which to get the argument name
+     * @return the argument name
+     */
+    public String argName(int index) {
+        return argNames[index];
+    }
+    
+    /**
+     * Get the first argument name.
+     * 
+     * @return the first argument name
+     */
+    public String firstArgName() {
+        return argNames[0];
+    }
+    
+    /**
+     * Get the last argument name.
+     * 
+     * @return the last argument name
+     */
+    public String lastArgName() {
+        return argNames[argNames.length - 1];
+    }
+    
+    /**
+     * Get the argument type at the given index.
+     * 
+     * @param index the index from which to get the argument type
+     * @return the argument type
+     */
     public Class argType(int index) {
         return methodType.parameterType(index);
     }
     
+    /**
+     * Get the first argument type.
+     * 
+     * @return the first argument type
+     */
+    public Class firstArgType() {
+        return methodType.parameterType(0);
+    }
+    
+    /**
+     * Get the last argument type.
+     * 
+     * @return the last argument type
+     */
     public Class lastArgType() {
         return argType(methodType.parameterCount() - 1);
     }
 
+    /**
+     * Create a new signature containing the same return value as this one, but
+     * only the specified arguments.
+     * 
+     * @param permuteArgs the names of the arguments to preserve
+     * @return the new signature
+     */
     public Signature permute(String... permuteArgs) {
         List<Class> types = new ArrayList<Class>(argNames.length);
         List<String> names = new ArrayList<String>(argNames.length);
@@ -362,9 +435,19 @@ public class Signature {
         return MethodHandles.permuteArguments(target, methodType, to(permute(permuteArgs)));
     }
     
+    /**
+     * Produce a new SmartHandle by permuting this Signature's arguments to the
+     * Signature of a target SmartHandle. The new SmartHandle's signature will
+     * match this one, permuting those arguments and invoking the target handle.
+     * 
+     * @param target the SmartHandle to use as a permutation target
+     * @return a new SmartHandle that permutes this Signature's args into a call
+     * to the target SmartHandle.
+     * @see Signature#permuteWith(java.lang.invoke.MethodHandle, java.lang.String[]) 
+     */
     public SmartHandle permuteWith(SmartHandle target) {
         String[] argNames = target.signature().argNames();
-        return new SmartHandle(permute(argNames), permuteWith(target.handle(), argNames));
+        return new SmartHandle(this, permuteWith(target.handle(), argNames));
     }
 
     /**
@@ -381,10 +464,11 @@ public class Signature {
 
     /**
      * Generate an array of argument offsets based on permuting this signature
-     * to the given signature. Repeats are permitted.
+     * to the given signature. Repeats are permitted, and the patterns will be
+     * matched against actual argument names using regex matching.
      * 
-     * @param otherArgPatterns the argument names to permute
-     * @return an array of argument offsets that will permute to the given
+     * @param otherArgPatterns the argument name patterns to permute
+     * @return an array of argument offsets that will permute to the matching
      * argument names
      */
     public int[] to(String... otherArgPatterns) {

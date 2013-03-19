@@ -155,6 +155,36 @@ public class SignatureTest {
     public void testArgNames() {
         assertArrayEquals(new String[] {"obj", "num"}, stringObjectInt.argNames());
     }
+    
+    @Test
+    public void testArgName() {
+        assertEquals("num", stringObjectInt.appendArg("flo", float.class).argName(1));
+    }
+    
+    @Test
+    public void testLastArgName() {
+        assertEquals("flo", stringObjectInt.appendArg("flo", float.class).lastArgName());
+    }
+    
+    @Test
+    public void testFirstArgName() {
+        assertEquals("obj", stringObjectInt.appendArg("flo", float.class).firstArgName());
+    }
+    
+    @Test
+    public void testArgType() {
+        assertEquals(int.class, stringObjectInt.appendArg("flo", float.class).argType(1));
+    }
+    
+    @Test
+    public void testFirstArgType() {
+        assertEquals(Object.class, stringObjectInt.appendArg("flo", float.class).firstArgType());
+    }
+    
+    @Test
+    public void testLastArgType() {
+        assertEquals(float.class, stringObjectInt.appendArg("flo", float.class).lastArgType());
+    }
 
     /**
      * Test of permute method, of class Signature.
@@ -173,7 +203,7 @@ public class SignatureTest {
      * Test of permuteTo method, of class Signature.
      */
     @Test
-    public void testPermuteTo() throws Throwable {
+    public void testPermuteWith() throws Throwable {
         MethodHandle handle = stringObjectInt
                 .appendArg("flo", float.class)
                 .appendArg("dub", double.class)
@@ -184,11 +214,39 @@ public class SignatureTest {
     }
     
     @Test
-    public void testSpread() throws Throwable {
+    public void testPermuteWithSmartHandle() throws Throwable {
+        SmartHandle target = new SmartHandle(stringObjectInt, stringObjectIntTarget);
+        SmartHandle permuted = stringObjectInt
+                .appendArg("flo", float.class)
+                .appendArg("dub", double.class)
+                .permuteWith(target);
+        
+        assertEquals("(Object obj, int num, float flo, double dub)String", permuted.signature().toString());
+        assertEquals("foo1", permuted.handle().invokeWithArguments("foo", 1, 1.0f, 1.0));
+    }
+    
+    @Test
+    public void testSpreadNamesAndTypes() throws Throwable {
         Signature sig = stringObjectAry
                 .spread(new String[]{"int", "flo"}, Integer.class, Float.class);
         
         assertEquals("(Integer int, Float flo)String", sig.toString());
+    }
+    
+    @Test
+    public void testSpreadNames() throws Throwable {
+        Signature sig = stringObjectAry
+                .spread("obj0", "obj1");
+        
+        assertEquals("(Object obj0, Object obj1)String", sig.toString());
+    }
+    
+    @Test
+    public void testSpreadNameAndCount() throws Throwable {
+        Signature sig = stringObjectAry
+                .spread("obj", 2);
+        
+        assertEquals("(Object obj0, Object obj1)String", sig.toString());
     }
 
     /**
@@ -212,9 +270,41 @@ public class SignatureTest {
         int[] permuteInts = stringObjectInt
                 .appendArg("flo", float.class)
                 .appendArg("dub", double.class)
-                .to("obj", "flo");
+                .to(".*o.*");
         
         assertArrayEquals(new int[] {0, 2}, permuteInts);
+        
+        permuteInts = stringObjectInt
+                .appendArg("flo", float.class)
+                .appendArg("dub", double.class)
+                .to("num", "dub");
+        
+        assertArrayEquals(new int[] {1, 3}, permuteInts);
+    }
+    
+    @Test
+    public void testDropArg() {
+        Signature newSig = stringObjectInt
+                .appendArg("flo", float.class)
+                .dropArg("num");
+        
+        assertEquals("(Object obj, float flo)String", newSig.toString());
+    }
+    
+    @Test
+    public void testDropLast() {
+        Signature newSig = stringObjectInt
+                .dropLast();
+        
+        assertEquals("(Object obj)String", newSig.toString());
+    }
+    
+    @Test
+    public void testDropFirst() {
+        Signature newSig = stringObjectInt
+                .dropFirst();
+        
+        assertEquals("(int num)String", newSig.toString());
     }
     
     private static final Signature stringObjectInt = Signature

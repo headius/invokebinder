@@ -259,6 +259,18 @@ public class BinderTest {
     }
 
     @Test
+    public void testSpreadCount() throws Throwable {
+        MethodHandle target = concatHandle();
+        MethodHandle handle = Binder
+                .from(String.class, String[].class)
+                .spread(2)
+                .invoke(target);
+        
+        assertEquals(MethodType.methodType(String.class, String[].class), handle.type());
+        assertEquals("foobar", (String)handle.invokeExact(new String[] {"foo", "bar"}));
+    }
+
+    @Test
     public void testCollect() throws Throwable {
         MethodHandle handle = Binder
                 .from(String[].class, String.class, String.class, String.class)

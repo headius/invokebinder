@@ -21,6 +21,7 @@ import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -320,6 +321,30 @@ public class Signature {
     }
     
     /**
+     * Replace the named argument with a new name and type.
+     * 
+     * @param oldName the old name of the argument
+     * @param newName the new name of the argument; can be the same as old
+     * @param oldName the new type of the argument; can be the same as old
+     */
+    public Signature replaceArg(String oldName, String newName, Class newType) {
+        int offset = argOffset(oldName);
+        String[] newArgNames = argNames;
+        
+        if (!oldName.equals(newName)) {
+            newArgNames = Arrays.copyOf(argNames, argNames.length);
+            newArgNames[offset] = newName;
+        }
+        
+        Class oldType = methodType.parameterType(offset);
+        MethodType newMethodType = methodType;
+        
+        if (!oldType.equals(newType)) newMethodType = methodType.changeParameterType(offset, newType);
+        
+        return new Signature(newMethodType, newArgNames);
+    }
+    
+    /**
      * Spread the trailing [] argument into the given argument types
      */
     public Signature spread(String[] names, Class... types) {
@@ -471,17 +496,49 @@ public class Signature {
      * @return the new signature
      */
     public Signature permute(String... permuteArgs) {
+        Pattern[] patterns = new Pattern[permuteArgs.length];
+        for (int i = 0; i < permuteArgs.length; i++) patterns[i] = Pattern.compile(permuteArgs[i]);
+        
         List<Class> types = new ArrayList<Class>(argNames.length);
         List<String> names = new ArrayList<String>(argNames.length);
-        for (String permuteArg : permuteArgs) {
-            Pattern pattern = Pattern.compile(permuteArg);
+        
+        for (Pattern pattern : patterns) {
             for (int argOffset = 0; argOffset < argNames.length; argOffset++) {
                 String arg = argNames[argOffset];
-                if (pattern.matcher(arg).find()) {
+                Matcher matcher = pattern.matcher(arg);
+                if (matcher.find()) {
                     types.add(methodType.parameterType(argOffset));
-                    names.add(argNames[argOffset]);
+                    names.add(arg);
                 }
             }
+        }
+        return new Signature(MethodType.methodType(methodType.returnType(), types.toArray(new Class[0])), names.toArray(new String[0]));
+    }
+
+    /**
+     * Create a new signature containing the same return value as this one, but
+     * omitting the specified arguments. Blacklisting to #permute's whitelisting.
+     * 
+     * @param excludeArgs the names of the arguments to exclude
+     * @return the new signature
+     */
+    public Signature exclude(String... excludeArgs) {
+        Pattern[] patterns = new Pattern[excludeArgs.length];
+        for (int i = 0; i < excludeArgs.length; i++) patterns[i] = Pattern.compile(excludeArgs[i]);
+        
+        List<Class> types = new ArrayList<Class>(argNames.length);
+        List<String> names = new ArrayList<String>(argNames.length);
+        
+        OUTER: for (int argOffset = 0; argOffset < argNames.length; argOffset++) {
+            String arg = argNames[argOffset];
+            for (Pattern pattern : patterns) {
+                Matcher matcher = pattern.matcher(arg);
+                if (matcher.find()) continue OUTER;
+            }
+            
+            // no matches, include
+            types.add(methodType.parameterType(argOffset));
+            names.add(arg);
         }
         return new Signature(MethodType.methodType(methodType.returnType(), types.toArray(new Class[0])), names.toArray(new String[0]));
     }

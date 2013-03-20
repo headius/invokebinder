@@ -18,6 +18,7 @@ package com.headius.invokebinder;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.invoke.MethodType;
 
 /**
  * A tuple of a Signature and a java.lang.invoke.MethodHandle, providing
@@ -124,326 +125,44 @@ public class SmartHandle {
     }
     
     /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
+     * Apply an argument into the handle at the given index, returning a new
+     * SmartHandle. The new handle will use the given value for the argument at
+     * the given index, accepting one fewer argument as a result. In other words,
+     * fix that argument (partial application) into the given handle.
      * 
      * @param name the name of the argument in the new SmartHandle's Signature
      * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
+     * @return a new SmartHandle that already has applied the given argument
      */
-    public SmartHandle insert(int index, Object arg) {
+    public SmartHandle apply(int index, Object arg) {
         return new SmartHandle(signature.dropArg(index), MethodHandles.insertArguments(handle, index, arg));
     }
     
     /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
+     * Apply an argument into the handle at the given name, returning a new
+     * SmartHandle. The new handle will use the given value for the argument at
+     * the given index, accepting one fewer argument as a result. In other words,
+     * fix that argument (partial application) into the given handle.
      * 
      * @param name the name of the argument in the new SmartHandle's Signature
      * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
+     * @return a new SmartHandle that already has applied the given argument
      */
-    public SmartHandle insert(int index, boolean arg) {
-        return new SmartHandle(signature.dropArg(index), MethodHandles.insertArguments(handle, index, arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(int index, byte arg) {
-        return new SmartHandle(signature.dropArg(index), MethodHandles.insertArguments(handle, index, arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(int index, short arg) {
-        return new SmartHandle(signature.dropArg(index), MethodHandles.insertArguments(handle, index, arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(int index, char arg) {
-        return new SmartHandle(signature.dropArg(index), MethodHandles.insertArguments(handle, index, arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(int index, int arg) {
-        return new SmartHandle(signature.dropArg(index), MethodHandles.insertArguments(handle, index, arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(int index, long arg) {
-        return new SmartHandle(signature.dropArg(index), MethodHandles.insertArguments(handle, index, arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(int index, float arg) {
-        return new SmartHandle(signature.dropArg(index), MethodHandles.insertArguments(handle, index, arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(int index, double arg) {
-        return new SmartHandle(signature.dropArg(index), MethodHandles.insertArguments(handle, index, arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(String name, Object arg) {
+    public SmartHandle apply(String name, Object arg) {
         return new SmartHandle(signature.dropArg(name), MethodHandles.insertArguments(handle, signature.argOffset(name), arg));
     }
     
     /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
+     * Apply an argument into the handle at the end, returning a new
+     * SmartHandle. The new handle will use the given value for the last
+     * argument, accepting one fewer argument as a result. In other words,
+     * fix that argument (partial application) into the given handle.
      * 
      * @param name the name of the argument in the new SmartHandle's Signature
      * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
+     * @return a new SmartHandle that already has applied the given argument
      */
-    public SmartHandle insert(String name, boolean arg) {
-        return new SmartHandle(signature.dropArg(name), MethodHandles.insertArguments(handle, signature.argOffset(name), arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(String name, byte arg) {
-        return new SmartHandle(signature.dropArg(name), MethodHandles.insertArguments(handle, signature.argOffset(name), arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(String name, short arg) {
-        return new SmartHandle(signature.dropArg(name), MethodHandles.insertArguments(handle, signature.argOffset(name), arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(String name, char arg) {
-        return new SmartHandle(signature.dropArg(name), MethodHandles.insertArguments(handle, signature.argOffset(name), arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(String name, int arg) {
-        return new SmartHandle(signature.dropArg(name), MethodHandles.insertArguments(handle, signature.argOffset(name), arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(String name, long arg) {
-        return new SmartHandle(signature.dropArg(name), MethodHandles.insertArguments(handle, signature.argOffset(name), arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(String name, float arg) {
-        return new SmartHandle(signature.dropArg(name), MethodHandles.insertArguments(handle, signature.argOffset(name), arg));
-    }
-    
-    /**
-     * Insert an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle insert(String name, double arg) {
-        return new SmartHandle(signature.dropArg(name), MethodHandles.insertArguments(handle, signature.argOffset(name), arg));
-    }
-        
-    /**
-     * Append an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle append(Object arg) {
-        return new SmartHandle(signature.dropLast(), MethodHandles.insertArguments(handle, signature.type().parameterCount(), arg));
-    }
-    
-    /**
-     * Append an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle append(boolean arg) {
-        return new SmartHandle(signature.dropLast(), MethodHandles.insertArguments(handle, signature.type().parameterCount(), arg));
-    }
-    
-    /**
-     * Append an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle append(byte arg) {
-        return new SmartHandle(signature.dropLast(), MethodHandles.insertArguments(handle, signature.type().parameterCount(), arg));
-    }
-    
-    /**
-     * Append an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle append(short arg) {
-        return new SmartHandle(signature.dropLast(), MethodHandles.insertArguments(handle, signature.type().parameterCount(), arg));
-    }
-    
-    /**
-     * Append an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle append(char arg) {
-        return new SmartHandle(signature.dropLast(), MethodHandles.insertArguments(handle, signature.type().parameterCount(), arg));
-    }
-    
-    /**
-     * Append an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle append(int arg) {
-        return new SmartHandle(signature.dropLast(), MethodHandles.insertArguments(handle, signature.type().parameterCount(), arg));
-    }
-    
-    /**
-     * Append an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle append(long arg) {
-        return new SmartHandle(signature.dropLast(), MethodHandles.insertArguments(handle, signature.type().parameterCount(), arg));
-    }
-    
-    /**
-     * Append an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle append(float arg) {
-        return new SmartHandle(signature.dropLast(), MethodHandles.insertArguments(handle, signature.type().parameterCount(), arg));
-    }
-    
-    /**
-     * Append an argument into the handle at the given index, returning a new
-     * SmartHandle.
-     * 
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg the argument value
-     * @return a new SmartHandle with the additional argument
-     */
-    public SmartHandle append(double arg) {
+    public SmartHandle applyLast(Object arg) {
         return new SmartHandle(signature.dropLast(), MethodHandles.insertArguments(handle, signature.type().parameterCount(), arg));
     }
     
@@ -514,6 +233,101 @@ public class SmartHandle {
      */
     public SmartHandle bindTo(Object obj) {
         return new SmartHandle(signature.dropFirst(), handle.bindTo(obj));
+    }
+    
+    /**
+     * Create a new SmartHandle that converts arguments from the given type to
+     * the current signature's type, using the same argument names. This conversion
+     * is equivalent to MethodHandle#asType.
+     * 
+     * @param incoming the target MethodType from which arguments will be converted
+     * @return a new SmartHandle that accepts the given argument types
+     */
+    public SmartHandle convert(MethodType incoming) {
+        return new SmartHandle(new Signature(incoming, signature.argNames()), handle.asType(incoming));
+    }
+    
+    /**
+     * Create a new SmartHandle that converts arguments from the given return
+     * type and argument types to the current signature's type, using the same
+     * argument names. This conversion is equivalent to MethodHandle#asType.
+     * 
+     * @param returnType the return type of the new handle
+     * @param argTypes the argument types of the new handle
+     * @return a new SmartHandle that accepts the given argument types
+     */
+    public SmartHandle convert(Class returnType, Class... argTypes) {
+        return convert(MethodType.methodType(returnType, argTypes));
+    }
+    
+    /**
+     * Create a new SmartHandle that converts arguments from the given signature to
+     * the current signature's type with the new argument names. This conversion
+     * is equivalent to MethodHandle#asType.
+     * 
+     * @param incoming the target MethodType from which arguments will be converted
+     * @return a new SmartHandle that accepts the given argument types
+     */
+    public SmartHandle convert(Signature incoming) {
+        return new SmartHandle(incoming, handle.asType(incoming.type()));
+    }
+    
+    /**
+     * Create a new SmartHandle that casts arguments from the given type to
+     * the current signature's type, using the same argument names. This casting
+     * is equivalent to MethodHandles#explicitCastArguments.
+     * 
+     * @param incoming the target MethodType from which arguments will be converted
+     * @return a new SmartHandle that accepts the given argument types
+     */
+    public SmartHandle cast(MethodType incoming) {
+        return new SmartHandle(new Signature(incoming, signature.argNames()), MethodHandles.explicitCastArguments(handle, incoming));
+    }
+    
+    /**
+     * Create a new SmartHandle that casts arguments from the given signature to
+     * the current signature's type with the new argument names. This casting
+     * is equivalent to MethodHandle#asType.
+     * 
+     * @param incoming the target MethodType from which arguments will be converted
+     * @return a new SmartHandle that accepts the given argument types
+     */
+    public SmartHandle cast(Signature incoming) {
+        return new SmartHandle(incoming, MethodHandles.explicitCastArguments(handle, incoming.type()));
+    }
+    
+    /**
+     * Create a new SmartHandle that casts arguments from the given return
+     * type and argument types to the current signature's type, using the same
+     * argument names. This casting is equivalent to MethodHandle#asType.
+     * 
+     * @param returnType the return type of the new handle
+     * @param argTypes the argument types of the new handle
+     * @return a new SmartHandle that accepts the given argument types
+     */
+    public SmartHandle cast(Class returnType, Class... argTypes) {
+        return cast(MethodType.methodType(returnType, argTypes));
+    }
+    
+    /**
+     * Replace the return value with the given value, performing no other
+     * processing of the original value.
+     * 
+     * @param value the type for the new return value
+     * @param value the new value to return
+     */
+    public SmartHandle returnValue(Class type, Object value) {
+        return new SmartHandle(signature.changeReturn(type), MethodHandles.filterReturnValue(handle, MethodHandles.constant(type, value)));
+    }
+    
+    /**
+     * A human-readable String representation of this SamrtHandle.
+     * 
+     * @return a String representation of this handle
+     */
+    @Override
+    public String toString() {
+        return signature.toString() + "=>" + handle;
     }
     
 }

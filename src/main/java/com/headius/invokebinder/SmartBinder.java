@@ -5,8 +5,11 @@
 package com.headius.invokebinder;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Maintains both a Binder, for building a series of transformations, and a
@@ -15,16 +18,25 @@ import java.util.Arrays;
  * @author headius
  */
 public class SmartBinder {
-    private final Signature signature;
+    private final Signature start;
+    private final List<Signature> signatures = new ArrayList<Signature>();
     private final Binder binder;
 
-    private SmartBinder(Signature signature, Binder binder) {
-        this.signature = signature;
+    private SmartBinder(Signature start, Binder binder) {
+        this.start = start;
+        this.signatures.add(start);
+        this.binder = binder;
+    }
+
+    private SmartBinder(SmartBinder original, Signature next, Binder binder) {
+        this.start = original.start;
+        this.signatures.add(0, next);
+        this.signatures.addAll(original.signatures);
         this.binder = binder;
     }
     
     public Signature signature() {
-        return signature;
+        return signatures.get(0);
     }
     
     public Binder binder() {
@@ -40,55 +52,66 @@ public class SmartBinder {
     }
 
     public SmartBinder fold(String newName, MethodHandle function) {
-        return new SmartBinder(signature.prependArg(newName, function.type().returnType()), binder.fold(function));
+        return new SmartBinder(this, signature().prependArg(newName, function.type().returnType()), binder.fold(function));
     }
 
     public SmartBinder fold(String newName, SmartHandle function) {
-        if (Arrays.equals(signature.argNames(), function.signature().argNames())) {
+        if (Arrays.equals(signature().argNames(), function.signature().argNames())) {
             return fold(newName, function.handle());
         } else {
-            return fold(newName, signature.permuteWith(function).handle());
+            return fold(newName, signature().changeReturn(function.signature().type().returnType()).permuteWith(function).handle());
         }
     }
 
     public SmartBinder foldVoid(MethodHandle function) {
-        return new SmartBinder(signature, binder.foldVoid(function));
+        return new SmartBinder(this, signature(), binder.foldVoid(function));
     }
 
     public SmartBinder foldVoid(SmartHandle function) {
-        if (Arrays.equals(signature.argNames(), function.signature().argNames())) {
+        if (Arrays.equals(signature().argNames(), function.signature().argNames())) {
             return foldVoid(function.handle());
         } else {
-            return foldVoid(signature.asFold(void.class).permuteWith(function).handle());
+            return foldVoid(signature().asFold(void.class).permuteWith(function).handle());
         }
     }
 
     public SmartBinder foldStatic(String newName, Lookup lookup, Class target, String method) {
         Binder newBinder = binder.foldStatic(lookup, target, method);
-        return new SmartBinder(signature.prependArg(newName, newBinder.type().parameterType(0)), binder);
+        return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), binder);
     }
 
     public SmartBinder foldStatic(String newName, Class target, String method) {
         Binder newBinder = binder.foldStatic(target, method);
-        return new SmartBinder(signature.prependArg(newName, newBinder.type().parameterType(0)), binder);
+        return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), binder);
     }
 
     public SmartBinder foldVirtual(String newName, Lookup lookup, String method) {
         Binder newBinder = binder.foldVirtual(lookup, method);
-        return new SmartBinder(signature.prependArg(newName, newBinder.type().parameterType(0)), binder);
+        return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), binder);
     }
 
     public SmartBinder foldVirtual(String newName, String method) {
         Binder newBinder = binder.foldVirtual(method);
-        return new SmartBinder(signature.prependArg(newName, newBinder.type().parameterType(0)), binder);
+        return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), binder);
     }
 
     public SmartBinder permute(Signature target) {
-        return new SmartBinder(target, binder.permute(signature.to(target)));
+        return new SmartBinder(this, target, binder.permute(signature().to(target)));
     }
 
     public SmartBinder permute(String... targetNames) {
-        return permute(signature.permute(targetNames));
+        return permute(signature().permute(targetNames));
+    }
+
+    /**
+     * Permute all parameters except the names given. Blacklisting to #permute's
+     * whitelisting.
+     * 
+     * @param excludeNames
+     * @return a new SmartBinder
+     */
+    public SmartBinder exclude(String... excludeNames) {
+        return permute(signature().exclude(excludeNames));
     }
 
     /**
@@ -98,131 +121,131 @@ public class SmartBinder {
      * @return a new Binder
      */
     public SmartBinder spread(String[] spreadNames, Class... spreadTypes) {
-        return new SmartBinder(signature.spread(spreadNames, spreadTypes), binder.spread(spreadTypes));
+        return new SmartBinder(this, signature().spread(spreadNames, spreadTypes), binder.spread(spreadTypes));
     }
     
     public SmartBinder spread(String baseName, int count) {
-        return new SmartBinder(signature.spread(baseName, count), binder.spread(count));
+        return new SmartBinder(this, signature().spread(baseName, count), binder.spread(count));
     }
     
     public SmartBinder insert(int index, String name, Object value) {
-        return new SmartBinder(signature.insertArg(index, name, value.getClass()), binder.insert(index, value));
+        return new SmartBinder(this, signature().insertArg(index, name, value.getClass()), binder.insert(index, value));
     }
     
     public SmartBinder insert(int index, String name, boolean value) {
-        return new SmartBinder(signature.insertArg(index, name, boolean.class), binder.insert(index, value));
+        return new SmartBinder(this, signature().insertArg(index, name, boolean.class), binder.insert(index, value));
     }
     
     public SmartBinder insert(int index, String name, byte value) {
-        return new SmartBinder(signature.insertArg(index, name, byte.class), binder.insert(index, value));
+        return new SmartBinder(this, signature().insertArg(index, name, byte.class), binder.insert(index, value));
     }
     
     public SmartBinder insert(int index, String name, short value) {
-        return new SmartBinder(signature.insertArg(index, name, short.class), binder.insert(index, value));
+        return new SmartBinder(this, signature().insertArg(index, name, short.class), binder.insert(index, value));
     }
     
     public SmartBinder insert(int index, String name, char value) {
-        return new SmartBinder(signature.insertArg(index, name, char.class), binder.insert(index, value));
+        return new SmartBinder(this, signature().insertArg(index, name, char.class), binder.insert(index, value));
     }
     
     public SmartBinder insert(int index, String name, int value) {
-        return new SmartBinder(signature.insertArg(index, name, int.class), binder.insert(index, value));
+        return new SmartBinder(this, signature().insertArg(index, name, int.class), binder.insert(index, value));
     }
     
     public SmartBinder insert(int index, String name, long value) {
-        return new SmartBinder(signature.insertArg(index, name, long.class), binder.insert(index, value));
+        return new SmartBinder(this, signature().insertArg(index, name, long.class), binder.insert(index, value));
     }
     
     public SmartBinder insert(int index, String name, float value) {
-        return new SmartBinder(signature.insertArg(index, name, float.class), binder.insert(index, value));
+        return new SmartBinder(this, signature().insertArg(index, name, float.class), binder.insert(index, value));
     }
     
     public SmartBinder insert(int index, String name, double value) {
-        return new SmartBinder(signature.insertArg(index, name, double.class), binder.insert(index, value));
+        return new SmartBinder(this, signature().insertArg(index, name, double.class), binder.insert(index, value));
     }
     
     public SmartBinder insert(int index, String[] names, Class[] types, Object... values) {
-        return new SmartBinder(signature.insertArgs(index, names, types), binder.insert(index, types, values));
+        return new SmartBinder(this, signature().insertArgs(index, names, types), binder.insert(index, types, values));
     }
     
     public SmartBinder append(String name, Object value) {
-        return new SmartBinder(signature.appendArg(name, value.getClass()), binder.append(value));
+        return new SmartBinder(this, signature().appendArg(name, value.getClass()), binder.append(value));
     }
     
     public SmartBinder append(String name, boolean value) {
-        return new SmartBinder(signature.appendArg(name, boolean.class), binder.append(value));
+        return new SmartBinder(this, signature().appendArg(name, boolean.class), binder.append(value));
     }
     
     public SmartBinder append(String name, byte value) {
-        return new SmartBinder(signature.appendArg(name, byte.class), binder.append(value));
+        return new SmartBinder(this, signature().appendArg(name, byte.class), binder.append(value));
     }
     
     public SmartBinder append(String name, short value) {
-        return new SmartBinder(signature.appendArg(name, short.class), binder.append(value));
+        return new SmartBinder(this, signature().appendArg(name, short.class), binder.append(value));
     }
     
     public SmartBinder append(String name, char value) {
-        return new SmartBinder(signature.appendArg(name, char.class), binder.append(value));
+        return new SmartBinder(this, signature().appendArg(name, char.class), binder.append(value));
     }
     
     public SmartBinder append(String name, int value) {
-        return new SmartBinder(signature.appendArg(name, int.class), binder.append(value));
+        return new SmartBinder(this, signature().appendArg(name, int.class), binder.append(value));
     }
     
     public SmartBinder append(String name, long value) {
-        return new SmartBinder(signature.appendArg(name, long.class), binder.append(value));
+        return new SmartBinder(this, signature().appendArg(name, long.class), binder.append(value));
     }
     
     public SmartBinder append(String name, float value) {
-        return new SmartBinder(signature.appendArg(name, float.class), binder.append(value));
+        return new SmartBinder(this, signature().appendArg(name, float.class), binder.append(value));
     }
     
     public SmartBinder append(String name, double value) {
-        return new SmartBinder(signature.appendArg(name, double.class), binder.append(value));
+        return new SmartBinder(this, signature().appendArg(name, double.class), binder.append(value));
     }
     
     public SmartBinder append(String[] names, Class[] types, Object... values) {
-        return new SmartBinder(signature.appendArgs(names, types), binder.append(types, values));
+        return new SmartBinder(this, signature().appendArgs(names, types), binder.append(types, values));
     }
     
     public SmartBinder prepend(String name, Object value) {
-        return new SmartBinder(signature.prependArg(name, value.getClass()), binder.prepend(value));
+        return new SmartBinder(this, signature().prependArg(name, value.getClass()), binder.prepend(value));
     }
     
     public SmartBinder prepend(String name, boolean value) {
-        return new SmartBinder(signature.prependArg(name, boolean.class), binder.prepend(value));
+        return new SmartBinder(this, signature().prependArg(name, boolean.class), binder.prepend(value));
     }
     
     public SmartBinder prepend(String name, byte value) {
-        return new SmartBinder(signature.prependArg(name, byte.class), binder.prepend(value));
+        return new SmartBinder(this, signature().prependArg(name, byte.class), binder.prepend(value));
     }
     
     public SmartBinder prepend(String name, short value) {
-        return new SmartBinder(signature.prependArg(name, short.class), binder.prepend(value));
+        return new SmartBinder(this, signature().prependArg(name, short.class), binder.prepend(value));
     }
     
     public SmartBinder prepend(String name, char value) {
-        return new SmartBinder(signature.prependArg(name, char.class), binder.prepend(value));
+        return new SmartBinder(this, signature().prependArg(name, char.class), binder.prepend(value));
     }
     
     public SmartBinder prepend(String name, int value) {
-        return new SmartBinder(signature.prependArg(name, int.class), binder.prepend(value));
+        return new SmartBinder(this, signature().prependArg(name, int.class), binder.prepend(value));
     }
     
     public SmartBinder prepend(String name, long value) {
-        return new SmartBinder(signature.prependArg(name, long.class), binder.prepend(value));
+        return new SmartBinder(this, signature().prependArg(name, long.class), binder.prepend(value));
     }
     
     public SmartBinder prepend(String name, float value) {
-        return new SmartBinder(signature.prependArg(name, float.class), binder.prepend(value));
+        return new SmartBinder(this, signature().prependArg(name, float.class), binder.prepend(value));
     }
     
     public SmartBinder prepend(String name, double value) {
-        return new SmartBinder(signature.prependArg(name, double.class), binder.prepend(value));
+        return new SmartBinder(this, signature().prependArg(name, double.class), binder.prepend(value));
     }
     
     public SmartBinder prepend(String[] names, Class[] types, Object... values) {
-        return new SmartBinder(signature.prependArgs(names, types), binder.prepend(types, values));
+        return new SmartBinder(this, signature().prependArgs(names, types), binder.prepend(types, values));
     }
 
     public SmartBinder cast(Signature target) {
@@ -230,28 +253,62 @@ public class SmartBinder {
     }
 
     public SmartBinder cast(Class returnType, Class... argTypes) {
-        return new SmartBinder(new Signature(returnType, argTypes, signature.argNames()), binder.cast(returnType, argTypes));
+        return new SmartBinder(this, new Signature(returnType, argTypes, signature().argNames()), binder.cast(returnType, argTypes));
+    }
+    
+    public SmartBinder castArg(String name, Class type) {
+        Signature newSig = signature().replaceArg(name, name, type);
+        return new SmartBinder(this, newSig, binder.cast(newSig.type()));
+    }
+    
+    public SmartBinder castReturn(Class type) {
+        return new SmartBinder(this, signature().changeReturn(type), binder.cast(type, binder.type().parameterArray()));
+    }
+    
+    public SmartBinder filterReturn(MethodHandle filter) {
+        return new SmartBinder(this, signature().changeReturn(filter.type().returnType()), binder.filterReturn(filter));
+    }
+    
+    public SmartBinder filterReturn(SmartHandle filter) {
+        return new SmartBinder(this, signature().changeReturn(filter.signature().type().returnType()), binder.filterReturn(filter.handle()));
     }
 
     public SmartHandle invokeVirtualQuiet(Lookup lookup, String name) {
-        return new SmartHandle(signature, binder.invokeVirtualQuiet(lookup, name));
+        return new SmartHandle(start, binder.invokeVirtualQuiet(lookup, name));
     }
     
     public SmartHandle invokeStaticQuiet(Lookup lookup, Class target, String name) {
-        return new SmartHandle(signature, binder.invokeStaticQuiet(lookup, target, name));
+        return new SmartHandle(start, binder.invokeStaticQuiet(lookup, target, name));
     }
     
     public SmartHandle invoke(SmartHandle target) {
-        return new SmartHandle(signature, binder.invoke(target.handle()));
+        return new SmartHandle(start, binder.invoke(target.handle()));
     }
     
     public SmartHandle invoke(MethodHandle target) {
-        return new SmartHandle(signature, binder.invoke(target));
+        return new SmartHandle(start, binder.invoke(target));
     }
     
     public SmartBinder printSignature() {
-        System.out.println(signature.toString());
+        System.out.println(signature().toString());
         return this;
     }
     
+    public SmartHandle arrayGet() {
+        return new SmartHandle(start, binder.arrayGet());
+    }
+    
+    public SmartHandle arraySet() {
+        return new SmartHandle(start, binder.arraySet());
+    }
+    
+    /**
+     * Produce a SmartHandle from this binder that invokes a leading
+     * MethodHandle argument with the remaining arguments.
+     * 
+     * @return a SmartHandle that invokes its leading MethodHandle argument
+     */
+    public SmartHandle invoker() {
+        return new SmartHandle(start, binder.invoker());
+    }
 }

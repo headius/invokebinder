@@ -725,7 +725,7 @@ public class Binder {
     }
 
     /**
-     * Spread a trailing Object[] into the specified argument types.
+     * Spread a trailing array argument into the specified argument types.
      *
      * @param spreadTypes the types into which to spread the incoming Object[]
      * @return a new Binder
@@ -738,6 +738,13 @@ public class Binder {
         return new Binder(this, new Spread(type(), spreadTypes));
     }
     
+    /**
+     * Spread a trailing array argument into the given number of arguments of
+     * the type of the array.
+     * 
+     * @param count the new count of arguments to spread from the trailing array
+     * @return a new Binder
+     */ 
     public Binder spread(int count) {
         if (count == 0) {
             return dropLast();
@@ -1418,6 +1425,16 @@ public class Binder {
      */
     public MethodHandle branch(MethodHandle test, MethodHandle truePath, MethodHandle falsePath) {
         return invoke(MethodHandles.guardWithTest(test, truePath, falsePath));
+    }
+    
+    /**
+     * Produce a MethodHandle that invokes its leading MethodHandle argument
+     * with the remaining arguments, returning the result.
+     * 
+     * @return a new handle that invokes its leading MethodHandle argument
+     */
+    public MethodHandle invoker() {
+        return invoke(MethodHandles.invoker(start));
     }
 
 }

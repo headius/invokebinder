@@ -18,6 +18,7 @@ package com.headius.invokebinder;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -231,6 +232,16 @@ public class SignatureTest {
         
         assertEquals("(Object obj, double dub)String", sig.toString());
     }
+    
+    @Test
+    public void testExclude() {
+        Signature sig = stringObjectInt
+                .appendArg("flo", float.class)
+                .appendArg("dub", double.class)
+                .exclude("obj", "dub");
+        
+        assertEquals("(int num, float flo)String", sig.toString());
+    }
 
     /**
      * Test of permuteTo method, of class Signature.
@@ -347,6 +358,14 @@ public class SignatureTest {
                 .dropFirst();
         
         assertEquals("(int num)String", newSig.toString());
+    }
+    
+    @Test
+    public void testReplaceArg() {
+        Signature newSig = stringObjectInt
+                .replaceArg("obj", "list", List.class);
+        
+        assertEquals("(List list, int num)String", newSig.toString());
     }
     
     private static final Signature stringObjectInt = Signature

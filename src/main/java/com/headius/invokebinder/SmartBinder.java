@@ -248,6 +248,11 @@ public class SmartBinder {
         return new SmartBinder(this, signature().prependArgs(names, types), binder.prepend(types, values));
     }
 
+    public SmartBinder drop(String name) {
+        int index = signature().argOffset(name);
+        return new SmartBinder(this, signature().dropArg(index), binder.drop(index));
+    }
+
     public SmartBinder cast(Signature target) {
         return new SmartBinder(target, binder.cast(target.type()));
     }

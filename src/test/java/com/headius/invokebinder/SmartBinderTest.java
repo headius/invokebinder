@@ -60,14 +60,33 @@ public class SmartBinderTest {
         
         assertEquals("42", (String)handle.handle().invokeExact(42));
     }
+
+    @Test
+    public void testDrop() throws Throwable {
+        Signature oldSig = Subjects.StringIntegerIntegerIntegerString;
+
+        SmartHandle handle = SmartBinder.from(oldSig)
+                .drop("b1")
+                .drop("b2")
+                .drop("b3")
+                .insert(1, "bs", new Integer[]{1,2,3})
+                .invoke(stringIntegersString);
+
+        assertEquals("[foo, [1, 2, 3], bar]", (String)handle.handle().invokeExact("foo", new Integer(5), new Integer(6), new Integer(7), "bar"));
+    }
     
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
     
     private static final MethodHandle stringInt = Binder
             .from(String.class, int.class)
             .invokeStaticQuiet(LOOKUP, SmartBinderTest.class, "stringInt");
+
+    private static final MethodHandle stringIntegersString = Binder
+            .from(String.class, String.class, Integer[].class, String.class)
+            .invokeStaticQuiet(LOOKUP, Subjects.class, "stringIntegersString");
     
     public static String stringInt(int value) {
         return Integer.toString(value);
     }
+
 }

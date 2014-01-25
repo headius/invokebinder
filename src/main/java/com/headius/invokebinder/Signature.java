@@ -396,6 +396,15 @@ public class Signature {
     }
 
     /**
+     * The current argument count.
+     *
+     * @return argument count of this signature
+     */
+    public int argCount() {
+        return argNames.length;
+    }
+
+    /**
      * The current argument names for this signature.
      * 
      * @return the current argument names

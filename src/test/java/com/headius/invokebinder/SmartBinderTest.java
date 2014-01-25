@@ -71,7 +71,7 @@ public class SmartBinderTest {
                 .drop("b2")
                 .drop("b3")
                 .insert(1, "bs", new Integer[]{1,2,3})
-                .invoke(Subjects.StringIntegersString);
+                .invoke(Subjects.StringIntegersStringHandle);
 
         assertEquals("[foo, [1, 2, 3], bar]", (String)handle.handle().invokeExact("foo", new Integer(5), new Integer(6), new Integer(7), "bar"));
     }
@@ -83,9 +83,50 @@ public class SmartBinderTest {
         SmartHandle handle = SmartBinder
                 .from(oldSig)
                 .collect("bs", "b.*")
-                .invoke(Subjects.StringIntegersString);
+                .invoke(Subjects.StringIntegersStringHandle);
 
         assertEquals("[foo, [1, 2, 3], bar]", (String)handle.handle().invokeExact("foo", new Integer(1), new Integer(2), new Integer(3), "bar"));
+    }
+
+    @Test
+    public void testInvokeStatic() throws Throwable {
+        SmartHandle handle = SmartBinder
+                .from(Subjects.StringIntegersString)
+                .invokeStatic(LOOKUP, Subjects.class, "stringIntegersString");
+
+        assertEquals(Subjects.StringIntegersString, handle.signature());
+        assertEquals(Subjects.StringIntegersString.type(), handle.handle().type());
+        assertEquals("[foo, [1, 2, 3], bar]", (String)handle.handle().invokeExact("foo", new Integer[]{1,2,3}, "bar"));
+
+        handle = SmartBinder
+                .from(Subjects.StringIntegersString)
+                .invokeStatic(LOOKUP, Subjects.class, "stringIntegersString");
+
+        assertEquals(Subjects.StringIntegersString, handle.signature());
+        assertEquals(Subjects.StringIntegersString.type(), handle.handle().type());
+        assertEquals("[foo, [1, 2, 3], bar]", (String)handle.handle().invokeExact("foo", new Integer[]{1,2,3}, "bar"));
+    }
+
+    @Test
+    public void testInvokeVirtual() throws Throwable {
+        Subjects subjects = new Subjects();
+        Signature thisSig = Subjects.StringIntegersString.prependArg("this", Subjects.class);
+
+        SmartHandle handle = SmartBinder
+                .from(thisSig)
+                .invokeVirtual(LOOKUP, "stringIntegersString2");
+
+        assertEquals(thisSig, handle.signature());
+        assertEquals(thisSig.type(), handle.handle().type());
+        assertEquals("[foo, [1, 2, 3], bar]", (String)handle.handle().invokeExact(subjects, "foo", new Integer[]{1,2,3}, "bar"));
+
+        handle = SmartBinder
+                .from(thisSig)
+                .invokeVirtual(LOOKUP, "stringIntegersString2");
+
+        assertEquals(thisSig, handle.signature());
+        assertEquals(thisSig.type(), handle.handle().type());
+        assertEquals("[foo, [1, 2, 3], bar]", (String)handle.handle().invokeExact(subjects, "foo", new Integer[]{1,2,3}, "bar"));
     }
     
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();

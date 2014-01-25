@@ -286,7 +286,7 @@ public class BinderTest {
         MethodHandle handle2 = Binder
                 .from(Subjects.StringIntegerIntegerIntegerString.type())
                 .collect(1, 3, Integer[].class)
-                .invoke(Subjects.StringIntegersString);
+                .invoke(Subjects.StringIntegersStringHandle);
 
         assertEquals(MethodType.methodType(String.class, String.class, Integer.class, Integer.class, Integer.class, String.class), handle2.type());
         assertEquals("[foo, [1, 2, 3], bar]", (String)handle2.invokeExact("foo", new Integer(1), new Integer(2), new Integer(3), "bar"));

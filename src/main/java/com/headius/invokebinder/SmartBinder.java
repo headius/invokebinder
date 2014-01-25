@@ -285,10 +285,18 @@ public class SmartBinder {
         return new SmartBinder(this, signature().changeReturn(filter.signature().type().returnType()), binder.filterReturn(filter.handle()));
     }
 
+    public SmartHandle invokeVirtual(Lookup lookup, String name) throws NoSuchMethodException, IllegalAccessException {
+        return new SmartHandle(start, binder.invokeVirtual(lookup, name));
+    }
+
     public SmartHandle invokeVirtualQuiet(Lookup lookup, String name) {
         return new SmartHandle(start, binder.invokeVirtualQuiet(lookup, name));
     }
-    
+
+    public SmartHandle invokeStatic(Lookup lookup, Class target, String name) throws NoSuchMethodException, IllegalAccessException {
+        return new SmartHandle(start, binder.invokeStatic(lookup, target, name));
+    }
+
     public SmartHandle invokeStaticQuiet(Lookup lookup, Class target, String name) {
         return new SmartHandle(start, binder.invokeStaticQuiet(lookup, target, name));
     }

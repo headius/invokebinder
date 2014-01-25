@@ -18,11 +18,21 @@ public class Subjects {
             .appendArg("b3", Integer.class)
             .appendArg("c", String.class);
 
-    public static final MethodHandle StringIntegersString = Binder
+    public static final Signature StringIntegersString = Signature
+            .returning(String.class)
+            .appendArg("a", String.class)
+            .appendArg("bs", Integer[].class)
+            .appendArg("c", String.class);
+
+    public static final MethodHandle StringIntegersStringHandle = Binder
                     .from(String.class, String.class, Integer[].class, String.class)
                     .invokeStaticQuiet(LOOKUP, Subjects.class, "stringIntegersString");
 
     public static String stringIntegersString(String a, Integer[] bs, String c) {
+        return Arrays.deepToString(new Object[]{a, bs, c});
+    }
+
+    public String stringIntegersString2(String a, Integer[] bs, String c) {
         return Arrays.deepToString(new Object[]{a, bs, c});
     }
 }

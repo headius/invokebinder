@@ -285,7 +285,7 @@ public class SmartBinder {
     public SmartBinder collect(String outName, String namePattern) {
         int index = signature().argOffsets(namePattern);
         Signature newSignature = signature().collect(outName, namePattern);
-        return new SmartBinder(this, newSignature, binder.collect(index, signature().argCount() - newSignature.argCount() + 1, Array.newInstance(signature().argType(index), 0).getClass()));
+        return new SmartBinder(this, newSignature, binder.collect(index, signature().argCount() - (newSignature.argCount() - 1), Array.newInstance(signature().argType(index), 0).getClass()));
     }
 
     public SmartBinder cast(Signature target) {

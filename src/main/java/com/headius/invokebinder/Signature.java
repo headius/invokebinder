@@ -18,6 +18,7 @@ package com.headius.invokebinder;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -384,6 +385,53 @@ public class Signature {
         for (int i = 0; i < count; i++) spreadNames[i] = baseName + i;
         
         return spread(spreadNames);
+    }
+
+    /**
+     * Collect sequential arguments matching pattern into an array. They must have the same type.
+     */
+    public Signature collect(String newName, String oldPattern) {
+        int start = -1;
+        int newCount = 0;
+        Class type = null;
+        Pattern pattern = Pattern.compile(oldPattern);
+
+        MethodType newType = type();
+
+        for (int i = 0; i < argNames.length; i++) {
+            if (pattern.matcher(argName(i)).matches()) {
+                newType = newType.dropParameterTypes(newCount, newCount+1);
+                Class argType = argType(i);
+                if (start == -1) start = i;
+                if (type == null) {
+                    type = argType;
+                } else {
+                    if (argType != type) {
+                        throw new InvalidTransformException("arguments matching " + pattern + " are not all of the same type");
+                    }
+                }
+            } else {
+                newCount++;
+            }
+        }
+
+        if (start != -1) {
+            String[] newNames = new String[newCount + 1];
+
+            // pre
+            System.arraycopy(argNames, 0, newNames, 0, start);
+
+            // vararg
+            newNames[start] = newName;
+            newType = newType.insertParameterTypes(start, Array.newInstance(type, 0).getClass());
+
+            // post
+            System.arraycopy(argNames, start + argNames.length - newCount, newNames, start + 1, newCount - (start + 1));
+
+            return new Signature(newType, newNames);
+        }
+
+        return this;
     }
 
     /**

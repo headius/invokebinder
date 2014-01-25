@@ -7,6 +7,7 @@ package com.headius.invokebinder;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -251,6 +252,12 @@ public class SmartBinder {
     public SmartBinder drop(String name) {
         int index = signature().argOffset(name);
         return new SmartBinder(this, signature().dropArg(index), binder.drop(index));
+    }
+
+    public SmartBinder collect(String outName, String namePattern) {
+        int index = signature().argOffsets(namePattern);
+        Signature newSignature = signature().collect(outName, namePattern);
+        return new SmartBinder(this, newSignature, binder.collect(index, signature().argCount() - newSignature.argCount() + 1, Array.newInstance(signature().argType(index), 0).getClass()));
     }
 
     public SmartBinder cast(Signature target) {

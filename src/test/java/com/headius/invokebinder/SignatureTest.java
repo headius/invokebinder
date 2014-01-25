@@ -367,6 +367,16 @@ public class SignatureTest {
         
         assertEquals("(List list, int num)String", newSig.toString());
     }
+
+    @Test
+    public void testCollect() {
+        Signature oldSig = Subjects.StringIntegerIntegerIntegerString;
+        Signature newSig = oldSig.collect("bs", "b.*");
+
+        assertEquals(Integer[].class, newSig.argType(1));
+        assertEquals("bs", newSig.argName(1));
+        assertEquals(3, newSig.argCount());
+    }
     
     private static final Signature stringObjectInt = Signature
             .returning(String.class)

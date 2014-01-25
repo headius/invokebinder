@@ -17,6 +17,7 @@ package com.headius.invokebinder;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -70,9 +71,21 @@ public class SmartBinderTest {
                 .drop("b2")
                 .drop("b3")
                 .insert(1, "bs", new Integer[]{1,2,3})
-                .invoke(stringIntegersString);
+                .invoke(Subjects.StringIntegersString);
 
         assertEquals("[foo, [1, 2, 3], bar]", (String)handle.handle().invokeExact("foo", new Integer(5), new Integer(6), new Integer(7), "bar"));
+    }
+
+    @Test
+    public void testCollect() throws Throwable {
+        Signature oldSig = Subjects.StringIntegerIntegerIntegerString;
+
+        SmartHandle handle = SmartBinder
+                .from(oldSig)
+                .collect("bs", "b.*")
+                .invoke(Subjects.StringIntegersString);
+
+        assertEquals("[foo, [1, 2, 3], bar]", (String)handle.handle().invokeExact("foo", new Integer(1), new Integer(2), new Integer(3), "bar"));
     }
     
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
@@ -81,10 +94,6 @@ public class SmartBinderTest {
             .from(String.class, int.class)
             .invokeStaticQuiet(LOOKUP, SmartBinderTest.class, "stringInt");
 
-    private static final MethodHandle stringIntegersString = Binder
-            .from(String.class, String.class, Integer[].class, String.class)
-            .invokeStaticQuiet(LOOKUP, Subjects.class, "stringIntegersString");
-    
     public static String stringInt(int value) {
         return Integer.toString(value);
     }

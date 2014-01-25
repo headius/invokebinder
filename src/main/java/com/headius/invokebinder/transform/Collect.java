@@ -1,7 +1,10 @@
 package com.headius.invokebinder.transform;
 
+import com.headius.invokebinder.Binder;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.util.Arrays;
 
 /**
  * An argument-boxing transform with a fixed incoming size.
@@ -11,30 +14,63 @@ import java.lang.invoke.MethodType;
 public class Collect extends Transform {
 
     private final MethodType source;
-    private int index;
+    private final int index;
+    private final int count;
     private final Class arrayType;
 
     public Collect(MethodType source, int index, Class arrayType) {
         this.source = source;
         this.index = index;
+        this.count = source.parameterCount() - index;
+        this.arrayType = arrayType;
+    }
+
+    public Collect(MethodType source, int index, int count, Class arrayType) {
+        this.source = source;
+        this.index = index;
+        this.count = count;
         this.arrayType = arrayType;
     }
 
     public MethodHandle up(MethodHandle target) {
-        return target.asCollector(arrayType, source.parameterCount() - index);
+        if (index + count == source.parameterCount()) {
+            // fast path for tail args
+            return target.asCollector(arrayType, count);
+        } else {
+            int[] movePermute = new int[source.parameterCount()];
+            int[] moveBackPermute = new int[target.type().parameterCount()];
+            // pre
+            for (int i = 0; i < index; i++) {
+                movePermute[i] = i;
+                moveBackPermute[i] = i;
+            }
+            // post
+            int shifted = 0;
+            for (int i = index; i + count < movePermute.length; i++, shifted++) movePermute[i] = i + count;
+            for (int i = index; i + 1 < moveBackPermute.length; i++) moveBackPermute[i + 1] = i;
+            // collected args
+            for (int i = index + shifted; i < movePermute.length; i++) movePermute[i] = i - shifted;
+            moveBackPermute[index] = moveBackPermute.length - 1;
+
+            return Binder.from(source)
+                    .permute(movePermute)
+                    .collect(source.parameterCount() - count, arrayType)
+                    .permute(moveBackPermute)
+                    .invoke(target);
+        }
     }
 
     public MethodType down(MethodType type) {
         assertTypesAreCompatible();
 
         return type
-                .dropParameterTypes(index, source.parameterCount())
-                .appendParameterTypes(arrayType);
+                .dropParameterTypes(index, index + count)
+                .insertParameterTypes(index, arrayType);
     }
 
     private void assertTypesAreCompatible() {
         Class componentType = arrayType.getComponentType();
-        for (int i = index; i < source.parameterCount(); i++) {
+        for (int i = index; i < index + count; i++) {
             Class in = source.parameterType(i);
             assert in.isAssignableFrom(componentType)
                     : "incoming type " + in.getName() + " not compatible with " + componentType.getName() + "[]";

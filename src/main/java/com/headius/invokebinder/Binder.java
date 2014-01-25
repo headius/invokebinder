@@ -772,6 +772,18 @@ public class Binder {
     }
 
     /**
+     * Box a range of incoming arguments into the given array type.
+     *
+     * @param index the index from which to start boxing args
+     * @param count the count of arguments to box
+     * @param type the array type into which the args will be boxed
+     * @return a new Binder
+     */
+    public Binder collect(int index, int count, Class type) {
+        return new Binder(this, new Collect(type(), index, count, type));
+    }
+
+    /**
      * Box all incoming arguments from the given position onward into the given array type.
      * This version accepts a variable number of incoming arguments.
      *

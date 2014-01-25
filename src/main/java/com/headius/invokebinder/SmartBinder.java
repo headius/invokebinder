@@ -48,8 +48,24 @@ public class SmartBinder {
         return new SmartBinder(inbound, Binder.from(inbound.type()));
     }
 
+    public static SmartBinder from(Class retType, String[] names, Class... types) {
+        return from(Signature.returning(retType).appendArgs(names, types));
+    }
+
+    public static SmartBinder from(Class retType, String name, Class... type) {
+        return from(Signature.returning(retType).appendArgs(new String[] {name}, type));
+    }
+
     public static SmartBinder from(Lookup lookup, Signature inbound) {
         return new SmartBinder(inbound, Binder.from(lookup, inbound.type()));
+    }
+
+    public static SmartBinder from(Lookup lookup, Class retType, String[] names, Class... types) {
+        return from(lookup, Signature.returning(retType).appendArgs(names, types));
+    }
+
+    public static SmartBinder from(Lookup lookup, Class retType, String name, Class type) {
+        return from(lookup, Signature.returning(retType).appendArgs(new String[] {name}, type));
     }
 
     public SmartBinder fold(String newName, MethodHandle function) {
@@ -163,6 +179,10 @@ public class SmartBinder {
     
     public SmartBinder insert(int index, String name, double value) {
         return new SmartBinder(this, signature().insertArg(index, name, double.class), binder.insert(index, value));
+    }
+
+    public SmartBinder insert(int index, String name, Class type, Object value) {
+        return new SmartBinder(this, signature().insertArg(index, name, type), binder.insert(index, type, value));
     }
     
     public SmartBinder insert(int index, String[] names, Class[] types, Object... values) {

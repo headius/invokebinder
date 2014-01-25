@@ -17,6 +17,7 @@ package com.headius.invokebinder;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -127,6 +128,27 @@ public class SmartBinderTest {
         assertEquals(thisSig, handle.signature());
         assertEquals(thisSig.type(), handle.handle().type());
         assertEquals("[foo, [1, 2, 3], bar]", (String)handle.handle().invokeExact(subjects, "foo", new Integer[]{1,2,3}, "bar"));
+    }
+
+    @Test
+    public void testInsert() throws Throwable {
+        MethodHandle target = Subjects.concatHandle();
+        SmartHandle handle = SmartBinder
+                .from(String.class, "arg0", String.class)
+                .insert(1, "arg1", "world")
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class), handle.signature().type());
+        assertEquals("Hello, world", (String) handle.handle().invokeExact("Hello, "));
+
+        MethodHandle target2 = Subjects.concatCharSequenceHandle();
+        SmartHandle handle2 = SmartBinder
+                .from(String.class, "arg0", String.class)
+                .insert(1, "arg1", CharSequence.class, "world")
+                .invoke(target2);
+
+        assertEquals(MethodType.methodType(String.class, String.class), handle2.signature().type());
+        assertEquals("Hello, world", (String) handle2.handle().invokeExact("Hello, "));
     }
     
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();

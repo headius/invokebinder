@@ -18,7 +18,7 @@ public class BinderTest {
     private static final Lookup LOOKUP = MethodHandles.lookup();
     @Test
     public void testFrom() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
 
         Binder binder1 = Binder
                 .from(String.class, String.class, Object.class)
@@ -97,7 +97,7 @@ public class BinderTest {
         assertEquals(MethodType.methodType(String.class, String.class, int.class), thisBinder.type());
         assertEquals(MethodType.methodType(String.class, String.class, String.class), newBinder.type());
         
-        MethodHandle target = newBinder.invoke(concatHandle());
+        MethodHandle target = newBinder.invoke(Subjects.concatHandle());
         
         assertEquals("Hello, world", (String)target.invokeExact());
     }
@@ -136,7 +136,7 @@ public class BinderTest {
 
     @Test
     public void testInsert() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle handle = Binder
                 .from(String.class, String.class)
                 .insert(1, "world")
@@ -144,11 +144,20 @@ public class BinderTest {
 
         assertEquals(MethodType.methodType(String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, "));
+
+        MethodHandle target2 = Subjects.concatCharSequenceHandle();
+        MethodHandle handle2 = Binder
+                .from(String.class, String.class)
+                .insert(1, CharSequence.class, "world")
+                .invoke(target2);
+
+        assertEquals(MethodType.methodType(String.class, String.class), handle2.type());
+        assertEquals("Hello, world", (String) handle2.invokeExact("Hello, "));
     }
 
     @Test
     public void testAppend() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle handle = Binder
                 .from(String.class, String.class, Object.class)
                 .append("world")
@@ -161,7 +170,7 @@ public class BinderTest {
 
     @Test
     public void testDropInsert() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle handle = Binder
                 .from(String.class, String.class, Object.class)
                 .drop(1)
@@ -174,7 +183,7 @@ public class BinderTest {
     
     @Test
     public void testDropLast() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle handle = Binder
                 .from(String.class, String.class, Object.class)
                 .dropLast()
@@ -235,7 +244,7 @@ public class BinderTest {
 
     @Test
     public void testDropReorder() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle handle = Binder
                 .from(String.class, Integer.class, Float.class, String.class)
                 .drop(0, 2)
@@ -248,7 +257,7 @@ public class BinderTest {
 
     @Test
     public void testSpread() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle handle = Binder
                 .from(String.class, Object[].class)
                 .spread(String.class, String.class)
@@ -260,7 +269,7 @@ public class BinderTest {
 
     @Test
     public void testSpreadCount() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle handle = Binder
                 .from(String.class, String[].class)
                 .spread(2)
@@ -338,7 +347,7 @@ public class BinderTest {
 
     @Test
     public void testFold() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle fold = Binder
                 .from(String.class, String.class)
                 .drop(0)
@@ -354,7 +363,7 @@ public class BinderTest {
 
     @Test
     public void testFoldStatic() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle handle = Binder
                 .from(LOOKUP, String.class, String.class)
                 .foldStatic(BinderTest.class, "alwaysYahooStatic")
@@ -366,7 +375,7 @@ public class BinderTest {
 
     @Test
     public void testFoldVirtual() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle handle = Binder
                 .from(LOOKUP, String.class, String.class)
                 .insert(0, this)
@@ -380,7 +389,7 @@ public class BinderTest {
 
     @Test
     public void testFilter() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle filter = LOOKUP.findStatic(BinderTest.class, "addBaz", MethodType.methodType(String.class, String.class));
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
@@ -393,7 +402,7 @@ public class BinderTest {
 
     @Test
     public void testInvoke() throws Throwable {
-        MethodHandle target = concatHandle();
+        MethodHandle target = Subjects.concatHandle();
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
                 .invoke(target);
@@ -404,7 +413,7 @@ public class BinderTest {
 
     @Test
     public void testInvokeReflected() throws Throwable {
-        Method target = BinderTest.class.getMethod("concatStatic", String.class, String.class);
+        Method target = Subjects.class.getMethod("concatStatic", String.class, String.class);
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
                 .invoke(LOOKUP, target);
@@ -415,7 +424,7 @@ public class BinderTest {
 
     @Test
     public void testInvokeReflected2() throws Throwable {
-        Method target = BinderTest.class.getMethod("concatStatic", String.class, String.class);
+        Method target = Subjects.class.getMethod("concatStatic", String.class, String.class);
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
                 .invokeQuiet(LOOKUP, target);
@@ -428,7 +437,7 @@ public class BinderTest {
     public void testInvokeStatic() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
-                .invokeStatic(LOOKUP, BinderTest.class, "concatStatic");
+                .invokeStatic(LOOKUP, Subjects.class, "concatStatic");
 
         assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
@@ -438,7 +447,7 @@ public class BinderTest {
     public void testInvokeStatic2() throws Throwable {
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
-                .invokeStaticQuiet(LOOKUP, BinderTest.class, "concatStatic");
+                .invokeStaticQuiet(LOOKUP, Subjects.class, "concatStatic");
 
         assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
@@ -783,16 +792,8 @@ public class BinderTest {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static MethodHandle concatHandle() throws Exception {
-        return LOOKUP.findStatic(BinderTest.class, "concatStatic", MethodType.methodType(String.class, String.class, String.class));
-    }
-
     public static MethodHandle intLongHandle() throws Exception {
         return LOOKUP.findStatic(BinderTest.class, "intLong", MethodType.methodType(String.class, int.class, long.class));
-    }
-
-    public static String concatStatic(String a, String b) {
-        return a + b;
     }
 
     public String concatVirtual(String a, String b) {

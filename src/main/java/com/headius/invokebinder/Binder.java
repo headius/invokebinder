@@ -434,6 +434,18 @@ public class Binder {
     }
 
     /**
+     * Insert at the given index the given argument value.
+     *
+     * @param index the index at which to insert the argument value
+     * @param type the actual type to use, rather than getClass
+     * @param value the value to insert
+     * @return a new Binder
+     */
+    public Binder insert(int index, Class type, Object value) {
+        return new Binder(this, new Insert(index, new Class[]{type}, value));
+    }
+
+    /**
      * Insert at the given index the given argument value(s).
      *
      * @param index the index at which to insert the argument value

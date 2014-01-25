@@ -2,6 +2,7 @@ package com.headius.invokebinder;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Arrays;
 
 /**
@@ -30,6 +31,22 @@ public class Subjects {
 
     public static String stringIntegersString(String a, Integer[] bs, String c) {
         return Arrays.deepToString(new Object[]{a, bs, c});
+    }
+
+    public static MethodHandle concatHandle() throws Exception {
+        return LOOKUP.findStatic(Subjects.class, "concatStatic", MethodType.methodType(String.class, String.class, String.class));
+    }
+
+    public static MethodHandle concatCharSequenceHandle() throws Exception {
+        return LOOKUP.findStatic(Subjects.class, "concatStatic", MethodType.methodType(String.class, String.class, CharSequence.class));
+    }
+
+    public static String concatStatic(String a, String b) {
+        return a + b;
+    }
+
+    public static String concatStatic(String a, CharSequence b) {
+        return a + b;
     }
 
     public String stringIntegersString2(String a, Integer[] bs, String c) {

@@ -150,6 +150,52 @@ public class SmartBinderTest {
         assertEquals(MethodType.methodType(String.class, String.class), handle2.signature().type());
         assertEquals("Hello, world", (String) handle2.handle().invokeExact("Hello, "));
     }
+
+    @Test
+    public void testAppend() throws Throwable {
+        MethodHandle target = Subjects.concatHandle();
+        SmartHandle handle = SmartBinder
+                .from(String.class, new String[] {"arg0", "arg1"}, String.class, Object.class)
+                .append("arg2", "world")
+                .drop("arg1")
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.signature().type());
+        assertEquals("Hello, world", (String) handle.handle().invokeExact("Hello, ", new Object()));
+
+        MethodHandle target2 = Subjects.concatCharSequenceHandle();
+        SmartHandle handle2 = SmartBinder
+                .from(String.class, new String[] {"arg0", "arg1"}, String.class, Object.class)
+                .append("arg2", CharSequence.class, "world")
+                .drop("arg1")
+                .invoke(target2);
+
+        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle2.signature().type());
+        assertEquals("Hello, world", (String) handle2.handle().invokeExact("Hello, ", new Object()));
+    }
+
+    @Test
+    public void testPrepend() throws Throwable {
+        MethodHandle target = Subjects.concatHandle();
+        SmartHandle handle = SmartBinder
+                .from(String.class, new String[]{"arg1", "arg2"}, Object.class, String.class)
+                .prepend("arg0", "Hello, ")
+                .drop("arg1")
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, Object.class, String.class), handle.signature().type());
+        assertEquals("Hello, world", (String) handle.handle().invokeExact(new Object(), "world"));
+
+        MethodHandle target2 = Subjects.concatHandle();
+        SmartHandle handle2 = SmartBinder
+                .from(String.class, new String[] {"arg1", "arg2"}, Object.class, String.class)
+                .prepend("arg0", String.class, "Hello, ")
+                .drop("arg1")
+                .invoke(target2);
+
+        assertEquals(MethodType.methodType(String.class, Object.class, String.class), handle2.signature().type());
+        assertEquals("Hello, world", (String) handle2.handle().invokeExact(new Object(), "world"));
+    }
     
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
     

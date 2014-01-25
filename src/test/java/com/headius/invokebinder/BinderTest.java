@@ -166,6 +166,39 @@ public class BinderTest {
 
         assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
+
+        MethodHandle target2 = Subjects.concatCharSequenceHandle();
+        MethodHandle handle2 = Binder
+                .from(String.class, String.class, Object.class)
+                .append(CharSequence.class, "world")
+                .drop(1)
+                .invoke(target2);
+
+        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle2.type());
+        assertEquals("Hello, world", (String) handle2.invokeExact("Hello, ", new Object()));
+    }
+
+    @Test
+    public void testPrepend() throws Throwable {
+        MethodHandle target = Subjects.concatHandle();
+        MethodHandle handle = Binder
+                .from(String.class, Object.class, String.class)
+                .prepend("Hello, ")
+                .drop(1)
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, Object.class, String.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact(new Object(), "world"));
+
+        MethodHandle target2 = Subjects.concatHandle();
+        MethodHandle handle2 = Binder
+                .from(String.class, Object.class, String.class)
+                .prepend(String.class, "Hello, ")
+                .drop(1)
+                .invoke(target2);
+
+        assertEquals(MethodType.methodType(String.class, Object.class, String.class), handle2.type());
+        assertEquals("Hello, world", (String) handle2.invokeExact(new Object(), "world"));
     }
 
     @Test

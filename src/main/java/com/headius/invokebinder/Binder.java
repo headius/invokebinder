@@ -638,7 +638,18 @@ public class Binder {
     }
 
     /**
-     * Append to the argument list the given argument value(s).
+     * Append to the argument list the given argument value with the specified type.
+     *
+     * @param type the actual type to use, rather than getClass
+     * @param value the value to append
+     * @return a new Binder
+     */
+    public Binder append(Class type, Object value) {
+        return new Binder(this, new Insert(type().parameterCount(), new Class[]{type}, value));
+    }
+
+    /**
+     * Append to the argument list the given argument values with the specified types.
      *
      * @param types the actual types to use, rather than getClass
      * @param values the value(s) to append
@@ -646,6 +657,28 @@ public class Binder {
      */
     public Binder append(Class[] types, Object... values) {
         return new Binder(this, new Insert(type().parameterCount(), types, values));
+    }
+
+    /**
+     * Prepend to the argument list the given argument value with the specified type
+     *
+     * @param type the actual type to use, rather than getClass
+     * @param value the value(s) to prepend
+     * @return a new Binder
+     */
+    public Binder prepend(Class type, Object value) {
+        return new Binder(this, new Insert(0, new Class[]{type}, value));
+    }
+
+    /**
+     * Prepend to the argument list the given argument values with the specified types.
+     *
+     * @param types the actual types to use, rather than getClass
+     * @param values the value(s) to prepend
+     * @return a new Binder
+     */
+    public Binder prepend(Class[] types, Object... values) {
+        return new Binder(this, new Insert(0, types, values));
     }
 
     /**

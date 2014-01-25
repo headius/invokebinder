@@ -180,15 +180,15 @@ public class Signature {
         MethodType newMethodType = methodType.insertParameterTypes(0, type);
         return new Signature(newMethodType, newArgNames);
     }
-    
+
     /**
-     * Prepend an argument (name + type) to the signature.
-     * 
-     * @param name the name of the argument
-     * @param type the type of the argument
+     * Prepend arguments (names + types) to the signature.
+     *
+     * @param names the names of the arguments
+     * @param types the types of the arguments
      * @return a new signature
      */
-    public Signature prependArgs(String[] names, Class[] types) {
+    public Signature prependArgs(String[] names, Class... types) {
         String[] newArgNames = new String[argNames.length + names.length];
         System.arraycopy(argNames, 0, newArgNames, names.length, argNames.length);
         System.arraycopy(names, 0, newArgNames, 0, names.length);

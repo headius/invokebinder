@@ -225,6 +225,10 @@ public class SmartBinder {
         return new SmartBinder(this, signature().appendArg(name, double.class), binder.append(value));
     }
     
+    public SmartBinder append(String name, Class type, Object value) {
+        return new SmartBinder(this, signature().appendArg(name, type), binder.append(new Class[]{type}, value));
+    }
+
     public SmartBinder append(String[] names, Class[] types, Object... values) {
         return new SmartBinder(this, signature().appendArgs(names, types), binder.append(types, values));
     }
@@ -263,6 +267,10 @@ public class SmartBinder {
     
     public SmartBinder prepend(String name, double value) {
         return new SmartBinder(this, signature().prependArg(name, double.class), binder.prepend(value));
+    }
+
+    public SmartBinder prepend(String name, Class type, Object value) {
+        return new SmartBinder(this, signature().prependArg(name, type), binder.prepend(type, value));
     }
     
     public SmartBinder prepend(String[] names, Class[] types, Object... values) {

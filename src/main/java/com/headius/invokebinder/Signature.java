@@ -426,7 +426,9 @@ public class Signature {
             newType = newType.insertParameterTypes(start, Array.newInstance(type, 0).getClass());
 
             // post
-            System.arraycopy(argNames, start + argNames.length - newCount, newNames, start + 1, newCount - (start + 1));
+            if (newCount >= start + 1 + 1) { // args not at end
+                System.arraycopy(argNames, start + argNames.length - newCount, newNames, start + 1, newCount - (start + 1));
+            }
 
             return new Signature(newType, newNames);
         }

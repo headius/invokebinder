@@ -19,6 +19,13 @@ public class Subjects {
             .appendArg("b3", Integer.class)
             .appendArg("c", String.class);
 
+    public static final Signature StringIntegerIntegerInteger = Signature
+            .returning(String.class)
+            .appendArg("a", String.class)
+            .appendArg("b1", Integer.class)
+            .appendArg("b2", Integer.class)
+            .appendArg("b3", Integer.class);
+
     public static final Signature StringIntegersString = Signature
             .returning(String.class)
             .appendArg("a", String.class)
@@ -29,8 +36,16 @@ public class Subjects {
                     .from(String.class, String.class, Integer[].class, String.class)
                     .invokeStaticQuiet(LOOKUP, Subjects.class, "stringIntegersString");
 
+    public static final MethodHandle StringIntegersHandle = Binder
+            .from(String.class, String.class, Integer[].class)
+            .invokeStaticQuiet(LOOKUP, Subjects.class, "stringIntegers");
+
     public static String stringIntegersString(String a, Integer[] bs, String c) {
         return Arrays.deepToString(new Object[]{a, bs, c});
+    }
+
+    public static String stringIntegers(String a, Integer[] bs) {
+        return Arrays.deepToString(new Object[]{a, bs});
     }
 
     public static MethodHandle concatHandle() throws Exception {

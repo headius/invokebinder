@@ -72,6 +72,19 @@ public class Signature {
         this(MethodType.methodType(retval, argTypes), argNames);
     }
 
+    /**
+     * Construct a new signature with the given return value, argument types,
+     * and argument names.
+     *
+     * @param retval the return value for the new signature
+     * @param firstArg the first argument type, often the receiver of an instance method
+     * @param restArgs the remaining argument types for the new signature
+     * @param argNames the argument names for the new signature
+     */
+    Signature(Class retval, Class firstArg, Class[] restArgs, String... argNames) {
+        this(MethodType.methodType(retval, firstArg, restArgs), argNames);
+    }
+
 
     /**
      * Construct a new signature with the given method type and argument names.
@@ -83,6 +96,22 @@ public class Signature {
         assert methodType.parameterCount() == argNames.length : "arg name count " + argNames.length + " does not match parameter count " + methodType.parameterCount();
         this.methodType = methodType;
         this.argNames = argNames;
+    }
+
+
+    /**
+     * Construct a new signature with the given method type and argument names.
+     *
+     * @param methodType the method type for the new signature
+     * @param firstName the first argument name for the new signature; for eventual instance methods, it can be "this"
+     * @param restNames the remaining argument names for the new signature
+     */
+    Signature(MethodType methodType, String firstName, String... restNames) {
+        assert methodType.parameterCount() == (restNames.length + 1) : "arg name count " + (restNames.length + 1) + " does not match parameter count " + methodType.parameterCount();
+        this.methodType = methodType;
+        this.argNames = new String[restNames.length + 1];
+        this.argNames[0] = firstName;
+        System.arraycopy(restNames, 0, this.argNames, 1, restNames.length);
     }
 
     /**
@@ -152,8 +181,8 @@ public class Signature {
     /**
      * Append an argument (name + type) to the signature.
      * 
-     * @param name the name of the argument
-     * @param type the type of the argument
+     * @param names the names of the arguments
+     * @param types the types of the argument
      * @return a new signature
      */
     public Signature appendArgs(String[] names, Class... types) {
@@ -491,7 +520,7 @@ public class Signature {
      * Retrieve the offset of the given argument name in this signature's
      * arguments. If the argument name is not in the argument list, returns -1.
      * 
-     * @param name the argument name to search for
+     * @param pattern the argument name to search for
      * @return the offset at which the argument name was found or -1
      */
     public int argOffsets(String pattern) {

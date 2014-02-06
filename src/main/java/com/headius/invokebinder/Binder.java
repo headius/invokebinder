@@ -770,6 +770,19 @@ public class Binder {
     }
 
     /**
+     * Cast the incoming arguments to the given MethodType. The casts
+     * applied are equivalent to those in MethodHandle.explicitCastArguments(MethodType).
+     *
+     * @param returnType the target return type
+     * @param firstType the first argument type
+     * @param restTypes the remaining target argument types
+     * @return a new Binder
+     */
+    public Binder cast(Class returnType, Class firstType, Class... restTypes) {
+        return new Binder(this, new Cast(type()), MethodType.methodType(returnType, firstType, restTypes));
+    }
+
+    /**
      * Spread a trailing array argument into the specified argument types.
      *
      * @param spreadTypes the types into which to spread the incoming Object[]

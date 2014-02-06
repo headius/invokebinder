@@ -284,7 +284,7 @@ public class SmartBinder {
 
     public SmartBinder collect(String outName, String namePattern) {
         int index = signature().argOffsets(namePattern);
-        if (index == -1) return this;
+        assert index >= 0 : "no arguments matching " + namePattern + " found in signature " + signature();
         Signature newSignature = signature().collect(outName, namePattern);
         return new SmartBinder(this, newSignature, binder.collect(index, signature().argCount() - (newSignature.argCount() - 1), Array.newInstance(signature().argType(index), 0).getClass()));
     }
@@ -295,6 +295,10 @@ public class SmartBinder {
 
     public SmartBinder cast(Class returnType, Class... argTypes) {
         return new SmartBinder(this, new Signature(returnType, argTypes, signature().argNames()), binder.cast(returnType, argTypes));
+    }
+
+    public SmartBinder castVirtual(Class returnType, Class firstArg, Class... restArgs) {
+        return new SmartBinder(this, new Signature(returnType, firstArg, restArgs, signature().argNames()), binder.cast(returnType, firstArg, restArgs));
     }
     
     public SmartBinder castArg(String name, Class type) {

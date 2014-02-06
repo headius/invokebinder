@@ -71,7 +71,7 @@ public class SmartBinderTest {
                 .drop("b1")
                 .drop("b2")
                 .drop("b3")
-                .insert(1, "bs", new Integer[]{1,2,3})
+                .insert(1, "bs", new Integer[]{1, 2, 3})
                 .invoke(Subjects.StringIntegersStringHandle);
 
         assertEquals("[foo, [1, 2, 3], bar]", (String)handle.handle().invokeExact("foo", new Integer(5), new Integer(6), new Integer(7), "bar"));
@@ -200,9 +200,19 @@ public class SmartBinderTest {
     @Test
     public void testCast() throws Throwable {
         MethodHandle target = LOOKUP.unreflect(String.class.getMethod("split", String.class));
+
+        // cast for virtual call using full static signature
         SmartHandle handle  = SmartBinder
                 .from(Object.class, new String[]{"this", "regex"}, Object.class, Object.class)
                 .cast(String[].class, String.class, String.class)
+                .invoke(target);
+
+        assertArrayEquals(new String[]{"foo", "bar"}, (String[])(Object)handle.handle().invokeExact((Object)"foo,bar", (Object)","));
+
+        // cast for virtual call using ret, this, args
+        handle  = SmartBinder
+                .from(new Signature(Object.class, Object.class, new Class[]{Object.class}, "this", "regex"))
+                .castVirtual(String[].class, String.class, new Class[]{String.class})
                 .invoke(target);
 
         assertArrayEquals(new String[]{"foo", "bar"}, (String[])(Object)handle.handle().invokeExact((Object)"foo,bar", (Object)","));

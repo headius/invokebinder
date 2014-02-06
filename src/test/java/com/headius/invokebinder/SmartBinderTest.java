@@ -196,6 +196,17 @@ public class SmartBinderTest {
         assertEquals(MethodType.methodType(String.class, Object.class, String.class), handle2.signature().type());
         assertEquals("Hello, world", (String) handle2.handle().invokeExact(new Object(), "world"));
     }
+
+    @Test
+    public void testCast() throws Throwable {
+        MethodHandle target = LOOKUP.unreflect(String.class.getMethod("split", String.class));
+        SmartHandle handle  = SmartBinder
+                .from(Object.class, new String[]{"this", "regex"}, Object.class, Object.class)
+                .cast(String[].class, String.class, String.class)
+                .invoke(target);
+
+        assertArrayEquals(new String[]{"foo", "bar"}, (String[])(Object)handle.handle().invokeExact((Object)"foo,bar", (Object)","));
+    }
     
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
     

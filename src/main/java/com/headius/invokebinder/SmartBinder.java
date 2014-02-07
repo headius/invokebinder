@@ -298,7 +298,7 @@ public class SmartBinder {
     }
 
     public SmartBinder castVirtual(Class returnType, Class firstArg, Class... restArgs) {
-        return new SmartBinder(this, new Signature(returnType, firstArg, restArgs, signature().argNames()), binder.cast(returnType, firstArg, restArgs));
+        return new SmartBinder(this, new Signature(returnType, firstArg, restArgs, signature().argNames()), binder.castVirtual(returnType, firstArg, restArgs));
     }
     
     public SmartBinder castArg(String name, Class type) {

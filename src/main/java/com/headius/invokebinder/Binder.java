@@ -774,11 +774,11 @@ public class Binder {
      * applied are equivalent to those in MethodHandle.explicitCastArguments(MethodType).
      *
      * @param returnType the target return type
-     * @param firstType the first argument type
+     * @param firstType the first argument type, usually a target type
      * @param restTypes the remaining target argument types
      * @return a new Binder
      */
-    public Binder cast(Class returnType, Class firstType, Class... restTypes) {
+    public Binder castVirtual(Class returnType, Class firstType, Class... restTypes) {
         return new Binder(this, new Cast(type()), MethodType.methodType(returnType, firstType, restTypes));
     }
 

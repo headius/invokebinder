@@ -424,6 +424,7 @@ public class Signature {
     public Signature collect(String newName, String oldPattern) {
         int start = -1;
         int newCount = 0;
+        int gatherCount = 0;
         Class type = null;
         Pattern pattern = Pattern.compile(oldPattern);
 
@@ -431,6 +432,7 @@ public class Signature {
 
         for (int i = 0; i < argNames.length; i++) {
             if (pattern.matcher(argName(i)).matches()) {
+                gatherCount++;
                 newType = newType.dropParameterTypes(newCount, newCount + 1);
                 Class argType = argType(i);
                 if (start == -1) start = i;
@@ -457,8 +459,8 @@ public class Signature {
             newType = newType.insertParameterTypes(start, Array.newInstance(type, 0).getClass());
 
             // post
-            if (newCount >= start + 1 + 1) { // args not at end
-                System.arraycopy(argNames, start + argNames.length - newCount, newNames, start + 1, newCount - (start + 1));
+            if (newCount + 1 > start) { // args not at end
+                System.arraycopy(argNames, start + gatherCount, newNames, start + 1, newCount - start);
             }
 
             return new Signature(newType, newNames);

@@ -376,6 +376,7 @@ public class SignatureTest {
         assertEquals(Integer[].class, newSig.argType(1));
         assertEquals("bs", newSig.argName(1));
         assertEquals(3, newSig.argCount());
+        assertEquals("c", newSig.argName(2));
 
         oldSig = Subjects.StringIntegerIntegerInteger;
         newSig = oldSig.collect("bs", "b.*");

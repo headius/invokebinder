@@ -58,10 +58,12 @@ public class Collect extends Transform {
                 movePermute[i] = i;
                 moveBackPermute[i] = i;
             }
+
             // post
             int shifted = 0;
             for (int i = index; i + count < movePermute.length; i++, shifted++) movePermute[i] = i + count;
             for (int i = index; i + 1 < moveBackPermute.length; i++) moveBackPermute[i + 1] = i;
+
             // collected args
             for (int i = index + shifted; i < movePermute.length; i++) movePermute[i] = i - shifted;
             moveBackPermute[index] = moveBackPermute.length - 1;

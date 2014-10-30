@@ -318,7 +318,7 @@ public class SmartHandle {
      * Replace the return value with the given value, performing no other
      * processing of the original value.
      *
-     * @param value the type for the new return value
+     * @param type the type for the new return value
      * @param value the new value to return
      * @return a new SmartHandle that returns the given value
      */

@@ -562,6 +562,19 @@ public class Signature {
     }
 
     /**
+     * Set the argument name at the given index.
+     *
+     * @param index the index at which to set the argument name
+     * @param name the name to set
+     * @return a new signature with the given name at the given index
+     */
+    public Signature argName(int index, String name) {
+        String[] argNames = Arrays.copyOf(argNames(), argNames().length);
+        argNames[index] = name;
+        return new Signature(type(), argNames);
+    }
+
+    /**
      * Get the argument type at the given index.
      *
      * @param index the index from which to get the argument type
@@ -587,6 +600,17 @@ public class Signature {
      */
     public Class lastArgType() {
         return argType(methodType.parameterCount() - 1);
+    }
+
+    /**
+     * Set the argument type at the given index.
+     *
+     * @param index the index at which to set the argument type
+     * @param type the type to set
+     * @return a new signature with the given type at the given index
+     */
+    public Signature argType(int index, Class type) {
+        return new Signature(type().changeParameterType(index, type), argNames());
     }
 
     /**

@@ -181,6 +181,11 @@ public class SignatureTest {
     @Test
     public void testArgName() {
         assertEquals("num", stringObjectInt.appendArg("flo", float.class).argName(1));
+
+        Signature oldSig = stringObjectInt;
+        Signature newSig = oldSig.argName(0, "str");
+
+        assertEquals("str", newSig.argName(0));
     }
     
     @Test
@@ -208,6 +213,11 @@ public class SignatureTest {
     @Test
     public void testArgType() {
         assertEquals(int.class, stringObjectInt.appendArg("flo", float.class).argType(1));
+
+        Signature oldSig = stringObjectInt;
+        Signature newSig = oldSig.argType(0, String.class);
+
+        assertEquals(String.class, newSig.argType(0));
     }
     
     @Test

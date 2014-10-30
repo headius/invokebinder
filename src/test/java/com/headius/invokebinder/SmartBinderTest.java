@@ -217,6 +217,19 @@ public class SmartBinderTest {
 
         assertArrayEquals(new String[]{"foo", "bar"}, (String[])(Object)handle.handle().invokeExact((Object)"foo,bar", (Object)","));
     }
+
+    @Test
+    public void testFilter() throws Throwable {
+        MethodHandle target = Subjects.concatHandle();
+        MethodHandle filter = MethodHandles.insertArguments(Subjects.concatHandle(), 1, "goodbye");
+        MethodHandle handle = SmartBinder
+                .from(String.class, new String[]{"arg1", "arg2"}, String.class, String.class)
+                .filter("arg.*", filter)
+                .invoke(target).handle();
+
+        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals("foogoodbyebargoodbye", (String)handle.invokeExact("foo", "bar"));
+    }
     
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
     

@@ -21,6 +21,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Maintains both a Binder, for building a series of transformations, and a
@@ -1065,5 +1066,28 @@ public class SmartBinder {
      */
     public SmartHandle invoker() {
         return new SmartHandle(start, binder.invoker());
+    }
+
+    /**
+     * Filter the arguments matching the given pattern using the given filter function.
+     *
+     * @param pattern the regular expression pattern to match arguments
+     * @param filter the MethodHandle to use to filter the arguments
+     * @return a new SmartBinder with the filter applied
+     */
+    public SmartBinder filter(String pattern, MethodHandle filter) {
+        String[] argNames = signature().argNames();
+        Pattern pat = Pattern.compile(pattern);
+
+        Binder newBinder = binder();
+        Signature newSig = signature();
+        for (int i = 0; i < argNames.length; i++) {
+            if (pat.matcher(argNames[i]).matches()) {
+                newBinder = newBinder.filter(i, filter);
+                newSig = newSig.argType(i, filter.type().returnType());
+            }
+        }
+
+        return new SmartBinder(newSig, newBinder);
     }
 }

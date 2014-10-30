@@ -22,7 +22,7 @@ import java.lang.invoke.MethodType;
 
 /**
  * An array-spreading transform.
- * <p/>
+ *
  * Equivalent call: MethodHandles.spreadInvoker(MethodType, int).bindTo(MethodHandle)
  */
 public class Spread extends Transform {

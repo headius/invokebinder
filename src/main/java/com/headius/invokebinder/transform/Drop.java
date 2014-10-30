@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 /**
  * An argument drop transform.
- * <p/>
+ *
  * Equivalent call: MethodHandles.dropArguments(MethodHandle, int, MethodType).
  */
 public class Drop extends Transform {

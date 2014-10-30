@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  * current Signature that maps symbolic names to arguments. Transformations
  * normally performed with Binder using argument indices can be done instead
  * using argument names and wildcards.
- * <p/>
+ *
  * TODO: Examples, or links to wiki examples.
  *
  * @author headius
@@ -305,7 +305,7 @@ public class SmartBinder {
      * Permute all parameters except the names given. Blacklisting to #permute's
      * whitelisting.
      *
-     * @param excludeNames
+     * @param excludeNames parameter patterns to exclude
      * @return a new SmartBinder with the exclude applied
      */
     public SmartBinder exclude(String... excludeNames) {
@@ -331,13 +331,13 @@ public class SmartBinder {
      * Spread a trailing array into count number of arguments, using the
      * natural component type for the array. Build names for the arguments
      * using the given baseName plus the argument's index.
-     * <p/>
+     *
      * Example:
      * Current binder has a signature of (int, String[])void. We want
      * to spread the strings into five arguments named "str".
-     * <p/>
+     *
      * <code>binder = binder.spread("str", 5)</code>
-     * <p/>
+     *
      * The resulting signature will have five trailing arguments named
      * "arg0" through "arg4".
      *
@@ -788,7 +788,7 @@ public class SmartBinder {
     /**
      * Collect arguments matching namePattern into an trailing array argument
      * named outName.
-     * <p/>
+     *
      * The namePattern is a standard regular expression.
      *
      * @param outName     the name of the new array argument
@@ -862,12 +862,12 @@ public class SmartBinder {
 
     /**
      * Cast the return value to the given type.
-     * <p/>
+     *
      * Example: Our current signature is (String)String but the method this
      * handle will eventually call returns CharSequence.
-     * <p/>
+     *
      * <code>binder = binder.castReturn(CharSequence.class);</code>
-     * <p/>
+     *
      * Our handle will now successfully find and call the target method and
      * propagate the returned CharSequence as a String.
      *
@@ -886,7 +886,7 @@ public class SmartBinder {
      * Use the given filter function to transform the return value at this
      * point in the binder. The filter will be inserted into the handle, and
      * return values will pass through it before continuing.
-     * <p/>
+     *
      * The filter's argument must match the expected return value downstream
      * from this point in the binder, and the return value must match the
      * return value at this point in the binder.
@@ -902,7 +902,7 @@ public class SmartBinder {
      * Use the given filter function to transform the return value at this
      * point in the binder. The filter will be inserted into the handle, and
      * return values will pass through it before continuing.
-     * <p/>
+     *
      * The filter's argument must match the expected return value downstream
      * from this point in the binder, and the return value must match the
      * return value at this point in the binder.
@@ -941,7 +941,7 @@ public class SmartBinder {
      * containing the actual reason. This method is for convenience in (for
      * example) field declarations, where checked exceptions noise up code
      * that can't recover anyway.
-     * <p/>
+     *
      * Use this in situations where you would not expect your library to be
      * usable if the target method can't be acquired.
      *
@@ -978,7 +978,7 @@ public class SmartBinder {
      * containing the actual reason. This method is for convenience in (for
      * example) field declarations, where checked exceptions noise up code
      * that can't recover anyway.
-     * <p/>
+     *
      * Use this in situations where you would not expect your library to be
      * usable if the target method can't be acquired.
      *
@@ -1021,7 +1021,7 @@ public class SmartBinder {
      * signature. The signature should have the array as its first argument,
      * an integer index as its second, and an appropriately-typed value as its
      * third. It should have a void return value.
-     * <p/>
+     *
      * Invoking the resulting handle will (eventually) perform the array
      * assignment.
      *
@@ -1036,7 +1036,7 @@ public class SmartBinder {
      * Terminate this binder by getting an array element based on the current
      * signature. The signature should have the array as its first argument and
      * an integer index as its second, and an appropriately-typed return value.
-     * <p/>
+     *
      * Invoking the resulting handle will (eventually) perform the array
      * assignment.
      *

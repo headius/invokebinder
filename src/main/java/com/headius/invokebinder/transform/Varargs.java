@@ -20,7 +20,7 @@ import java.lang.invoke.MethodType;
 
 /**
  * An argument-boxing transform.
- * <p/>
+ *
  * Equivalent call: MethodHandle.asVarargsCollector(Class)
  */
 public class Varargs extends Transform {

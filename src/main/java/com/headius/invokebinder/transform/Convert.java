@@ -21,7 +21,7 @@ import java.lang.invoke.MethodType;
 
 /**
  * An argument conversion transform.
- * <p/>
+ *
  * Equivalent call: MethodHandles.asType(MethodHandle, MethodType).
  */
 public class Convert extends Transform {

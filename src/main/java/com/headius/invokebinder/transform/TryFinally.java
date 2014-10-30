@@ -23,9 +23,9 @@ import java.lang.invoke.MethodType;
 
 /**
  * An try-finally transform.
- * <p/>
+ *
  * Equivalent call: A combination of folds and catches.
- * <p/>
+ *
  * MethodHandle exceptionHandler = [drop exception and invoke post logic]
  * target = MethodHandles.catchException(target, Throwable.class, exceptionHandler)
  * target = MethodHandles.foldArguments(post, target)

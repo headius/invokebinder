@@ -21,7 +21,7 @@ import java.lang.invoke.MethodType;
 
 /**
  * A casting transform.
- * <p/>
+ *
  * Equivalent call: MethodHandles.explicitCastArguments(MethodHandle, MethodType).
  */
 public class Cast extends Transform {

@@ -23,26 +23,26 @@ import java.lang.invoke.MethodType;
 /**
  * A tuple of a Signature and a java.lang.invoke.MethodHandle, providing
  * features of both plus a number of MethodHandles.* methods in a simpler form.
- * <p/>
+ *
  * SmartHandle is provided as a way to couple a given MethodHandle to a
  * Signature, allowing future adaptation of the MethodHandle to proceed using
  * Signature's various shortcuts and conveniences.
- * <p/>
+ *
  * Example:
- * <p/>
+ *
  * <code>
  * // A signature that only wants the "context" and "args" arguments
  * public static final Signature ARG_COUNT_CHECK_FOLD = Signature
  * .returning(void.class)
  * .appendArg("args", Object[].class);
- * <p/>
+ *
  * // The actual target signature for arg count checking, with min and max ints
  * public static final Signature ARG_COUNT_CHECK_SIGNATURE = Signature
  * .returning(int.class)
  * .appendArg("args", Object[].class)
  * .appendArg("min", int.class)
  * .appendArg("max", int.class);
- * <p/>
+ *
  * // A SmartHandle for the arity-checking method, using the fold and signature
  * // from above and inserting 1, 3 for min, max
  * SmartHandle arityCheck = SmartBinder
@@ -51,7 +51,7 @@ import java.lang.invoke.MethodType;
  * .append("max", 3)
  * .cast(ARITY_CHECK_SIGNATURE)
  * .invokeStaticQuiet(LOOKUP, ArgCountChecker.class, "checkArgumentCount");
- * <p/>
+ *
  * // The variable-arity call contaings other arguments plus the Object[] args.
  * // Here, we can just fold with our arityCheck SmartHandle, which drops args
  * // we are not interested in, passes along the args array, and ignores the
@@ -134,7 +134,7 @@ public class SmartHandle {
      * the given index, accepting one fewer argument as a result. In other words,
      * fix that argument (partial application) into the given handle.
      *
-     * @param name the name of the argument in the new SmartHandle's Signature
+     * @param index the index of the argument in the new SmartHandle's Signature
      * @param arg  the argument value
      * @return a new SmartHandle that already has applied the given argument
      */
@@ -162,7 +162,6 @@ public class SmartHandle {
      * argument, accepting one fewer argument as a result. In other words,
      * fix that argument (partial application) into the given handle.
      *
-     * @param name the name of the argument in the new SmartHandle's Signature
      * @param arg  the argument value
      * @return a new SmartHandle that already has applied the given argument
      */
@@ -171,11 +170,12 @@ public class SmartHandle {
     }
 
     /**
-     * Insert an argument into the handle at the given index, returning a new
+     * Drop an argument name and type from the handle at the given index, returning a new
      * SmartHandle.
      *
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg  the argument value
+     * @param beforeName name before which the dropped argument goes
+     * @param newName name of the argument
+     * @param type type of the argument
      * @return a new SmartHandle with the additional argument
      */
     public SmartHandle drop(String beforeName, String newName, Class type) {
@@ -183,11 +183,12 @@ public class SmartHandle {
     }
 
     /**
-     * Insert an argument into the handle at the given index, returning a new
+     * Drop an argument from the handle at the given index, returning a new
      * SmartHandle.
      *
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg  the argument value
+     * @param index index before which the dropped argument goes
+     * @param newName name of the argument
+     * @param type type of the argument
      * @return a new SmartHandle with the additional argument
      */
     public SmartHandle drop(int index, String newName, Class type) {
@@ -195,11 +196,11 @@ public class SmartHandle {
     }
 
     /**
-     * Insert an argument into the handle at the given index, returning a new
+     * Drop an argument from the handle at the end, returning a new
      * SmartHandle.
      *
-     * @param name the name of the argument in the new SmartHandle's Signature
-     * @param arg  the argument value
+     * @param newName name of the argument
+     * @param type type of the argument
      * @return a new SmartHandle with the additional argument
      */
     public SmartHandle dropLast(String newName, Class type) {
@@ -319,6 +320,7 @@ public class SmartHandle {
      *
      * @param value the type for the new return value
      * @param value the new value to return
+     * @return a new SmartHandle that returns the given value
      */
     public SmartHandle returnValue(Class type, Object value) {
         return new SmartHandle(signature.changeReturn(type), MethodHandles.filterReturnValue(handle, MethodHandles.constant(type, value)));

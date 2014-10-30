@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 /**
  * A permutation transform.
- * <p/>
+ *
  * Equivalent call: MethodHandles.permuteArguments(MethodHandle, MethodType, int...)
  */
 public class Permute extends Transform {

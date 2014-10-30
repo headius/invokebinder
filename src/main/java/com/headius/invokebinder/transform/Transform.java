@@ -43,7 +43,7 @@ public abstract class Transform {
     /**
      * Return a string representation of this transform.
      *
-     * @return
+     * @return a string representation of this transform
      */
     public abstract String toString();
 }

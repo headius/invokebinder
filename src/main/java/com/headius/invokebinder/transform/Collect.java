@@ -22,7 +22,7 @@ import java.lang.invoke.MethodType;
 
 /**
  * An argument-boxing transform with a fixed incoming size.
- * <p/>
+ *
  * Equivalent call: MethodHandle.asCollector(Class, int)
  */
 public class Collect extends Transform {

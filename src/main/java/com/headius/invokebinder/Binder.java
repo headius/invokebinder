@@ -47,15 +47,15 @@ import java.util.logging.Logger;
  * transformations are pushed into a stack, allowing the DSL to operate forward
  * from an incoming signature rather than backward from a target handle. This
  * is often conceptually easier to understand, and certainly easier to read.
- * <p/>
+ *
  * The transformations are also applied simultaneously to the starting
  * java.lang.invoke.MethodType, allowing Binder to check at each step whether
  * the adaptation is valid.
- * <p/>
+ *
  * Here's a typical use, starting with a signature that takes two Strings and
  * returns a String, dropping and inserting arguments, casting to a target
  * signature, and finally calling a target handle with that signature.
- * <p/>
+ *
  * <pre>
  * MethodHandle mh = Binder
  *     .from(String.class, String.class, String.class) // String w(String, String)
@@ -99,6 +99,8 @@ public class Binder {
 
     /**
      * Construct a new Binder using the given invokebinder.
+     *
+     * @param source a Binder to duplicate
      */
     public Binder(Binder source) {
         this.start = source.start;
@@ -325,6 +327,7 @@ public class Binder {
     /**
      * Println the current MethodType to the given stream.
      *
+     * @param ps a PrintStream to which to println the current MethodType
      * @return this Binding
      */
     public Binder printType(PrintStream ps) {
@@ -881,7 +884,7 @@ public class Binder {
 
     /**
      * Permute the incoming arguments to a new sequence specified by the given values.
-     * <p/>
+     *
      * Arguments may be duplicated or dropped in this sequence.
      *
      * @param reorder the int offsets of the incoming arguments in the desired permutation
@@ -985,13 +988,13 @@ public class Binder {
 
     /**
      * Apply transforms to run the given handle's logic as a "finally" block.
-     * <p/>
+     *
      * try {
      * some_code // your eventual endpoint
      * } finally {
      * finally_logic // the given handle
      * }
-     * <p/>
+     *
      * The layering uses a combination of catch and fold to reuse the same target
      * handle for both exceptional and non-exceptional paths. In essence, the
      * result is equivalent to using the given post logic as both an exception
@@ -1073,7 +1076,7 @@ public class Binder {
     /**
      * Apply the chain of transforms with the target method handle as the final
      * endpoint. Produces a handle that has the transforms in given sequence.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
      *
@@ -1097,13 +1100,14 @@ public class Binder {
      * using the end signature plus the given class and method. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
      *
      * @param lookup the MethodHandles.Lookup to use to unreflect the method
      * @param method the Method to unreflect
      * @return the full handle chain, bound to the given method
+     * @throws java.lang.IllegalAccessException if the method is not accessible
      */
     public MethodHandle invoke(MethodHandles.Lookup lookup, Method method) throws IllegalAccessException {
         return invoke(lookup.unreflect(method));
@@ -1114,10 +1118,10 @@ public class Binder {
      * using the end signature plus the given class and method. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
-     * <p/>
+     *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
      *
@@ -1138,7 +1142,7 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
      *
@@ -1146,6 +1150,8 @@ public class Binder {
      * @param target the class in which to find the method
      * @param name   the name of the method to invoke
      * @return the full handle chain, bound to the given method
+     * @throws java.lang.NoSuchMethodException if the method does not exist
+     * @throws java.lang.IllegalAccessException if the method is not accessible
      */
     public MethodHandle invokeStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchMethodException, IllegalAccessException {
         return invoke(lookup.findStatic(target, name, type()));
@@ -1156,10 +1162,10 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
-     * <p/>
+     *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
      *
@@ -1183,13 +1189,15 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
      *
      * @param lookup the MethodHandles.Lookup to use to look up the method
      * @param name   the name of the method to invoke
      * @return the full handle chain, bound to the given method
+     * @throws java.lang.NoSuchMethodException if the method does not exist
+     * @throws java.lang.IllegalAccessException if the method is not accessible
      */
     public MethodHandle invokeVirtual(MethodHandles.Lookup lookup, String name) throws NoSuchMethodException, IllegalAccessException {
         return invoke(lookup.findVirtual(type().parameterType(0), name, type().dropParameterTypes(0, 1)));
@@ -1200,10 +1208,10 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
-     * <p/>
+     *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
      *
@@ -1226,7 +1234,7 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
      *
@@ -1234,6 +1242,8 @@ public class Binder {
      * @param name   the name of the method to invoke
      * @param caller the calling class
      * @return the full handle chain, bound to the given method
+     * @throws java.lang.NoSuchMethodException if the method does not exist
+     * @throws java.lang.IllegalAccessException if the method is not accessible
      */
     public MethodHandle invokeSpecial(MethodHandles.Lookup lookup, String name, Class caller) throws NoSuchMethodException, IllegalAccessException {
         return invoke(lookup.findSpecial(type().parameterType(0), name, type().dropParameterTypes(0, 1), caller));
@@ -1244,10 +1254,10 @@ public class Binder {
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
      * exactly.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
-     * <p/>
+     *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
      *
@@ -1271,13 +1281,15 @@ public class Binder {
      * using the end signature plus the given class. The constructor will
      * be retrieved using the given Lookup and must match the end signature's
      * arguments exactly.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
      *
      * @param lookup the MethodHandles.Lookup to use to look up the constructor
      * @param target the constructor's class
      * @return the full handle chain, bound to the given constructor
+     * @throws java.lang.NoSuchMethodException if the constructor does not exist
+     * @throws java.lang.IllegalAccessException if the constructor is not accessible
      */
     public MethodHandle invokeConstructor(MethodHandles.Lookup lookup, Class target) throws NoSuchMethodException, IllegalAccessException {
         return invoke(lookup.findConstructor(target, type().changeReturnType(void.class)));
@@ -1288,10 +1300,10 @@ public class Binder {
      * using the end signature plus the given class. The constructor will
      * be retrieved using the given Lookup and must match the end signature's
      * arguments exactly.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
-     * <p/>
+     *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
      *
@@ -1314,13 +1326,17 @@ public class Binder {
      * using the end signature plus the given class and name. The field must
      * match the end signature's return value and the end signature must take
      * the target class or a subclass as its only argument.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
      *
      * @param lookup the MethodHandles.Lookup to use to look up the field
      * @param name   the field's name
      * @return the full handle chain, bound to the given field access
+     * @throws java.lang.NoSuchFieldException if the field does not exist
+     * @throws java.lang.IllegalAccessException if the field is not accessible
+     * @throws java.lang.NoSuchFieldException if the field does not exist
+     * @throws java.lang.IllegalAccessException if the field is not accessible
      */
     public MethodHandle getField(MethodHandles.Lookup lookup, String name) throws NoSuchFieldException, IllegalAccessException {
         return invoke(lookup.findGetter(type().parameterType(0), name, type().returnType()));
@@ -1331,10 +1347,10 @@ public class Binder {
      * using the end signature plus the given class and name. The field must
      * match the end signature's return value and the end signature must take
      * the target class or a subclass as its only argument.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
-     * <p/>
+     *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
      *
@@ -1357,7 +1373,7 @@ public class Binder {
      * using the end signature plus the given class and name. The field must
      * match the end signature's return value and the end signature must take
      * no arguments.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
      *
@@ -1365,6 +1381,8 @@ public class Binder {
      * @param target the class in which the field is defined
      * @param name   the field's name
      * @return the full handle chain, bound to the given field access
+     * @throws java.lang.NoSuchFieldException if the field does not exist
+     * @throws java.lang.IllegalAccessException if the field is not accessible or cannot be modified
      */
     public MethodHandle getStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
         return invoke(lookup.findStaticGetter(target, name, type().returnType()));
@@ -1375,10 +1393,10 @@ public class Binder {
      * using the end signature plus the given class and name. The field must
      * match the end signature's return value and the end signature must take
      * no arguments.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
-     * <p/>
+     *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
      *
@@ -1402,13 +1420,15 @@ public class Binder {
      * using the end signature plus the given class and name. The end signature must take
      * the target class or a subclass and the field's type as its arguments, and its return
      * type must be compatible with void.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
      *
      * @param lookup the MethodHandles.Lookup to use to look up the field
      * @param name   the field's name
      * @return the full handle chain, bound to the given field assignment
+     * @throws java.lang.NoSuchFieldException if the field does not exist
+     * @throws java.lang.IllegalAccessException if the field is not accessible or cannot be modified
      */
     public MethodHandle setField(MethodHandles.Lookup lookup, String name) throws NoSuchFieldException, IllegalAccessException {
         return invoke(lookup.findSetter(type().parameterType(0), name, type().parameterType(1)));
@@ -1419,10 +1439,10 @@ public class Binder {
      * using the end signature plus the given class and name. The end signature must take
      * the target class or a subclass and the field's type as its arguments, and its return
      * type must be compatible with void.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
-     * <p/>
+     *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
      *
@@ -1445,7 +1465,7 @@ public class Binder {
      * using the end signature plus the given class and name. The end signature must take
      * the target class or a subclass and the field's type as its arguments, and its return
      * type must be compatible with void.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
      *
@@ -1453,6 +1473,8 @@ public class Binder {
      * @param target the class in which the field is defined
      * @param name   the field's name
      * @return the full handle chain, bound to the given field assignment
+     * @throws java.lang.NoSuchFieldException if the field does not exist
+     * @throws java.lang.IllegalAccessException if the field is not accessible or cannot be modified
      */
     public MethodHandle setStatic(MethodHandles.Lookup lookup, Class target, String name) throws NoSuchFieldException, IllegalAccessException {
         return invoke(lookup.findStaticSetter(target, name, type().parameterType(0)));
@@ -1463,10 +1485,10 @@ public class Binder {
      * using the end signature plus the given class and name. The end signature must take
      * the target class or a subclass and the field's type as its arguments, and its return
      * type must be compatible with void.
-     * <p/>
+     *
      * If the final handle's type does not exactly match the initial type for
      * this Binder, an additional cast will be attempted.
-     * <p/>
+     *
      * This version is "quiet" in that it throws an unchecked InvalidTransformException
      * if the target method does not exist or is inaccessible.
      *

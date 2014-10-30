@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 /**
  * An argument insertion transform.
- * <p/>
+ *
  * Equivalent call: MethodHandles.insertArguments(MethodHandle, int, Object...).
  */
 public class Insert extends Transform {

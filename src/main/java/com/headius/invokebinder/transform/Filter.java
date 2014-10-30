@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 /**
  * An argument-filtering transform.
- * <p/>
+ *
  * Equivalent call: MethodHandles.filterArguments(MethodHandle, int, MethodHandle...).
  */
 public class Filter extends Transform {

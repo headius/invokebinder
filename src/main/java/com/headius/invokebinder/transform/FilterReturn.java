@@ -23,7 +23,7 @@ import java.lang.invoke.MethodType;
 
 /**
  * An return-filtering transform.
- * <p/>
+ *
  * Equivalent call: MethodHandles.filterReturn(MethodHandle, MethodHandle).
  */
 public class FilterReturn extends Transform {

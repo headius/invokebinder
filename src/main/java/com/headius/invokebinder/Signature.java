@@ -27,20 +27,20 @@ import java.util.regex.Pattern;
 
 /**
  * Signature represents a series of method arguments plus their symbolic names.
- * <p/>
+ *
  * In order to make it easier to permute arguments, track their flow, and debug
  * cases where reordering or permuting fails to work properly, the Signature
  * class also tracks symbolic names for all arguments. This allows permuting
  * by name or by name pattern, avoiding the error-prone juggling of int[] for
  * the standard MethodHandles.permuteArguments call.
- * <p/>
+ *
  * A Signature is created starting using #thatReturns method, and expanded using
  * #withArgument for each named argument in sequence. Order is preserved.
- * <p/>
+ *
  * A Signature can be mutated into another by manipuating the argument list as
  * with java.lang.invoke.MethodType, but using argument names and name patterns
  * instead of integer offsets.
- * <p/>
+ *
  * Two signatures can be used to produce a permute array suitable for use in
  * java.lang.invoke.MethodHandles#permuteArguments using the #to methods. The
  * #to method can also accept a list of argument names, as a shortcut.
@@ -145,6 +145,11 @@ public class Signature {
 
     /**
      * Create a new signature based on the given return value, argument types, and argument names
+     *
+     * @param retval the type of the return value
+     * @param argTypes the types of the arguments
+     * @param argNames the names of the arguments
+     * @return a new Signature
      */
     public static Signature from(Class retval, Class[] argTypes, String... argNames) {
         assert argTypes.length == argNames.length;
@@ -156,7 +161,7 @@ public class Signature {
      * Create a new signature based on this one with a different return type.
      *
      * @param retval the class for the new signature's return type
-     * @return the new signature
+     * @return the new signature with modified return value
      */
     public Signature changeReturn(Class retval) {
         return new Signature(methodType.changeReturnType(retval), argNames);
@@ -166,7 +171,7 @@ public class Signature {
      * Produce a new signature based on this one with a different return type.
      *
      * @param retval the new return type for the new signature
-     * @return the new signature
+     * @return a new signature with the added argument
      */
     public Signature asFold(Class retval) {
         return new Signature(methodType.changeReturnType(retval), argNames);
@@ -177,7 +182,7 @@ public class Signature {
      *
      * @param name the name of the argument
      * @param type the type of the argument
-     * @return a new signature
+     * @return a new signature with the added arguments
      */
     public Signature appendArg(String name, Class type) {
         String[] newArgNames = new String[argNames.length + 1];
@@ -192,7 +197,7 @@ public class Signature {
      *
      * @param names the names of the arguments
      * @param types the types of the argument
-     * @return a new signature
+     * @return a new signature with the added arguments
      */
     public Signature appendArgs(String[] names, Class... types) {
         assert names.length == types.length : "names and types must be of the same length";
@@ -209,7 +214,7 @@ public class Signature {
      *
      * @param name the name of the argument
      * @param type the type of the argument
-     * @return a new signature
+     * @return a new signature with the added arguments
      */
     public Signature prependArg(String name, Class type) {
         String[] newArgNames = new String[argNames.length + 1];
@@ -224,7 +229,7 @@ public class Signature {
      *
      * @param names the names of the arguments
      * @param types the types of the arguments
-     * @return a new signature
+     * @return a new signature with the added arguments
      */
     public Signature prependArgs(String[] names, Class... types) {
         String[] newArgNames = new String[argNames.length + names.length];
@@ -240,7 +245,7 @@ public class Signature {
      * @param index the index at which to insert
      * @param name  the name of the new argument
      * @param type  the type of the new argument
-     * @return a new signature
+     * @return a new signature with the added arguments
      */
     public Signature insertArg(int index, String name, Class type) {
         return insertArgs(index, new String[]{name}, new Class[]{type});
@@ -253,7 +258,7 @@ public class Signature {
      * @param beforeName the name of the argument before which to insert
      * @param name       the name of the new argument
      * @param type       the type of the new argument
-     * @return a new signature
+     * @return a new signature with the added arguments
      */
     public Signature insertArg(String beforeName, String name, Class type) {
         return insertArgs(argOffset(beforeName), new String[]{name}, new Class[]{type});
@@ -265,7 +270,7 @@ public class Signature {
      * @param index the index at which to insert
      * @param names the names of the new arguments
      * @param types the types of the new arguments
-     * @return a new signature
+     * @return a new signature with the added arguments
      */
     public Signature insertArgs(int index, String[] names, Class... types) {
         assert names.length == types.length : "names and types must be of the same length";
@@ -288,7 +293,7 @@ public class Signature {
      * @param beforeName the name of the argument before which to insert
      * @param names      the names of the new arguments
      * @param types      the types of the new arguments
-     * @return
+     * @return a new Signature with the added arguments
      */
     public Signature insertArgs(String beforeName, String[] names, Class... types) {
         return insertArgs(argOffset(beforeName), names, types);
@@ -366,7 +371,8 @@ public class Signature {
      *
      * @param oldName the old name of the argument
      * @param newName the new name of the argument; can be the same as old
-     * @param oldName the new type of the argument; can be the same as old
+     * @param newType the new type of the argument; can be the same as old
+     * @return a new signature with the modified argument
      */
     public Signature replaceArg(String oldName, String newName, Class newType) {
         int offset = argOffset(oldName);
@@ -386,7 +392,11 @@ public class Signature {
     }
 
     /**
-     * Spread the trailing [] argument into the given argument types
+     * Spread the trailing [] argument into its component type assigning given names.
+     *
+     * @param names names to use for the decomposed arguments
+     * @param types types to use for the decomposed arguments
+     * @return a new signature with decomposed arguments in place of the trailing array
      */
     public Signature spread(String[] names, Class... types) {
         assert names.length == types.length : "names and types must be of the same length";
@@ -404,6 +414,9 @@ public class Signature {
 
     /**
      * Spread the trailing [] argument into its component type assigning given names.
+     *
+     * @param names names to use for the decomposed arguments
+     * @return a new signature with decomposed arguments in place of the trailing array
      */
     public Signature spread(String... names) {
         Class aryType = lastArgType();
@@ -418,6 +431,10 @@ public class Signature {
 
     /**
      * Spread the trailing [] argument into its component type assigning given names.
+     *
+     * @param baseName base name of the spread arguments
+     * @param count number of arguments into which the last argument will decompose
+     * @return a new signature with decomposed arguments in place of the trailing array
      */
     public Signature spread(String baseName, int count) {
         String[] spreadNames = new String[count];
@@ -429,6 +446,10 @@ public class Signature {
 
     /**
      * Collect sequential arguments matching pattern into an array. They must have the same type.
+     *
+     * @param newName the name of the new array argument
+     * @param oldPattern the pattern of arguments to collect
+     * @return a new signature with an array argument where the collected arguments were
      */
     public Signature collect(String newName, String oldPattern) {
         int start = -1;
@@ -672,9 +693,9 @@ public class Signature {
     /**
      * Produce a method handle permuting the arguments in this signature using
      * the given permute arguments and targeting the given java.lang.invoke.MethodHandle.
-     * <p/>
+     *
      * Example:
-     * <p/>
+     *
      * <pre>
      * Signature sig = Signature.returning(String.class).appendArg("a", int.class).appendArg("b", int.class);
      * MethodHandle handle = handleThatTakesOneInt();

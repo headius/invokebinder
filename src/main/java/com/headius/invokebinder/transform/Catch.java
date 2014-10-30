@@ -21,7 +21,7 @@ import java.lang.invoke.MethodType;
 
 /**
  * An exception-handling transform.
- * <p/>
+ *
  * Equivalent call: MethodHandles.catchException(MethodHandle, Class, MethodHandle).
  */
 public class Catch extends Transform {

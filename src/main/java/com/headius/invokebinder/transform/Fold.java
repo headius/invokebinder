@@ -21,7 +21,7 @@ import java.lang.invoke.MethodType;
 
 /**
  * An argument-folding transform.
- * <p/>
+ *
  * Equivalent call: MethodHandles.foldArguments(MethodHandle, MethodHandle).
  */
 public class Fold extends Transform {

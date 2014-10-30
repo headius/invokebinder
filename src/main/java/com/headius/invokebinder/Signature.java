@@ -144,6 +144,15 @@ public class Signature {
     }
 
     /**
+     * Create a new signature based on the given return value, argument types, and argument names
+     */
+    public static Signature from(Class retval, Class[] argTypes, String... argNames) {
+        assert argTypes.length == argNames.length;
+
+        return new Signature(retval, argTypes, argNames);
+    }
+
+    /**
      * Create a new signature based on this one with a different return type.
      *
      * @param retval the class for the new signature's return type

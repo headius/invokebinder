@@ -741,6 +741,15 @@ public class Binder {
     }
 
     /**
+     * Drop all arguments from this handle chain
+     *
+     * @return a new Binder
+     */
+    public Binder dropAll() {
+        return drop(0, type().parameterCount());
+    }
+
+    /**
      * Convert the incoming arguments to the given MethodType. The conversions
      * applied are equivalent to those in MethodHandle.asType(MethodType).
      *

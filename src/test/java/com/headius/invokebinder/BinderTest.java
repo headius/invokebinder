@@ -228,6 +228,19 @@ public class BinderTest {
     }
 
     @Test
+    public void testDropAll() throws Throwable {
+        MethodHandle target = Subjects.concatHandle();
+        MethodHandle handle = Binder
+                .from(String.class, String.class, Object.class)
+                .dropAll()
+                .insert(0, "Hello, ", "world")
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
+    }
+
+    @Test
     public void testConvert() throws Throwable {
         MethodHandle target = mixedHandle();
         MethodHandle handle = Binder

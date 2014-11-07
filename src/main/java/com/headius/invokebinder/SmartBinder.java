@@ -781,6 +781,44 @@ public class SmartBinder {
         return new SmartBinder(this, signature().dropArg(index), binder.drop(index));
     }
 
+    /**
+     * Drop the last argument.
+     *
+     * @return a new SmartBinder with the drop applied
+     */
+    public SmartBinder dropLast() {
+        return dropLast(1);
+    }
+
+    /**
+     * Drop the last N arguments.
+     *
+     * @param count the count of arguments to drop
+     * @return a new SmartBinder with the drop applied
+     */
+    public SmartBinder dropLast(int count) {
+        return new SmartBinder(this, signature().dropLast(count), binder.dropLast(count));
+    }
+
+    /**
+     * Drop the first argument.
+     *
+     * @return a new SmartBinder with the drop applied
+     */
+    public SmartBinder dropFirst() {
+        return dropFirst(1);
+    }
+
+    /**
+     * Drop the first N arguments.
+     *
+     * @param count the count of arguments to drop
+     * @return a new SmartBinder with the drop applied
+     */
+    public SmartBinder dropFirst(int count) {
+        return new SmartBinder(this, signature().dropFirst(count), binder.dropFirst(count));
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // COLLECTS, based on MethodHandle#asCollector
     ///////////////////////////////////////////////////////////////////////////

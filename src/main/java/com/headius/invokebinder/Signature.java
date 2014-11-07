@@ -350,9 +350,19 @@ public class Signature {
      * @return a new signature
      */
     public Signature dropLast() {
+        return dropLast(1);
+    }
+
+    /**
+     * Drop the specified number of last arguments from this signature.
+     *
+     * @param n number of arguments to drop
+     * @return a new signature
+     */
+    public Signature dropLast(int n) {
         return new Signature(
-                methodType.dropParameterTypes(methodType.parameterCount() - 1, methodType.parameterCount()),
-                Arrays.copyOfRange(argNames, 0, argNames.length - 1));
+                methodType.dropParameterTypes(methodType.parameterCount() - n, methodType.parameterCount()),
+                Arrays.copyOfRange(argNames, 0, argNames.length - n));
     }
 
     /**
@@ -361,9 +371,19 @@ public class Signature {
      * @return a new signature
      */
     public Signature dropFirst() {
+        return dropFirst(1);
+    }
+
+    /**
+     * Drop the specified number of first arguments from this signature.
+     *
+     * @param n number of arguments to drop
+     * @return a new signature
+     */
+    public Signature dropFirst(int n) {
         return new Signature(
-                methodType.dropParameterTypes(0, 1),
-                Arrays.copyOfRange(argNames, 1, argNames.length));
+                methodType.dropParameterTypes(0, n),
+                Arrays.copyOfRange(argNames, n, argNames.length));
     }
 
     /**

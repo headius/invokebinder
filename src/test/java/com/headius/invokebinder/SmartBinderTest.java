@@ -78,6 +78,32 @@ public class SmartBinderTest {
     }
 
     @Test
+    public void testDropLast() throws Throwable {
+        Signature oldSig = Subjects.StringIntegerIntegerIntegerString;
+
+        SmartHandle handle = SmartBinder.from(oldSig)
+                .dropLast(4)
+                .append("bs", new Integer[]{1, 2, 3})
+                .append("c", "baz")
+                .invoke(Subjects.StringIntegersStringHandle);
+
+        assertEquals("[foo, [1, 2, 3], baz]", (String)handle.handle().invokeExact("foo", new Integer(5), new Integer(6), new Integer(7), "bar"));
+    }
+
+    @Test
+    public void testDropFirst() throws Throwable {
+        Signature oldSig = Subjects.StringIntegerIntegerIntegerString;
+
+        SmartHandle handle = SmartBinder.from(oldSig)
+                .dropFirst(4)
+                .prepend("bs", new Integer[]{1, 2, 3})
+                .prepend("a", "baz")
+                .invoke(Subjects.StringIntegersStringHandle);
+
+        assertEquals("[baz, [1, 2, 3], bar]", (String)handle.handle().invokeExact("foo", new Integer(5), new Integer(6), new Integer(7), "bar"));
+    }
+
+    @Test
     public void testCollect() throws Throwable {
         Signature oldSig = Subjects.StringIntegerIntegerIntegerString;
 

@@ -360,6 +360,11 @@ public class SignatureTest {
                 .dropLast();
         
         assertEquals("(Object obj)String", newSig.toString());
+
+        newSig = stringObjectInt
+                .dropLast(2);
+
+        assertEquals("()String", newSig.toString());
     }
     
     @Test
@@ -368,6 +373,11 @@ public class SignatureTest {
                 .dropFirst();
         
         assertEquals("(int num)String", newSig.toString());
+
+        newSig = stringObjectInt
+                .dropFirst(2);
+
+        assertEquals("()String", newSig.toString());
     }
     
     @Test

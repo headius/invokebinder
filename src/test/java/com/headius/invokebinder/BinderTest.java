@@ -225,6 +225,37 @@ public class BinderTest {
 
         assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
+
+        handle = Binder
+                .from(String.class, String.class, Object.class, double.class)
+                .dropLast(2)
+                .insert(1, "world")
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, String.class, Object.class, double.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object(), 1.0));
+    }
+
+    @Test
+    public void testDropFirst() throws Throwable {
+        MethodHandle target = Subjects.concatHandle();
+        MethodHandle handle = Binder
+                .from(String.class, Object.class, String.class)
+                .dropFirst()
+                .insert(1, "world")
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, Object.class, String.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact(new Object(), "Hello, "));
+
+        handle = Binder
+                .from(String.class, Object.class, double.class, String.class)
+                .dropFirst(2)
+                .insert(1, "world")
+                .invoke(target);
+
+        assertEquals(MethodType.methodType(String.class, Object.class, double.class, String.class), handle.type());
+        assertEquals("Hello, world", (String) handle.invokeExact(new Object(), 1.0, "Hello, "));
     }
 
     @Test

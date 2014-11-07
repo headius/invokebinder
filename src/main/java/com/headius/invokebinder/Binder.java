@@ -744,6 +744,27 @@ public class Binder {
     }
 
     /**
+     * Drop a single argument at the beginning of the argument list.
+     *
+     * @return a new Binder
+     */
+    public Binder dropFirst() {
+        return dropFirst(1);
+    }
+
+    /**
+     * Drop from the end of the argument list a number of arguments.
+     *
+     * @param count the number of arguments to drop
+     * @return a new Binder
+     */
+    public Binder dropFirst(int count) {
+        assert count <= type().parameterCount();
+
+        return drop(0, count);
+    }
+
+    /**
      * Drop all arguments from this handle chain
      *
      * @return a new Binder

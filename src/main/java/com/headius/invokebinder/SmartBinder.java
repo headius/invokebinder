@@ -1085,6 +1085,21 @@ public class SmartBinder {
         return new SmartHandle(start, binder.arraySet());
     }
 
+    /**
+     * Terminate this binder by returning its sole remaining argument. The
+     * signature must take only one argument whose type matches the return
+     * type.
+     *
+     * Invoking the resulting handle will (eventually) return the argument
+     * passed in at this point.
+     *
+     * @return a new SmartHandle with this binder's starting signature that
+     * simply returns its sole received argument
+     */
+    public SmartHandle identity() {
+        return new SmartHandle(start, binder.identity());
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // OTHER UTILITIES
     ///////////////////////////////////////////////////////////////////////////

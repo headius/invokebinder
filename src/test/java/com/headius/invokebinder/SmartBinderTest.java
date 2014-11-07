@@ -256,15 +256,24 @@ public class SmartBinderTest {
         assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
         assertEquals("foogoodbyebargoodbye", (String)handle.invokeExact("foo", "bar"));
     }
+
+    @Test
+    public void testIdentity() throws Throwable {
+        MethodHandle handle = SmartBinder
+                .from(String.class, "i", int.class)
+                .fold("s", stringInt)
+                .dropLast()
+                .identity()
+                .handle();
+
+        assertEquals(MethodType.methodType(String.class, int.class), handle.type());
+        assertEquals("15", (String)handle.invokeExact(15));
+    }
     
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
     
     private static final MethodHandle stringInt = Binder
             .from(String.class, int.class)
-            .invokeStaticQuiet(LOOKUP, SmartBinderTest.class, "stringInt");
-
-    public static String stringInt(int value) {
-        return Integer.toString(value);
-    }
+            .invokeStaticQuiet(LOOKUP, Integer.class, "toString");
 
 }

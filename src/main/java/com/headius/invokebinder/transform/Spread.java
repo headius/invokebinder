@@ -28,9 +28,9 @@ import java.lang.invoke.MethodType;
 public class Spread extends Transform {
 
     private final MethodType source;
-    private final Class[] spreadTypes;
+    private final Class<?>[] spreadTypes;
 
-    public Spread(MethodType source, Class... spreadTypes) {
+    public Spread(MethodType source, Class<?>... spreadTypes) {
         this.source = source;
         this.spreadTypes = spreadTypes;
     }

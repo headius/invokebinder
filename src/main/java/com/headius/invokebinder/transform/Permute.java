@@ -42,7 +42,7 @@ public class Permute extends Transform {
     }
 
     public MethodType down(MethodType type) {
-        Class[] types = new Class[reorder.length];
+        Class<?>[] types = new Class<?>[reorder.length];
         for (int i = 0; i < reorder.length; i++) {
             int typeIndex = reorder[i];
             if (typeIndex < 0 || typeIndex >= type.parameterCount()) {

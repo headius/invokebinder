@@ -27,9 +27,9 @@ public class Varargs extends Transform {
 
     private final MethodType source;
     private int index;
-    private final Class arrayType;
+    private final Class<?> arrayType;
 
-    public Varargs(MethodType source, int index, Class arrayType) {
+    public Varargs(MethodType source, int index, Class<?> arrayType) {
         this.source = source;
         this.index = index;
         this.arrayType = arrayType;
@@ -48,9 +48,9 @@ public class Varargs extends Transform {
     }
 
     private void assertTypesAreCompatible() {
-        Class componentType = arrayType.getComponentType();
+        Class<?> componentType = arrayType.getComponentType();
         for (int i = index; i < source.parameterCount(); i++) {
-            Class in = source.parameterType(i);
+            Class<?> in = source.parameterType(i);
             assert in.isAssignableFrom(componentType)
                     : "incoming type " + in.getName() + " not compatible with " + componentType.getName() + "[]";
         }

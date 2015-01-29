@@ -1068,7 +1068,7 @@ public class Binder {
         if (type().parameterCount() != 1 || !Throwable.class.isAssignableFrom(type().parameterType(0))) {
             throw new InvalidTransformException("incoming signature must have one Throwable type as its sole argument: " + type());
         }
-        return invoke(MethodHandles.throwException(type().returnType(), (Class<Throwable>)type().parameterType(0)));
+        return invoke(MethodHandles.throwException(type().returnType(), type().parameterType(0).asSubclass(Throwable.class)));
     }
 
     /**

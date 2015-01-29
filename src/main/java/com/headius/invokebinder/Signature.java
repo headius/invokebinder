@@ -56,7 +56,7 @@ public class Signature {
      *
      * @param retval the return value for the new signature
      */
-    Signature(Class retval) {
+    Signature(Class<?> retval) {
         this(MethodType.methodType(retval));
     }
 
@@ -68,7 +68,7 @@ public class Signature {
      * @param argTypes the argument types for the new signature
      * @param argNames the argument names for the new signature
      */
-    Signature(Class retval, Class[] argTypes, String... argNames) {
+    Signature(Class<?> retval, Class<?>[] argTypes, String... argNames) {
         this(MethodType.methodType(retval, argTypes), argNames);
     }
 
@@ -81,7 +81,7 @@ public class Signature {
      * @param restArgs the remaining argument types for the new signature
      * @param argNames the argument names for the new signature
      */
-    Signature(Class retval, Class firstArg, Class[] restArgs, String... argNames) {
+    Signature(Class<?> retval, Class<?> firstArg, Class<?>[] restArgs, String... argNames) {
         this(MethodType.methodType(retval, firstArg, restArgs), argNames);
     }
 
@@ -138,7 +138,7 @@ public class Signature {
      * @param retval the return type for the new signature
      * @return the new signature
      */
-    public static Signature returning(Class retval) {
+    public static Signature returning(Class<?> retval) {
         Signature sig = new Signature(retval);
         return sig;
     }
@@ -151,7 +151,7 @@ public class Signature {
      * @param argNames the names of the arguments
      * @return a new Signature
      */
-    public static Signature from(Class retval, Class[] argTypes, String... argNames) {
+    public static Signature from(Class<?> retval, Class<?>[] argTypes, String... argNames) {
         assert argTypes.length == argNames.length;
 
         return new Signature(retval, argTypes, argNames);
@@ -163,7 +163,7 @@ public class Signature {
      * @param retval the class for the new signature's return type
      * @return the new signature with modified return value
      */
-    public Signature changeReturn(Class retval) {
+    public Signature changeReturn(Class<?> retval) {
         return new Signature(methodType.changeReturnType(retval), argNames);
     }
 
@@ -173,7 +173,7 @@ public class Signature {
      * @param retval the new return type for the new signature
      * @return a new signature with the added argument
      */
-    public Signature asFold(Class retval) {
+    public Signature asFold(Class<?> retval) {
         return new Signature(methodType.changeReturnType(retval), argNames);
     }
 
@@ -184,7 +184,7 @@ public class Signature {
      * @param type the type of the argument
      * @return a new signature with the added arguments
      */
-    public Signature appendArg(String name, Class type) {
+    public Signature appendArg(String name, Class<?> type) {
         String[] newArgNames = new String[argNames.length + 1];
         System.arraycopy(argNames, 0, newArgNames, 0, argNames.length);
         newArgNames[argNames.length] = name;
@@ -199,7 +199,7 @@ public class Signature {
      * @param types the types of the argument
      * @return a new signature with the added arguments
      */
-    public Signature appendArgs(String[] names, Class... types) {
+    public Signature appendArgs(String[] names, Class<?>... types) {
         assert names.length == types.length : "names and types must be of the same length";
 
         String[] newArgNames = new String[argNames.length + names.length];
@@ -216,7 +216,7 @@ public class Signature {
      * @param type the type of the argument
      * @return a new signature with the added arguments
      */
-    public Signature prependArg(String name, Class type) {
+    public Signature prependArg(String name, Class<?> type) {
         String[] newArgNames = new String[argNames.length + 1];
         System.arraycopy(argNames, 0, newArgNames, 1, argNames.length);
         newArgNames[0] = name;
@@ -231,7 +231,7 @@ public class Signature {
      * @param types the types of the arguments
      * @return a new signature with the added arguments
      */
-    public Signature prependArgs(String[] names, Class... types) {
+    public Signature prependArgs(String[] names, Class<?>... types) {
         String[] newArgNames = new String[argNames.length + names.length];
         System.arraycopy(argNames, 0, newArgNames, names.length, argNames.length);
         System.arraycopy(names, 0, newArgNames, 0, names.length);
@@ -247,8 +247,8 @@ public class Signature {
      * @param type  the type of the new argument
      * @return a new signature with the added arguments
      */
-    public Signature insertArg(int index, String name, Class type) {
-        return insertArgs(index, new String[]{name}, new Class[]{type});
+    public Signature insertArg(int index, String name, Class<?> type) {
+        return insertArgs(index, new String[]{name}, new Class<?>[]{type});
     }
 
     /**
@@ -260,8 +260,8 @@ public class Signature {
      * @param type       the type of the new argument
      * @return a new signature with the added arguments
      */
-    public Signature insertArg(String beforeName, String name, Class type) {
-        return insertArgs(argOffset(beforeName), new String[]{name}, new Class[]{type});
+    public Signature insertArg(String beforeName, String name, Class<?> type) {
+        return insertArgs(argOffset(beforeName), new String[]{name}, new Class<?>[]{type});
     }
 
     /**
@@ -272,7 +272,7 @@ public class Signature {
      * @param types the types of the new arguments
      * @return a new signature with the added arguments
      */
-    public Signature insertArgs(int index, String[] names, Class... types) {
+    public Signature insertArgs(int index, String[] names, Class<?>... types) {
         assert names.length == types.length : "names and types must be of the same length";
 
         String[] newArgNames = new String[argNames.length + names.length];
@@ -295,7 +295,7 @@ public class Signature {
      * @param types      the types of the new arguments
      * @return a new Signature with the added arguments
      */
-    public Signature insertArgs(String beforeName, String[] names, Class... types) {
+    public Signature insertArgs(String beforeName, String[] names, Class<?>... types) {
         return insertArgs(argOffset(beforeName), names, types);
     }
 
@@ -394,7 +394,7 @@ public class Signature {
      * @param newType the new type of the argument; can be the same as old
      * @return a new signature with the modified argument
      */
-    public Signature replaceArg(String oldName, String newName, Class newType) {
+    public Signature replaceArg(String oldName, String newName, Class<?> newType) {
         int offset = argOffset(oldName);
         String[] newArgNames = argNames;
 
@@ -403,7 +403,7 @@ public class Signature {
             newArgNames[offset] = newName;
         }
 
-        Class oldType = methodType.parameterType(offset);
+        Class<?> oldType = methodType.parameterType(offset);
         MethodType newMethodType = methodType;
 
         if (!oldType.equals(newType)) newMethodType = methodType.changeParameterType(offset, newType);
@@ -418,7 +418,7 @@ public class Signature {
      * @param types types to use for the decomposed arguments
      * @return a new signature with decomposed arguments in place of the trailing array
      */
-    public Signature spread(String[] names, Class... types) {
+    public Signature spread(String[] names, Class<?>... types) {
         assert names.length == types.length : "names and types must be of the same length";
 
         String[] newArgNames = new String[argNames.length - 1 + names.length];
@@ -439,11 +439,11 @@ public class Signature {
      * @return a new signature with decomposed arguments in place of the trailing array
      */
     public Signature spread(String... names) {
-        Class aryType = lastArgType();
+        Class<?> aryType = lastArgType();
 
         assert lastArgType().isArray();
 
-        Class[] newTypes = new Class[names.length];
+        Class<?>[] newTypes = new Class<?>[names.length];
         Arrays.fill(newTypes, aryType.getComponentType());
 
         return spread(names, newTypes);
@@ -475,7 +475,7 @@ public class Signature {
         int start = -1;
         int newCount = 0;
         int gatherCount = 0;
-        Class type = null;
+        Class<?> type = null;
         Pattern pattern = Pattern.compile(oldPattern);
 
         MethodType newType = type();
@@ -484,7 +484,7 @@ public class Signature {
             if (pattern.matcher(argName(i)).matches()) {
                 gatherCount++;
                 newType = newType.dropParameterTypes(newCount, newCount + 1);
-                Class argType = argType(i);
+                Class<?> argType = argType(i);
                 if (start == -1) start = i;
                 if (type == null) {
                     type = argType;
@@ -621,7 +621,7 @@ public class Signature {
      * @param index the index from which to get the argument type
      * @return the argument type
      */
-    public Class argType(int index) {
+    public Class<?> argType(int index) {
         return methodType.parameterType(index);
     }
 
@@ -630,7 +630,7 @@ public class Signature {
      *
      * @return the first argument type
      */
-    public Class firstArgType() {
+    public Class<?> firstArgType() {
         return methodType.parameterType(0);
     }
 
@@ -639,7 +639,7 @@ public class Signature {
      *
      * @return the last argument type
      */
-    public Class lastArgType() {
+    public Class<?> lastArgType() {
         return argType(methodType.parameterCount() - 1);
     }
 
@@ -650,7 +650,7 @@ public class Signature {
      * @param type the type to set
      * @return a new signature with the given type at the given index
      */
-    public Signature argType(int index, Class type) {
+    public Signature argType(int index, Class<?> type) {
         return new Signature(type().changeParameterType(index, type), argNames());
     }
 
@@ -665,8 +665,8 @@ public class Signature {
         Pattern[] patterns = new Pattern[permuteArgs.length];
         for (int i = 0; i < permuteArgs.length; i++) patterns[i] = Pattern.compile(permuteArgs[i]);
 
-        List<Class> types = new ArrayList<Class>(argNames.length);
-        List<String> names = new ArrayList<String>(argNames.length);
+        List<Class<?>> types = new ArrayList<>(argNames.length);
+        List<String> names = new ArrayList<>(argNames.length);
 
         for (Pattern pattern : patterns) {
             for (int argOffset = 0; argOffset < argNames.length; argOffset++) {
@@ -678,7 +678,7 @@ public class Signature {
                 }
             }
         }
-        return new Signature(MethodType.methodType(methodType.returnType(), types.toArray(new Class[0])), names.toArray(new String[0]));
+        return new Signature(MethodType.methodType(methodType.returnType(), types.toArray(new Class<?>[0])), names.toArray(new String[0]));
     }
 
     /**
@@ -692,8 +692,8 @@ public class Signature {
         Pattern[] patterns = new Pattern[excludeArgs.length];
         for (int i = 0; i < excludeArgs.length; i++) patterns[i] = Pattern.compile(excludeArgs[i]);
 
-        List<Class> types = new ArrayList<Class>(argNames.length);
-        List<String> names = new ArrayList<String>(argNames.length);
+        List<Class<?>> types = new ArrayList<>(argNames.length);
+        List<String> names = new ArrayList<>(argNames.length);
 
         OUTER:
         for (int argOffset = 0; argOffset < argNames.length; argOffset++) {
@@ -707,7 +707,7 @@ public class Signature {
             types.add(methodType.parameterType(argOffset));
             names.add(arg);
         }
-        return new Signature(MethodType.methodType(methodType.returnType(), types.toArray(new Class[0])), names.toArray(new String[0]));
+        return new Signature(MethodType.methodType(methodType.returnType(), types.toArray(new Class<?>[0])), names.toArray(new String[0]));
     }
 
     /**

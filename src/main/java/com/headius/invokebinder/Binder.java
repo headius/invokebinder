@@ -1198,10 +1198,8 @@ public class Binder {
     public MethodHandle invokeStaticQuiet(MethodHandles.Lookup lookup, Class<?> target, String name) {
         try {
             return invokeStatic(lookup, target, name);
-        } catch (IllegalAccessException iae) {
-            throw new InvalidTransformException(iae);
-        } catch (NoSuchMethodException nsme) {
-            throw new InvalidTransformException(nsme);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            throw new InvalidTransformException(e);
         }
     }
 
@@ -1243,10 +1241,8 @@ public class Binder {
     public MethodHandle invokeVirtualQuiet(MethodHandles.Lookup lookup, String name) {
         try {
             return invokeVirtual(lookup, name);
-        } catch (IllegalAccessException iae) {
-            throw new InvalidTransformException(iae);
-        } catch (NoSuchMethodException nsme) {
-            throw new InvalidTransformException(nsme);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            throw new InvalidTransformException(e);
         }
     }
 
@@ -1290,10 +1286,8 @@ public class Binder {
     public MethodHandle invokeSpecialQuiet(MethodHandles.Lookup lookup, String name, Class<?> caller) {
         try {
             return invokeSpecial(lookup, name, caller);
-        } catch (IllegalAccessException iae) {
-            throw new InvalidTransformException(iae);
-        } catch (NoSuchMethodException nsme) {
-            throw new InvalidTransformException(nsme);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            throw new InvalidTransformException(e);
         }
     }
 
@@ -1335,10 +1329,8 @@ public class Binder {
     public MethodHandle invokeConstructorQuiet(MethodHandles.Lookup lookup, Class<?> target) {
         try {
             return invokeConstructor(lookup, target);
-        } catch (IllegalAccessException iae) {
-            throw new InvalidTransformException(iae);
-        } catch (NoSuchMethodException nsme) {
-            throw new InvalidTransformException(nsme);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            throw new InvalidTransformException(e);
         }
     }
 
@@ -1382,10 +1374,8 @@ public class Binder {
     public MethodHandle getFieldQuiet(MethodHandles.Lookup lookup, String name) {
         try {
             return getField(lookup, name);
-        } catch (IllegalAccessException iae) {
-            throw new InvalidTransformException(iae);
-        } catch (NoSuchFieldException nsfe) {
-            throw new InvalidTransformException(nsfe);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new InvalidTransformException(e);
         }
     }
 
@@ -1429,10 +1419,8 @@ public class Binder {
     public MethodHandle getStaticQuiet(MethodHandles.Lookup lookup, Class<?> target, String name) {
         try {
             return getStatic(lookup, target, name);
-        } catch (IllegalAccessException iae) {
-            throw new InvalidTransformException(iae);
-        } catch (NoSuchFieldException nsfe) {
-            throw new InvalidTransformException(nsfe);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new InvalidTransformException(e);
         }
     }
 
@@ -1474,10 +1462,8 @@ public class Binder {
     public MethodHandle setFieldQuiet(MethodHandles.Lookup lookup, String name) {
         try {
             return setField(lookup, name);
-        } catch (IllegalAccessException iae) {
-            throw new InvalidTransformException(iae);
-        } catch (NoSuchFieldException nsfe) {
-            throw new InvalidTransformException(nsfe);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new InvalidTransformException(e);
         }
     }
 
@@ -1521,10 +1507,8 @@ public class Binder {
     public MethodHandle setStaticQuiet(MethodHandles.Lookup lookup, Class<?> target, String name) {
         try {
             return setStatic(lookup, target, name);
-        } catch (IllegalAccessException iae) {
-            throw new InvalidTransformException(iae);
-        } catch (NoSuchFieldException nsfe) {
-            throw new InvalidTransformException(nsfe);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new InvalidTransformException(e);
         }
     }
 

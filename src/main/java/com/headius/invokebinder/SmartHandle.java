@@ -103,10 +103,8 @@ public class SmartHandle {
     public static SmartHandle findStaticQuiet(Lookup lookup, Class<?> target, String name, Signature signature) {
         try {
             return new SmartHandle(signature, lookup.findStatic(target, name, signature.type()));
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException nae) {
-            throw new RuntimeException(nae);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 

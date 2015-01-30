@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
  */
 public class SmartBinder {
     private final Signature start;
-    private final List<Signature> signatures = new ArrayList<Signature>();
+    private final List<Signature> signatures = new ArrayList<>();
     private final Binder binder;
 
     private SmartBinder(Signature start, Binder binder) {
@@ -87,7 +87,7 @@ public class SmartBinder {
      * @param types   the argument types
      * @return a new SmartBinder
      */
-    public static SmartBinder from(Class retType, String[] names, Class... types) {
+    public static SmartBinder from(Class<?> retType, String[] names, Class<?>... types) {
         return from(Signature.returning(retType).appendArgs(names, types));
     }
 
@@ -99,7 +99,7 @@ public class SmartBinder {
      * @param type    the sole argument's type
      * @return a new SmartBinder
      */
-    public static SmartBinder from(Class retType, String name, Class type) {
+    public static SmartBinder from(Class<?> retType, String name, Class<?> type) {
         return from(Signature.returning(retType).appendArg(name, type));
     }
 
@@ -125,7 +125,7 @@ public class SmartBinder {
      * @param types   the argument types
      * @return a new SmartBinder
      */
-    public static SmartBinder from(Lookup lookup, Class retType, String[] names, Class... types) {
+    public static SmartBinder from(Lookup lookup, Class<?> retType, String[] names, Class<?>... types) {
         return from(lookup, Signature.returning(retType).appendArgs(names, types));
     }
 
@@ -139,7 +139,7 @@ public class SmartBinder {
      * @param type    the sole argument's type
      * @return a new SmartBinder
      */
-    public static SmartBinder from(Lookup lookup, Class retType, String name, Class type) {
+    public static SmartBinder from(Lookup lookup, Class<?> retType, String name, Class<?> type) {
         return from(lookup, Signature.returning(retType).appendArg(name, type));
     }
 
@@ -217,7 +217,7 @@ public class SmartBinder {
      * @param method  the name of the method to become a folding function
      * @return a new SmartBinder with the fold applied
      */
-    public SmartBinder foldStatic(String newName, Lookup lookup, Class target, String method) {
+    public SmartBinder foldStatic(String newName, Lookup lookup, Class<?> target, String method) {
         Binder newBinder = binder.foldStatic(lookup, target, method);
         return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), binder);
     }
@@ -233,7 +233,7 @@ public class SmartBinder {
      * @param method  the name of the method to become a folding function
      * @return a new SmartBinder with the fold applied
      */
-    public SmartBinder foldStatic(String newName, Class target, String method) {
+    public SmartBinder foldStatic(String newName, Class<?> target, String method) {
         Binder newBinder = binder.foldStatic(target, method);
         return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), binder);
     }
@@ -323,7 +323,7 @@ public class SmartBinder {
      * @param spreadTypes the types as which to spread the incoming array
      * @return a new SmartBinder with the spread applied
      */
-    public SmartBinder spread(String[] spreadNames, Class... spreadTypes) {
+    public SmartBinder spread(String[] spreadNames, Class<?>... spreadTypes) {
         return new SmartBinder(this, signature().spread(spreadNames, spreadTypes), binder.spread(spreadTypes));
     }
 
@@ -480,7 +480,7 @@ public class SmartBinder {
      * @param value the value of the new argument
      * @return a new SmartBinder with the insert applied
      */
-    public SmartBinder insert(int index, String name, Class type, Object value) {
+    public SmartBinder insert(int index, String name, Class<?> type, Object value) {
         return new SmartBinder(this, signature().insertArg(index, name, type), binder.insert(index, type, value));
     }
 
@@ -494,7 +494,7 @@ public class SmartBinder {
      * @param values the values of the new arguments
      * @return a new SmartBinder with the insert applied
      */
-    public SmartBinder insert(int index, String[] names, Class[] types, Object... values) {
+    public SmartBinder insert(int index, String[] names, Class<?>[] types, Object... values) {
         return new SmartBinder(this, signature().insertArgs(index, names, types), binder.insert(index, types, values));
     }
 
@@ -615,8 +615,8 @@ public class SmartBinder {
      * @param value the value of the new argument
      * @return a new SmartBinder with the append applied
      */
-    public SmartBinder append(String name, Class type, Object value) {
-        return new SmartBinder(this, signature().appendArg(name, type), binder.append(new Class[]{type}, value));
+    public SmartBinder append(String name, Class<?> type, Object value) {
+        return new SmartBinder(this, signature().appendArg(name, type), binder.append(new Class<?>[]{type}, value));
     }
 
     /**
@@ -628,7 +628,7 @@ public class SmartBinder {
      * @param values the values of the new arguments
      * @return a new SmartBinder with the append applied
      */
-    public SmartBinder append(String[] names, Class[] types, Object... values) {
+    public SmartBinder append(String[] names, Class<?>[] types, Object... values) {
         return new SmartBinder(this, signature().appendArgs(names, types), binder.append(types, values));
     }
 
@@ -749,7 +749,7 @@ public class SmartBinder {
      * @param value the value of the new argument
      * @return a new SmartBinder with the prepend applied
      */
-    public SmartBinder prepend(String name, Class type, Object value) {
+    public SmartBinder prepend(String name, Class<?> type, Object value) {
         return new SmartBinder(this, signature().prependArg(name, type), binder.prepend(type, value));
     }
 
@@ -762,7 +762,7 @@ public class SmartBinder {
      * @param values the values of the new arguments
      * @return a new SmartBinder with the prepend applied
      */
-    public SmartBinder prepend(String[] names, Class[] types, Object... values) {
+    public SmartBinder prepend(String[] names, Class<?>[] types, Object... values) {
         return new SmartBinder(this, signature().prependArgs(names, types), binder.prepend(types, values));
     }
 
@@ -867,7 +867,7 @@ public class SmartBinder {
      * @param argTypes   the types of the arguments for the casted signature
      * @return a new SmartBinder with the cast applied
      */
-    public SmartBinder cast(Class returnType, Class... argTypes) {
+    public SmartBinder cast(Class<?> returnType, Class<?>... argTypes) {
         return new SmartBinder(this, new Signature(returnType, argTypes, signature().argNames()), binder.cast(returnType, argTypes));
     }
 
@@ -882,7 +882,7 @@ public class SmartBinder {
      * @param restArgs   the types of the remaining arguments for the casted signature
      * @return a new SmartBinder with the cast applied.
      */
-    public SmartBinder castVirtual(Class returnType, Class firstArg, Class... restArgs) {
+    public SmartBinder castVirtual(Class<?> returnType, Class<?> firstArg, Class<?>... restArgs) {
         return new SmartBinder(this, new Signature(returnType, firstArg, restArgs, signature().argNames()), binder.castVirtual(returnType, firstArg, restArgs));
     }
 
@@ -893,7 +893,7 @@ public class SmartBinder {
      * @param type the type to which that argument will be cast
      * @return a new SmartBinder with the cast applied
      */
-    public SmartBinder castArg(String name, Class type) {
+    public SmartBinder castArg(String name, Class<?> type) {
         Signature newSig = signature().replaceArg(name, name, type);
         return new SmartBinder(this, newSig, binder.cast(newSig.type()));
     }
@@ -912,7 +912,7 @@ public class SmartBinder {
      * @param type the new type for the return value
      * @return a new SmartBinder
      */
-    public SmartBinder castReturn(Class type) {
+    public SmartBinder castReturn(Class<?> type) {
         return new SmartBinder(this, signature().changeReturn(type), binder.cast(type, binder.type().parameterArray()));
     }
 
@@ -1005,7 +1005,7 @@ public class SmartBinder {
      * @throws NoSuchMethodException  if the named method with current signature's types does not exist
      * @throws IllegalAccessException if the named method is not accessible to the given Lookup
      */
-    public SmartHandle invokeStatic(Lookup lookup, Class target, String name) throws NoSuchMethodException, IllegalAccessException {
+    public SmartHandle invokeStatic(Lookup lookup, Class<?> target, String name) throws NoSuchMethodException, IllegalAccessException {
         return new SmartHandle(start, binder.invokeStatic(lookup, target, name));
     }
 
@@ -1026,7 +1026,7 @@ public class SmartBinder {
      * @return a SmartHandle with this binder's starting signature, bound
      * to the target method
      */
-    public SmartHandle invokeStaticQuiet(Lookup lookup, Class target, String name) {
+    public SmartHandle invokeStaticQuiet(Lookup lookup, Class<?> target, String name) {
         return new SmartHandle(start, binder.invokeStaticQuiet(lookup, target, name));
     }
 

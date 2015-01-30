@@ -30,16 +30,16 @@ public class Collect extends Transform {
     private final MethodType source;
     private final int index;
     private final int count;
-    private final Class arrayType;
+    private final Class<?> arrayType;
 
-    public Collect(MethodType source, int index, Class arrayType) {
+    public Collect(MethodType source, int index, Class<?> arrayType) {
         this.source = source;
         this.index = index;
         this.count = source.parameterCount() - index;
         this.arrayType = arrayType;
     }
 
-    public Collect(MethodType source, int index, int count, Class arrayType) {
+    public Collect(MethodType source, int index, int count, Class<?> arrayType) {
         this.source = source;
         this.index = index;
         this.count = count;
@@ -85,9 +85,9 @@ public class Collect extends Transform {
     }
 
     private void assertTypesAreCompatible() {
-        Class componentType = arrayType.getComponentType();
+        Class<?> componentType = arrayType.getComponentType();
         for (int i = index; i < index + count; i++) {
-            Class in = source.parameterType(i);
+            Class<?> in = source.parameterType(i);
             assert in.isAssignableFrom(componentType)
                     : "incoming type " + in.getName() + " not compatible with " + componentType.getName() + "[]";
         }

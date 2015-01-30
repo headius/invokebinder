@@ -28,13 +28,13 @@ import java.util.Arrays;
 public class Insert extends Transform {
 
     private final int position;
-    private final Class[] types;
+    private final Class<?>[] types;
     private final Object[] values;
 
     public Insert(int position, Object... values) {
         this.position = position;
         this.values = values;
-        Class[] types = new Class[values.length];
+        Class<?>[] types = new Class<?>[values.length];
         for (int i = 0; i < values.length; i++) {
             types[i] = values[i].getClass();
         }
@@ -89,7 +89,7 @@ public class Insert extends Transform {
         this.types = new Class[]{double.class};
     }
 
-    public Insert(int position, Class[] types, Object... values) {
+    public Insert(int position, Class<?>[] types, Object... values) {
         this.position = position;
         this.values = values;
         this.types = types;
@@ -107,8 +107,8 @@ public class Insert extends Transform {
         return "insert " + Arrays.toString(types()) + " at " + position;
     }
 
-    private Class[] types() {
-        Class[] types = new Class[values.length];
+    private Class<?>[] types() {
+        Class<?>[] types = new Class<?>[values.length];
         for (int i = 0; i < types.length; i++) {
             types[i] = values[i].getClass();
         }

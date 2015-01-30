@@ -28,9 +28,9 @@ import java.util.Arrays;
 public class Drop extends Transform {
 
     private final int position;
-    private final Class[] types;
+    private final Class<?>[] types;
 
-    public Drop(int position, Class... types) {
+    public Drop(int position, Class<?>... types) {
         this.position = position;
         this.types = types;
     }

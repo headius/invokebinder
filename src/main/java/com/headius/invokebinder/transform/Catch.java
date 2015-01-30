@@ -26,10 +26,10 @@ import java.lang.invoke.MethodType;
  */
 public class Catch extends Transform {
 
-    private final Class throwable;
+    private final Class<? extends Throwable> throwable;
     private final MethodHandle function;
 
-    public Catch(Class throwable, MethodHandle function) {
+    public Catch(Class<? extends Throwable> throwable, MethodHandle function) {
         this.throwable = throwable;
         this.function = function;
     }

@@ -100,13 +100,11 @@ public class SmartHandle {
      * @param signature the signature of the method
      * @return a new SmartHandle based on the signature and looked-up MethodHandle
      */
-    public static SmartHandle findStaticQuiet(Lookup lookup, Class target, String name, Signature signature) {
+    public static SmartHandle findStaticQuiet(Lookup lookup, Class<?> target, String name, Signature signature) {
         try {
             return new SmartHandle(signature, lookup.findStatic(target, name, signature.type()));
-        } catch (NoSuchMethodException nsme) {
-            throw new RuntimeException(nsme);
-        } catch (IllegalAccessException nae) {
-            throw new RuntimeException(nae);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -178,7 +176,7 @@ public class SmartHandle {
      * @param type type of the argument
      * @return a new SmartHandle with the additional argument
      */
-    public SmartHandle drop(String beforeName, String newName, Class type) {
+    public SmartHandle drop(String beforeName, String newName, Class<?> type) {
         return new SmartHandle(signature.insertArg(beforeName, newName, type), MethodHandles.dropArguments(handle, signature.argOffset(beforeName), type));
     }
 
@@ -191,7 +189,7 @@ public class SmartHandle {
      * @param type type of the argument
      * @return a new SmartHandle with the additional argument
      */
-    public SmartHandle drop(int index, String newName, Class type) {
+    public SmartHandle drop(int index, String newName, Class<?> type) {
         return new SmartHandle(signature.insertArg(index, newName, type), MethodHandles.dropArguments(handle, index, type));
     }
 
@@ -203,7 +201,7 @@ public class SmartHandle {
      * @param type type of the argument
      * @return a new SmartHandle with the additional argument
      */
-    public SmartHandle dropLast(String newName, Class type) {
+    public SmartHandle dropLast(String newName, Class<?> type) {
         return new SmartHandle(signature.appendArg(newName, type), MethodHandles.dropArguments(handle, signature.argOffset(newName), type));
     }
 
@@ -261,7 +259,7 @@ public class SmartHandle {
      * @param argTypes   the argument types of the new handle
      * @return a new SmartHandle that accepts the given argument types
      */
-    public SmartHandle convert(Class returnType, Class... argTypes) {
+    public SmartHandle convert(Class<?> returnType, Class<?>... argTypes) {
         return convert(MethodType.methodType(returnType, argTypes));
     }
 
@@ -310,7 +308,7 @@ public class SmartHandle {
      * @param argTypes   the argument types of the new handle
      * @return a new SmartHandle that accepts the given argument types
      */
-    public SmartHandle cast(Class returnType, Class... argTypes) {
+    public SmartHandle cast(Class<?> returnType, Class<?>... argTypes) {
         return cast(MethodType.methodType(returnType, argTypes));
     }
 
@@ -322,7 +320,7 @@ public class SmartHandle {
      * @param value the new value to return
      * @return a new SmartHandle that returns the given value
      */
-    public SmartHandle returnValue(Class type, Object value) {
+    public SmartHandle returnValue(Class<?> type, Object value) {
         return new SmartHandle(signature.changeReturn(type), MethodHandles.filterReturnValue(handle, MethodHandles.constant(type, value)));
     }
 

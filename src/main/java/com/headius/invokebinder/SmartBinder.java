@@ -235,7 +235,7 @@ public class SmartBinder {
      */
     public SmartBinder foldStatic(String newName, Class<?> target, String method) {
         Binder newBinder = binder.foldStatic(target, method);
-        return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), binder);
+        return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), newBinder);
     }
 
     /**
@@ -251,7 +251,7 @@ public class SmartBinder {
      */
     public SmartBinder foldVirtual(String newName, Lookup lookup, String method) {
         Binder newBinder = binder.foldVirtual(lookup, method);
-        return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), binder);
+        return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), newBinder);
     }
 
     /**
@@ -267,7 +267,7 @@ public class SmartBinder {
      */
     public SmartBinder foldVirtual(String newName, String method) {
         Binder newBinder = binder.foldVirtual(method);
-        return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), binder);
+        return new SmartBinder(this, signature().prependArg(newName, newBinder.type().parameterType(0)), newBinder);
     }
 
     ///////////////////////////////////////////////////////////////////////////

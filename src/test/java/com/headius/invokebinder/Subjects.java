@@ -67,4 +67,18 @@ public class Subjects {
     public String stringIntegersString2(String a, Integer[] bs, String c) {
         return Arrays.deepToString(new Object[]{a, bs, c});
     }
+    
+    public static String foldStringIntegerIntegerInteger(String a, Integer b1, Integer b2, Integer b3) {
+        return "forty_two";
+    }
+
+    public String foldVirtualStringIntegerIntegerInteger(String a, Integer b1, Integer b2, Integer b3) {
+        return "forty_two";
+    }
+
+
+    public static String upperCase(String x) {
+        return x.toUpperCase();
+    }
+    
 }

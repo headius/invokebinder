@@ -257,7 +257,7 @@ public class SmartBinderTest {
         assertEquals("foogoodbyebargoodbye", (String)handle.invokeExact("foo", "bar"));
     }
 
-    @Test
+    @Test   
     public void testIdentity() throws Throwable {
         MethodHandle handle = SmartBinder
                 .from(String.class, "i", int.class)
@@ -269,7 +269,61 @@ public class SmartBinderTest {
         assertEquals(MethodType.methodType(String.class, int.class), handle.type());
         assertEquals("15", (String)handle.invokeExact(15));
     }
-    
+
+
+    @Test
+    public void testFoldStatic() throws Throwable {
+        MethodHandle handle = SmartBinder
+                .from(Subjects.StringIntegerIntegerInteger)
+                .foldStatic("x", Subjects.class, "foldStringIntegerIntegerInteger")
+                .drop("a")
+                .drop("b1")
+                .drop("b2")
+                .drop("b3").printSignature()
+                .invokeStatic(MethodHandles.lookup(), Subjects.class, "upperCase")
+                .handle();
+
+        assertEquals("FORTY_TWO", (String)handle.invokeExact("foo",
+                Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3)));
+    }
+
+    @Test
+    public void testFoldVirtual() throws Throwable {
+        MethodHandle handle = SmartBinder
+                .from(Subjects.StringIntegerIntegerInteger)
+                .prepend("this", new Subjects()).printSignature()
+                .foldVirtual("x", "foldVirtualStringIntegerIntegerInteger")
+                .drop("this")
+                .drop("a")
+                .drop("b1")
+                .drop("b2")
+                .drop("b3").printSignature()
+                .invokeStatic(MethodHandles.lookup(), Subjects.class, "upperCase")
+                .handle();
+
+        assertEquals("FORTY_TWO", (String)handle.invokeExact("foo",
+                Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3)));
+    }
+
+    @Test
+    public void testFoldVirtualWithLookup() throws Throwable {
+        MethodHandle handle = SmartBinder
+                .from(Subjects.StringIntegerIntegerInteger)
+                .prepend("this", new Subjects()).printSignature()
+                .foldVirtual("x", MethodHandles.lookup(), "foldVirtualStringIntegerIntegerInteger")
+                .drop("this")
+                .drop("a")
+                .drop("b1")
+                .drop("b2")
+                .drop("b3").printSignature()
+                .invokeStatic(MethodHandles.lookup(), Subjects.class, "upperCase")
+                .handle();
+
+        assertEquals("FORTY_TWO", (String)handle.invokeExact("foo",
+                Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3)));
+    }
+
+
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
     
     private static final MethodHandle stringInt = Binder

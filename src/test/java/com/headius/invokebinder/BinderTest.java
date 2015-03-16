@@ -390,6 +390,13 @@ public class BinderTest {
         assertEquals(2, ary.length);
         assertEquals("two", ary[0]);
         assertEquals("three", ary[1]);
+
+        // from #2
+        MethodHandle foo = Binder.from(MethodType.methodType(String.class, String.class))
+                .varargs(0, Object[].class)
+                .invokeStatic(MethodHandles.publicLookup(), getClass(), "varargs");
+
+        assertEquals(foo.invokeWithArguments("value"), "value");
     }
 
     @Test
@@ -914,6 +921,11 @@ public class BinderTest {
 
     public static String[] varargs(String arg0, String... args) {
         return args;
+    }
+
+    public static String varargs(Object... args)
+    {
+        return (String) args[0];
     }
 
     public static String intLong(int a, long b) {

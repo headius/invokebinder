@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.headius</groupId>
     <artifactId>invokebinder</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <version>1.7-SNAPSHOT</version>
     <name>invokebinder</name>
     <url>http://maven.apache.org</url>
@@ -41,6 +41,17 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>com.headius.invokebinder</Bundle-SymbolicName>
+                        <Export-Package>com.headius.invokebinder.*</Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

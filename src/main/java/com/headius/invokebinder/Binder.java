@@ -969,7 +969,7 @@ public class Binder {
      * @return a new Binder
      */
     public Binder foldVirtual(MethodHandles.Lookup lookup, String method) {
-        return fold(Binder.from(type()).printType().invokeVirtualQuiet(lookup, method));
+        return fold(Binder.from(type()).invokeVirtualQuiet(lookup, method));
     }
 
     /**

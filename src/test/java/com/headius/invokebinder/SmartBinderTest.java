@@ -15,6 +15,8 @@
  */
 package com.headius.invokebinder;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -279,7 +281,7 @@ public class SmartBinderTest {
                 .drop("a")
                 .drop("b1")
                 .drop("b2")
-                .drop("b3").printSignature()
+                .drop("b3")
                 .invokeStatic(MethodHandles.lookup(), Subjects.class, "upperCase")
                 .handle();
 
@@ -291,13 +293,13 @@ public class SmartBinderTest {
     public void testFoldVirtual() throws Throwable {
         MethodHandle handle = SmartBinder
                 .from(Subjects.StringIntegerIntegerInteger)
-                .prepend("this", new Subjects()).printSignature()
+                .prepend("this", new Subjects())
                 .foldVirtual("x", "foldVirtualStringIntegerIntegerInteger")
                 .drop("this")
                 .drop("a")
                 .drop("b1")
                 .drop("b2")
-                .drop("b3").printSignature()
+                .drop("b3")
                 .invokeStatic(MethodHandles.lookup(), Subjects.class, "upperCase")
                 .handle();
 
@@ -309,18 +311,40 @@ public class SmartBinderTest {
     public void testFoldVirtualWithLookup() throws Throwable {
         MethodHandle handle = SmartBinder
                 .from(Subjects.StringIntegerIntegerInteger)
-                .prepend("this", new Subjects()).printSignature()
+                .prepend("this", new Subjects())
                 .foldVirtual("x", MethodHandles.lookup(), "foldVirtualStringIntegerIntegerInteger")
                 .drop("this")
                 .drop("a")
                 .drop("b1")
                 .drop("b2")
-                .drop("b3").printSignature()
+                .drop("b3")
                 .invokeStatic(MethodHandles.lookup(), Subjects.class, "upperCase")
                 .handle();
 
         assertEquals("FORTY_TWO", (String)handle.invokeExact("foo",
                 Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3)));
+    }
+
+    @Test
+    public void testPrintSignature() throws Throwable {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        MethodHandle handle = SmartBinder
+                .from(Subjects.StringIntegerIntegerInteger)
+                .foldStatic("x", Subjects.class, "foldStringIntegerIntegerInteger")
+                .drop("a").printSignature(ps)
+                .drop("b1")
+                .drop("b2")
+                .drop("b3").printSignature(ps)
+                .invokeStatic(MethodHandles.lookup(), Subjects.class, "upperCase")
+                .handle();
+
+        String result = baos.toString();
+
+        assertEquals(
+                "(String x, Integer b1, Integer b2, Integer b3)String\n" +
+                "(String x)String\n",
+                result);
     }
 
 

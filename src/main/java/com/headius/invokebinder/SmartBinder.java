@@ -15,6 +15,7 @@
  */
 package com.headius.invokebinder;
 
+import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Array;
@@ -1105,12 +1106,21 @@ public class SmartBinder {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Print this binder's current signature to stdout.
+     * Print this binder's current signature to System.out.
      *
      * @return this SmartBinder
      */
     public SmartBinder printSignature() {
-        System.out.println(signature().toString());
+        return printSignature(System.out);
+    }
+
+    /**
+     * Print this binder's current signature to the give PrintStream.
+     *
+     * @return this SmartBinder
+     */
+    public SmartBinder printSignature(PrintStream ps) {
+        ps.println(signature().toString());
         return this;
     }
 

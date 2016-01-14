@@ -62,6 +62,15 @@ public class SmartBinder {
     }
 
     /**
+     * Get the signature this binder started with.
+     *
+     * @return the signature this binder started with.
+     */
+    public Signature baseSignature() {
+        return signatures.get(signatures.size() - 1);
+    }
+
+    /**
      * Get the Binder instance associated with this SmartBinder.
      *
      * @return this SmartBinder's Binder instance

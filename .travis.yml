@@ -9,5 +9,5 @@ matrix:
       before_install:
         - docker pull ibmcom/ibmjava:8-sdk
       script:
-        - docker run -v `pwd`:/work ibmcom/ibmjava:8-sdk /bin/sh -c "cd work; ./mvnw clean test"
+        - docker run -v `pwd`:/work ibmcom/ibmjava:8-sdk /bin/sh -c "cd work; java -version; ./mvnw clean test"
 

@@ -788,4 +788,22 @@ public class Signature {
         return offsets;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Signature signature = (Signature) o;
+
+        if (!methodType.equals(signature.methodType)) return false;
+
+        return Arrays.equals(argNames, signature.argNames);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = methodType.hashCode();
+        result = 31 * result + Arrays.hashCode(argNames);
+        return result;
+    }
 }

@@ -1165,4 +1165,11 @@ public class SmartBinder {
 
         return new SmartBinder(newSig, newBinder);
     }
+
+    /**
+     * @see Binder#tryFinally(MethodHandle)
+     */
+    public SmartBinder tryFinally(MethodHandle post) {
+        return new SmartBinder(this, signature(), binder.tryFinally(post));
+    }
 }

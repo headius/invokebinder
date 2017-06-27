@@ -3,7 +3,7 @@
     <groupId>com.headius</groupId>
     <artifactId>invokebinder</artifactId>
     <packaging>bundle</packaging>
-    <version>1.8</version>
+    <version>1.9-SNAPSHOT</version>
     <name>invokebinder</name>
     <url>http://maven.apache.org</url>
 

@@ -16,6 +16,7 @@
 package com.headius.invokebinder.transform;
 
 import com.headius.invokebinder.Binder;
+import com.headius.invokebinder.Util;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -39,6 +40,8 @@ public class TryFinally extends Transform {
     }
 
     public MethodHandle up(MethodHandle target) {
+        if (Util.isJava9()) return nativeTryFinally(target, post);
+
         MethodHandle exceptionHandler = Binder
                 .from(target.type().insertParameterTypes(0, Throwable.class).changeReturnType(void.class))
                 .drop(0)
@@ -70,6 +73,32 @@ public class TryFinally extends Transform {
         }
 
         return MethodHandles.foldArguments(realPost, target);
+    }
+
+    private MethodHandle nativeTryFinally(MethodHandle target, MethodHandle post) {
+        MethodType targetType = target.type();
+        boolean voidReturn = targetType.returnType() == Void.TYPE;
+        MethodType finallyType = targetType.insertParameterTypes(0, Throwable.class);
+        int dropCount = 1;
+
+        if (!voidReturn) {
+            finallyType = finallyType.insertParameterTypes(1, targetType.returnType());
+            dropCount = 2;
+        }
+
+        MethodHandle wrapPost = Binder
+                .from(finallyType)
+                .drop(0, dropCount)
+                .invoke(post);
+
+        if (!voidReturn) {
+            wrapPost = Binder.from(finallyType)
+                    .foldVoid(wrapPost)
+                    .permute(1)
+                    .identity();
+        }
+
+        return MethodHandles.tryFinally(target, wrapPost);
     }
 
     public MethodType down(MethodType type) {

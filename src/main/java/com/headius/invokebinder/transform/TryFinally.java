@@ -21,6 +21,7 @@ import com.headius.invokebinder.Util;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * An try-finally transform.
@@ -34,6 +35,8 @@ import java.lang.invoke.MethodType;
 public class TryFinally extends Transform {
 
     private final MethodHandle post;
+
+    private static final MethodHandle tryFinallyJava9;
 
     public TryFinally(MethodHandle post) {
         this.post = post;
@@ -98,7 +101,11 @@ public class TryFinally extends Transform {
                     .identity();
         }
 
-        return MethodHandles.tryFinally(target, wrapPost);
+        try {
+            return (MethodHandle) tryFinallyJava9.invokeExact(target, wrapPost);
+        } catch (Throwable t) {
+            throw new RuntimeException("Java 9 detected but MethodHandles.tryFinally missing", t);
+        }
     }
 
     public MethodType down(MethodType type) {
@@ -107,5 +114,13 @@ public class TryFinally extends Transform {
 
     public String toString() {
         return "try/finally with " + post;
+    }
+
+    static {
+        if (Util.isJava9()) {
+            tryFinallyJava9 = Binder.from(MethodHandle.class, MethodHandle.class, MethodHandle.class).invokeStaticQuiet(MethodHandles.lookup(), MethodHandles.class, "tryFinally");
+        } else {
+            tryFinallyJava9 = null;
+        }
     }
 }

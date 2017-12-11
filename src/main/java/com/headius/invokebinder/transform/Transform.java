@@ -52,7 +52,7 @@ public abstract class Transform {
      *
      * @return a Java code representation of this transform.
      */
-    public String toJava(MethodType incoming) { return ""; }
+    public abstract String toJava(MethodType incoming);
 
     /**
      * Build a list of argument type classes suitable for inserting into Java code.

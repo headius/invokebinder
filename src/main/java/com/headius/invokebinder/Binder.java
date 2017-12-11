@@ -34,6 +34,7 @@ import java.io.PrintStream;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -1524,6 +1525,36 @@ public class Binder {
         return invoke(MethodHandles.arrayElementSetter(type().parameterType(0)));
     }
 
+    /**
+     * Apply the chain of transforms and bind them to a volatile array element set.
+     *
+     * @see Binder#arraySet()
+     * @see VarHandle#setVolatile(Object...)
+     */
+    public MethodHandle arraySetVolatile() {
+        return arrayAccess(VarHandle.AccessMode.SET_VOLATILE);
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a release-fenced array element set.
+     *
+     * @see Binder#arraySet()
+     * @see VarHandle#setRelease(Object...)
+     */
+    public MethodHandle arraySetAcquire() {
+        return arrayAccess(VarHandle.AccessMode.SET_RELEASE);
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to an opaque (no ordering guarantee) array element set.
+     *
+     * @see Binder#arraySet()
+     * @see VarHandle#setVolatile(Object...)
+     */
+    public MethodHandle arraySetOpaque() {
+        return arrayAccess(VarHandle.AccessMode.SET_OPAQUE);
+    }
+
 
     /**
      * Apply the chain of transforms and bind them to an array element get. The signature
@@ -1534,6 +1565,44 @@ public class Binder {
      */
     public MethodHandle arrayGet() {
         return invoke(MethodHandles.arrayElementGetter(type().parameterType(0)));
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to a volatile array element get.
+     *
+     * @see Binder#arrayGet()
+     * @see VarHandle#getVolatile(Object...)
+     */
+    public MethodHandle arrayGetVolatile() {
+        return arrayAccess(VarHandle.AccessMode.GET_VOLATILE);
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to an acquire-fenced array element get.
+     *
+     * @see Binder#arrayGet()
+     * @see VarHandle#getAcquire(Object...)
+     */
+    public MethodHandle arrayGetAcquire() {
+        return arrayAccess(VarHandle.AccessMode.GET_ACQUIRE);
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to an opaque (no ordering guarantee) array element get.
+     *
+     * @see Binder#arrayGet()
+     * @see VarHandle#getVolatile(Object...)
+     */
+    public MethodHandle arrayGetOpaque() {
+        return arrayAccess(VarHandle.AccessMode.GET_OPAQUE);
+    }
+
+    /**
+     * Apply the chain of transforms and bind them to an array varhandle operation. The
+     * signature at the endpoint must match the VarHandle access type passed in.
+     */
+    public MethodHandle arrayAccess(VarHandle.AccessMode mode) {
+        return invoke(MethodHandles.arrayElementVarHandle(type().parameterType(0)).toMethodHandle(mode));
     }
 
     /**

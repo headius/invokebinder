@@ -9,6 +9,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Method;
 
 /**
@@ -16,6 +17,7 @@ import java.lang.reflect.Method;
  */
 public class BinderTest {
     private static final Lookup LOOKUP = MethodHandles.lookup();
+
     @Test
     public void testFrom() throws Throwable {
         MethodHandle target = Subjects.concatHandle();
@@ -851,6 +853,42 @@ public class BinderTest {
         assertEquals(MethodType.methodType(Object.class, Object[].class, int.class), handle.type());
         Object[] ary = new Object[] {"foo"};
         assertEquals(handle.invokeExact(ary, 0), "foo");
+    }
+
+    public static final VarHandle.AccessMode[] GET_ACCESS_MODES = new VarHandle.AccessMode[]{
+            VarHandle.AccessMode.GET,
+            VarHandle.AccessMode.GET_VOLATILE,
+            VarHandle.AccessMode.GET_ACQUIRE,
+            VarHandle.AccessMode.GET_OPAQUE};
+
+    public static final VarHandle.AccessMode[] SET_ACCESS_MODES = new VarHandle.AccessMode[]{
+            VarHandle.AccessMode.SET,
+            VarHandle.AccessMode.SET_VOLATILE,
+            VarHandle.AccessMode.SET_RELEASE,
+            VarHandle.AccessMode.SET_OPAQUE};
+
+    @Test
+    public void testArrayAccess() throws Throwable {
+        for (VarHandle.AccessMode mode : GET_ACCESS_MODES) {
+            MethodHandle handle = Binder
+                    .from(Object.class, Object[].class, int.class)
+                    .arrayAccess(mode);
+
+            assertEquals(MethodType.methodType(Object.class, Object[].class, int.class), handle.type());
+            Object[] ary = new Object[]{"foo"};
+            assertEquals(handle.invokeExact(ary, 0), "foo");
+        }
+
+        for (VarHandle.AccessMode mode : SET_ACCESS_MODES) {
+            MethodHandle handle = Binder
+                    .from(void.class, Object[].class, int.class, Object.class)
+                    .arrayAccess(mode);
+
+            assertEquals(MethodType.methodType(void.class, Object[].class, int.class, Object.class), handle.type());
+            Object[] ary = new Object[1];
+            handle.invokeExact(ary, 0, (Object) "foo");
+            assertEquals(ary[0], "foo");
+        }
     }
     
     @Test

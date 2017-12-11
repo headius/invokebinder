@@ -25,8 +25,9 @@ import java.lang.invoke.MethodType;
  * Equivalent call: MethodHandles.foldArguments(MethodHandle, MethodHandle).
  */
 public class Fold extends Transform {
-
     private final MethodHandle function;
+
+    public static final String FOLD_FUNCTION_JAVA = "<fold function>";
 
     public Fold(MethodHandle function) {
         this.function = function;
@@ -43,5 +44,9 @@ public class Fold extends Transform {
 
     public String toString() {
         return "fold args with " + function;
+    }
+
+    public String toJava(MethodType incoming) {
+        return "handle = MethodHandles.foldArguments(handle, " + FOLD_FUNCTION_JAVA + ");";
     }
 }

@@ -26,6 +26,7 @@ import java.lang.invoke.MethodType;
  */
 public class Catch extends Transform {
 
+    public static final String EXCEPTION_HANDLER_JAVA = "<exception handler>";
     private final Class<? extends Throwable> throwable;
     private final MethodHandle function;
 
@@ -44,5 +45,12 @@ public class Catch extends Transform {
 
     public String toString() {
         return "catch exception type " + throwable + " using " + function;
+    }
+
+    public String toJava(MethodType incoming) {
+        StringBuilder builder = new StringBuilder("handle = MethodHandles.catchException(handle, ");
+        buildClassArgument(builder, throwable);
+        builder.append(", ").append(EXCEPTION_HANDLER_JAVA).append(");");
+        return builder.toString();
     }
 }

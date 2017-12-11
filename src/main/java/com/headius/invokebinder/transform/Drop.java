@@ -46,4 +46,14 @@ public class Drop extends Transform {
     public String toString() {
         return "drop " + Arrays.toString(types) + " at " + position;
     }
+
+    public String toJava(MethodType incoming) {
+        StringBuilder builder = new StringBuilder("handle = MethodHandles.dropArguments(handle, ");
+
+        builder.append(position).append(", ");
+        buildClassArguments(builder, types);
+        builder.append(");");
+
+        return builder.toString();
+    }
 }

@@ -35,8 +35,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.logging.Logger;
@@ -68,8 +68,8 @@ import java.util.logging.Logger;
 public class Binder {
 
     private final Logger logger = Logger.getLogger("Invoke Binder");
-    private final List<Transform> transforms = new ArrayList<>();
-    private final List<MethodType> types = new ArrayList<>();
+    private final List<Transform> transforms = new LinkedList<>();
+    private final List<MethodType> types = new LinkedList<>();
     private final MethodType start;
     private final MethodHandles.Lookup lookup;
 
@@ -1558,6 +1558,22 @@ public class Binder {
      */
     public MethodHandle invoker() {
         return invoke(MethodHandles.invoker(start));
+    }
+
+    /**
+     * Produce Java code that would perform equivalent operations to this binder.
+     *
+     * @return Java code for the handle adaptations this Binder would produce.
+     */
+    public String toJava(MethodType incoming) {
+        StringBuilder builder = new StringBuilder();
+        boolean second = false;
+        for (Transform transform : transforms) {
+            if (second) builder.append('\n');
+            second = true;
+            builder.append(transform.toJava(incoming));
+        }
+        return builder.toString();
     }
 
 }

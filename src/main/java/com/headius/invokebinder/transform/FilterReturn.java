@@ -27,8 +27,9 @@ import java.lang.invoke.MethodType;
  * Equivalent call: MethodHandles.filterReturn(MethodHandle, MethodHandle).
  */
 public class FilterReturn extends Transform {
-
     private final MethodHandle function;
+
+    public static final String FILTER_FUNCTION_JAVA = "<filter function>";
 
     public FilterReturn(MethodHandle function) {
         this.function = function;
@@ -52,5 +53,9 @@ public class FilterReturn extends Transform {
 
     public String toString() {
         return "filter return with " + function;
+    }
+
+    public String toJava(MethodType incoming) {
+        return "handle = MethodHandles.filterReturnValue(handle, " + FILTER_FUNCTION_JAVA + ");";
     }
 }

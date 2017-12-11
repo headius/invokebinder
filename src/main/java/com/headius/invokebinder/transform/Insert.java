@@ -107,6 +107,30 @@ public class Insert extends Transform {
         return "insert " + Arrays.toString(types()) + " at " + position;
     }
 
+    public String toJava(MethodType incoming) {
+        StringBuilder builder = new StringBuilder("handle = MethodHandles.insertArguments(handle, ");
+        builder
+                .append(position)
+                .append(", ");
+
+        // we cast all arguments since natural type will frequently be wrong
+        boolean second = false;
+        for (int i = 0; i < types.length; i++) {
+            if (second) builder.append(", ");
+            second = true;
+
+            buildClassCast(builder, types[i]);
+            if (types[i].isPrimitive()) {
+                buildPrimitiveJava(builder, values[i]);
+            } else {
+                builder.append("value").append(i + 1);
+            }
+        }
+        builder.append(");");
+
+        return builder.toString();
+    }
+
     private Class<?>[] types() {
         Class<?>[] types = new Class<?>[values.length];
         for (int i = 0; i < types.length; i++) {

@@ -47,33 +47,22 @@ public class Collect extends Transform {
     }
 
     public MethodHandle up(MethodHandle target) {
-        if (index + count == source.parameterCount()) {
+        if (onlyTail()) {
             // fast path for tail args
             return target.asCollector(arrayType, count);
         } else {
-            int[] movePermute = new int[source.parameterCount()];
-            int[] moveBackPermute = new int[target.type().parameterCount()];
-            // pre
-            for (int i = 0; i < index; i++) {
-                movePermute[i] = i;
-                moveBackPermute[i] = i;
-            }
+            Permutes permutes = buildPermutes(source, target.type());
 
-            // post
-            int shifted = 0;
-            for (int i = index; i + count < movePermute.length; i++, shifted++) movePermute[i] = i + count;
-            for (int i = index; i + 1 < moveBackPermute.length; i++) moveBackPermute[i + 1] = i;
-
-            // collected args
-            for (int i = index + shifted; i < movePermute.length; i++) movePermute[i] = i - shifted;
-            moveBackPermute[index] = moveBackPermute.length - 1;
-
-            return Binder.from(source)
-                    .permute(movePermute)
-                    .collect(source.parameterCount() - count, arrayType)
-                    .permute(moveBackPermute)
-                    .invoke(target);
+            Binder binder = preparePermuteBinder(permutes);
+            return binder.invoke(target);
         }
+    }
+
+    private Binder preparePermuteBinder(Permutes permutes) {
+        return Binder.from(source)
+                .permute(permutes.movePermute)
+                .collect(source.parameterCount() - count, arrayType)
+                .permute(permutes.moveBackPermute);
     }
 
     public MethodType down(MethodType type) {
@@ -95,5 +84,55 @@ public class Collect extends Transform {
 
     public String toString() {
         return "collect at " + index + " into " + arrayType.getName();
+    }
+
+    public String toJava(MethodType incoming) {
+        StringBuilder builder = new StringBuilder();
+        if (onlyTail()) {
+            builder.append("handle = handle.asCollector(");
+            buildClassArgument(builder, arrayType);
+            builder
+                    .append(", ")
+                    .append(count)
+                    .append(");");
+        } else {
+            Permutes permutes = buildPermutes(source, incoming);
+
+            Binder binder = preparePermuteBinder(permutes);
+            return binder.toJava(incoming);
+        }
+        return builder.toString();
+    }
+
+    private boolean onlyTail() {
+        return index + count == source.parameterCount();
+    }
+
+    private static class Permutes {
+        private final int[] movePermute;
+        private final int[] moveBackPermute;
+
+        private Permutes(MethodType source, MethodType target, int index, int count) {
+            movePermute = new int[source.parameterCount()];
+            moveBackPermute = new int[target.parameterCount()];
+            // pre
+            for (int i = 0; i < index; i++) {
+                movePermute[i] = i;
+                moveBackPermute[i] = i;
+            }
+
+            // post
+            int shifted = 0;
+            for (int i = index; i + count < movePermute.length; i++, shifted++) movePermute[i] = i + count;
+            for (int i = index; i + 1 < moveBackPermute.length; i++) moveBackPermute[i + 1] = i;
+
+            // collected args
+            for (int i = index + shifted; i < movePermute.length; i++) movePermute[i] = i - shifted;
+            moveBackPermute[index] = moveBackPermute.length - 1;
+        }
+    }
+
+    private Permutes buildPermutes(MethodType source, MethodType target) {
+        return new Permutes(source, target, index, count);
     }
 }

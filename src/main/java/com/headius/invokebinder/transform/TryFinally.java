@@ -116,6 +116,10 @@ public class TryFinally extends Transform {
         return "try/finally with " + post;
     }
 
+    public String toJava(MethodType incoming) {
+        throw new RuntimeException("TryFinally does not yet support toJava");
+    }
+
     static {
         if (Util.isJava9()) {
             tryFinallyJava9 = Binder.from(MethodHandle.class, MethodHandle.class, MethodHandle.class).invokeStaticQuiet(MethodHandles.lookup(), MethodHandles.class, "tryFinally");

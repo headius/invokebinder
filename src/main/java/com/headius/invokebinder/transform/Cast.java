@@ -54,4 +54,12 @@ public class Cast extends Transform {
     public String toString() {
         return "cast args to " + type;
     }
+
+    public String toJava(MethodType incoming) {
+        StringBuilder builder = new StringBuilder("handle = MethodHandles.explicitCastArguments(handle, ");
+        buildClassArguments(builder, type.parameterArray());
+        builder.append(");");
+        return builder.toString();
+    }
+
 }

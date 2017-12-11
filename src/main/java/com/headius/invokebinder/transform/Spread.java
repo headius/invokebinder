@@ -52,4 +52,17 @@ public class Spread extends Transform {
     public String toString() {
         return "spread " + source + " to " + down(source);
     }
+
+    public String toJava(MethodType incoming) {
+        StringBuilder builder = new StringBuilder("handle = handle.asSpreader(");
+
+        buildClassArgument(builder, source.parameterType(source.parameterCount() - 1));
+        builder
+                .append(", ")
+                .append(spreadTypes.length);
+
+        builder.append(");");
+
+        return builder.toString();
+    }
 }

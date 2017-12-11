@@ -57,4 +57,16 @@ public class Permute extends Transform {
     public String toString() {
         return "permute " + source + " with " + Arrays.toString(reorder);
     }
+
+    public String toJava(MethodType incoming) {
+        StringBuilder builder = new StringBuilder("handle = MethodHandles.permuteArguments(handle, ");
+
+        String reorder = Arrays.toString(this.reorder);
+        reorder = reorder.substring(1, reorder.length() - 1);
+
+        builder.append(generateMethodType(source) + ", new int[] {" + reorder + "});");
+
+        return builder.toString();
+    }
+
 }

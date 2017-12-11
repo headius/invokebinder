@@ -59,4 +59,15 @@ public class Varargs extends Transform {
     public String toString() {
         return "varargs at " + index + " into " + arrayType.getName();
     }
+
+    public String toJava(MethodType incoming) {
+        StringBuilder builder = new StringBuilder("handle = handle.asVarargsCollector(");
+
+        buildClassArgument(builder, arrayType);
+        builder.append(").asType(");
+        builder.append(generateMethodType(source));
+        builder.append(");");
+
+        return builder.toString();
+    }
 }

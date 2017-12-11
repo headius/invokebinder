@@ -26,9 +26,10 @@ import java.util.Arrays;
  * Equivalent call: MethodHandles.filterArguments(MethodHandle, int, MethodHandle...).
  */
 public class Filter extends Transform {
-
     private final int index;
     private final MethodHandle[] functions;
+
+    public static final String FILTER_FUNCTIONS_JAVA = "<filter functions>";
 
     public Filter(int index, MethodHandle... functions) {
         this.index = index;
@@ -48,5 +49,9 @@ public class Filter extends Transform {
 
     public String toString() {
         return "fold args from " + index + " with " + Arrays.toString(functions);
+    }
+
+    public String toJava(MethodType incoming) {
+        return "handle = MethodHandles.filterArguments(handle, " + index + ", " + FILTER_FUNCTIONS_JAVA + ");";
     }
 }

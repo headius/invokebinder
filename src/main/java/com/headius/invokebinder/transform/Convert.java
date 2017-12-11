@@ -53,4 +53,14 @@ public class Convert extends Transform {
     public String toString() {
         return "convert args to " + type;
     }
+
+    public String toJava(MethodType incoming) {
+        String methodTypeJava = generateMethodType(type);
+
+        if (incoming.returnType() == void.class) {
+            return "handle = MethodHandles.explicitCastArguments(handle.asType(" + methodTypeJava + ", " + methodTypeJava + ");";
+        }
+
+        return "handle = handle.asType(" + methodTypeJava + ");";
+    }
 }

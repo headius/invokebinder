@@ -928,6 +928,14 @@ public class Binder {
         return new Binder(this, new Fold(function));
     }
 
+    /**
+     * Process the incoming arguments using the given handle, leaving the argument list
+     * unmodified.
+     *
+     * @param function the function that will process the incoming arguments. Its
+     *                 signature must match the current signature's arguments exactly.
+     * @return a new Binder
+     */
     public Binder foldVoid(MethodHandle function) {
         if (type().returnType() == void.class) {
             return fold(function);

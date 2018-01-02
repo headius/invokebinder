@@ -1,6 +1,8 @@
 package com.headius.invokebinder;
 
 import org.junit.Test;
+
+import static java.lang.invoke.MethodType.methodType;
 import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
@@ -31,7 +33,7 @@ public class BinderTest {
                 .insert(1, "world")
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
+        assertEquals(methodType(String.class, String.class, Object.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
     }
 
@@ -40,35 +42,35 @@ public class BinderTest {
         Binder b1 = Binder
                 .from(void.class)
                 .insert(0, true);
-        assertEquals(MethodType.methodType(void.class, boolean.class), b1.type());
+        assertEquals(methodType(void.class, boolean.class), b1.type());
         Binder b2 = Binder
                 .from(void.class)
                 .insert(0, (byte)1);
-        assertEquals(MethodType.methodType(void.class, byte.class), b2.type());
+        assertEquals(methodType(void.class, byte.class), b2.type());
         Binder b3 = Binder
                 .from(void.class)
                 .insert(0, (short)1);
-        assertEquals(MethodType.methodType(void.class, short.class), b3.type());
+        assertEquals(methodType(void.class, short.class), b3.type());
         Binder b4 = Binder
                 .from(void.class)
                 .insert(0, (char)1);
-        assertEquals(MethodType.methodType(void.class, char.class), b4.type());
+        assertEquals(methodType(void.class, char.class), b4.type());
         Binder b5 = Binder
                 .from(void.class)
                 .insert(0, 1);
-        assertEquals(MethodType.methodType(void.class, int.class), b5.type());
+        assertEquals(methodType(void.class, int.class), b5.type());
         Binder b6 = Binder
                 .from(void.class)
                 .insert(0, 1L);
-        assertEquals(MethodType.methodType(void.class, long.class), b6.type());
+        assertEquals(methodType(void.class, long.class), b6.type());
         Binder b7 = Binder
                 .from(void.class)
                 .insert(0, 1.0F);
-        assertEquals(MethodType.methodType(void.class, float.class), b7.type());
+        assertEquals(methodType(void.class, float.class), b7.type());
         Binder b8 = Binder
                 .from(void.class)
                 .insert(0, 1.0);
-        assertEquals(MethodType.methodType(void.class, double.class), b8.type());
+        assertEquals(methodType(void.class, double.class), b8.type());
 
         MethodHandle target = intLongHandle();
 
@@ -77,7 +79,7 @@ public class BinderTest {
                 .insert(0, new Class[]{int.class, long.class}, 1, 1L)
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class), handle.type());
+        assertEquals(methodType(String.class), handle.type());
         assertEquals("intLong ok", (String) handle.invokeExact());
     }
 
@@ -95,9 +97,9 @@ public class BinderTest {
         
         Binder newBinder = thisBinder.to(otherBinder);
         
-        assertEquals(MethodType.methodType(String.class, String.class, String.class), otherBinder.type());
-        assertEquals(MethodType.methodType(String.class, String.class, int.class), thisBinder.type());
-        assertEquals(MethodType.methodType(String.class, String.class, String.class), newBinder.type());
+        assertEquals(methodType(String.class, String.class, String.class), otherBinder.type());
+        assertEquals(methodType(String.class, String.class, int.class), thisBinder.type());
+        assertEquals(methodType(String.class, String.class, String.class), newBinder.type());
         
         MethodHandle target = newBinder.invoke(Subjects.concatHandle());
         
@@ -109,12 +111,12 @@ public class BinderTest {
         Binder binder = Binder
                 .from(String.class, String.class, Integer.class);
 
-        assertEquals(MethodType.methodType(String.class, String.class, Integer.class), binder.type());
+        assertEquals(methodType(String.class, String.class, Integer.class), binder.type());
 
         binder = binder
                 .drop(1);
 
-        assertEquals(MethodType.methodType(String.class, String.class), binder.type());
+        assertEquals(methodType(String.class, String.class), binder.type());
     }
 
     @Test
@@ -144,7 +146,7 @@ public class BinderTest {
                 .insert(1, "world")
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, "));
 
         MethodHandle target2 = Subjects.concatCharSequenceHandle();
@@ -153,7 +155,7 @@ public class BinderTest {
                 .insert(1, CharSequence.class, "world")
                 .invoke(target2);
 
-        assertEquals(MethodType.methodType(String.class, String.class), handle2.type());
+        assertEquals(methodType(String.class, String.class), handle2.type());
         assertEquals("Hello, world", (String) handle2.invokeExact("Hello, "));
     }
 
@@ -166,7 +168,7 @@ public class BinderTest {
                 .drop(1)
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
+        assertEquals(methodType(String.class, String.class, Object.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
 
         MethodHandle target2 = Subjects.concatCharSequenceHandle();
@@ -176,7 +178,7 @@ public class BinderTest {
                 .drop(1)
                 .invoke(target2);
 
-        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle2.type());
+        assertEquals(methodType(String.class, String.class, Object.class), handle2.type());
         assertEquals("Hello, world", (String) handle2.invokeExact("Hello, ", new Object()));
     }
 
@@ -189,7 +191,7 @@ public class BinderTest {
                 .drop(1)
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, Object.class, String.class), handle.type());
+        assertEquals(methodType(String.class, Object.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact(new Object(), "world"));
 
         MethodHandle target2 = Subjects.concatHandle();
@@ -199,7 +201,7 @@ public class BinderTest {
                 .drop(1)
                 .invoke(target2);
 
-        assertEquals(MethodType.methodType(String.class, Object.class, String.class), handle2.type());
+        assertEquals(methodType(String.class, Object.class, String.class), handle2.type());
         assertEquals("Hello, world", (String) handle2.invokeExact(new Object(), "world"));
     }
 
@@ -212,7 +214,7 @@ public class BinderTest {
                 .insert(1, "world")
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
+        assertEquals(methodType(String.class, String.class, Object.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
     }
     
@@ -225,7 +227,7 @@ public class BinderTest {
                 .insert(1, "world")
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
+        assertEquals(methodType(String.class, String.class, Object.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
 
         handle = Binder
@@ -234,7 +236,7 @@ public class BinderTest {
                 .insert(1, "world")
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class, Object.class, double.class), handle.type());
+        assertEquals(methodType(String.class, String.class, Object.class, double.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object(), 1.0));
     }
 
@@ -247,7 +249,7 @@ public class BinderTest {
                 .insert(1, "world")
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, Object.class, String.class), handle.type());
+        assertEquals(methodType(String.class, Object.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact(new Object(), "Hello, "));
 
         handle = Binder
@@ -256,7 +258,7 @@ public class BinderTest {
                 .insert(1, "world")
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, Object.class, double.class, String.class), handle.type());
+        assertEquals(methodType(String.class, Object.class, double.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact(new Object(), 1.0, "Hello, "));
     }
 
@@ -269,7 +271,7 @@ public class BinderTest {
                 .insert(0, "Hello, ", "world")
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class, Object.class), handle.type());
+        assertEquals(methodType(String.class, String.class, Object.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", new Object()));
     }
 
@@ -281,7 +283,7 @@ public class BinderTest {
                 .convert(target.type())
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, Object.class, Integer.class, Float.class), handle.type());
+        assertEquals(methodType(String.class, Object.class, Integer.class, Float.class), handle.type());
         assertEquals(null, (String) handle.invokeExact((Object) "foo", (Integer) 5, (Float) 5.0f));
     }
 
@@ -293,7 +295,7 @@ public class BinderTest {
                 .convert(target.type().returnType(), target.type().parameterArray())
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, Object.class, Integer.class, Float.class), handle.type());
+        assertEquals(methodType(String.class, Object.class, Integer.class, Float.class), handle.type());
         assertEquals(null, (String)handle.invokeExact((Object)"foo", (Integer)5, (Float)5.0f));
     }
 
@@ -305,7 +307,7 @@ public class BinderTest {
                 .cast(target.type())
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, Object.class, byte.class, int.class), handle.type());
+        assertEquals(methodType(String.class, Object.class, byte.class, int.class), handle.type());
         assertEquals(null, (String)handle.invokeExact((Object)"foo", (byte)5, 5));
     }
 
@@ -317,7 +319,7 @@ public class BinderTest {
                 .cast(target.type().returnType(), target.type().parameterArray())
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, Object.class, byte.class, int.class), handle.type());
+        assertEquals(methodType(String.class, Object.class, byte.class, int.class), handle.type());
         assertEquals(null, (String)handle.invokeExact((Object)"foo", (byte)5, 5));
     }
 
@@ -330,7 +332,7 @@ public class BinderTest {
                 .permute(0, 0)
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, Integer.class, Float.class, String.class), handle.type());
+        assertEquals(methodType(String.class, Integer.class, Float.class, String.class), handle.type());
         assertEquals("foofoo", (String)handle.invokeExact((Integer) 0, (Float) 0.0f, "foo"));
     }
 
@@ -342,7 +344,7 @@ public class BinderTest {
                 .spread(String.class, String.class)
                 .invoke(target);
         
-        assertEquals(MethodType.methodType(String.class, Object[].class), handle.type());
+        assertEquals(methodType(String.class, Object[].class), handle.type());
         assertEquals("foobar", (String)handle.invokeExact(new Object[] {"foo", "bar"}));
     }
 
@@ -354,7 +356,7 @@ public class BinderTest {
                 .spread(2)
                 .invoke(target);
         
-        assertEquals(MethodType.methodType(String.class, String[].class), handle.type());
+        assertEquals(methodType(String.class, String[].class), handle.type());
         assertEquals("foobar", (String)handle.invokeExact(new String[] {"foo", "bar"}));
     }
 
@@ -365,7 +367,7 @@ public class BinderTest {
                 .collect(1, String[].class)
                 .invokeStatic(LOOKUP, BinderTest.class, "varargs");
 
-        assertEquals(MethodType.methodType(String[].class, String.class, String.class, String.class), handle.type());
+        assertEquals(methodType(String[].class, String.class, String.class, String.class), handle.type());
         String[] ary = (String[])handle.invokeExact("one", "two", "three");
         assertEquals(2, ary.length);
         assertEquals("two", ary[0]);
@@ -376,7 +378,7 @@ public class BinderTest {
                 .collect(1, 3, Integer[].class)
                 .invoke(Subjects.StringIntegersStringHandle);
 
-        assertEquals(MethodType.methodType(String.class, String.class, Integer.class, Integer.class, Integer.class, String.class), handle2.type());
+        assertEquals(methodType(String.class, String.class, Integer.class, Integer.class, Integer.class, String.class), handle2.type());
         assertEquals("[foo, [1, 2, 3], bar]", (String)handle2.invokeExact("foo", new Integer(1), new Integer(2), new Integer(3), "bar"));
     }
 
@@ -387,14 +389,14 @@ public class BinderTest {
                 .varargs(1, String[].class)
                 .invokeStatic(LOOKUP, BinderTest.class, "varargs");
 
-        assertEquals(MethodType.methodType(String[].class, String.class, String.class, String.class), handle.type());
+        assertEquals(methodType(String[].class, String.class, String.class, String.class), handle.type());
         String[] ary = (String[])handle.invokeExact("one", "two", "three");
         assertEquals(2, ary.length);
         assertEquals("two", ary[0]);
         assertEquals("three", ary[1]);
 
         // from #2
-        MethodHandle foo = Binder.from(MethodType.methodType(String.class, String.class))
+        MethodHandle foo = Binder.from(methodType(String.class, String.class))
                 .varargs(0, Object[].class)
                 .invokeStatic(MethodHandles.publicLookup(), getClass(), "varargs");
 
@@ -407,7 +409,7 @@ public class BinderTest {
                 .from(String.class)
                 .constant("hello");
 
-        assertEquals(MethodType.methodType(String.class), handle.type());
+        assertEquals(methodType(String.class), handle.type());
         assertEquals("hello", (String)handle.invokeExact());
     }
 
@@ -417,7 +419,7 @@ public class BinderTest {
                 .from(Object.class)
                 .constant("hello");
 
-        assertEquals(MethodType.methodType(Object.class), handle.type());
+        assertEquals(methodType(Object.class), handle.type());
         assertEquals("hello", (Object)handle.invokeExact());
     }
 
@@ -427,7 +429,7 @@ public class BinderTest {
                 .from(String.class, String.class)
                 .identity();
 
-        assertEquals(MethodType.methodType(String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class), handle.type());
         assertEquals("hello", (String)handle.invokeExact("hello"));
     }
 
@@ -443,7 +445,7 @@ public class BinderTest {
                 .fold(fold)
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class), handle.type());
         assertEquals("yahoofoo", (String)handle.invokeExact("foo"));
     }
 
@@ -455,7 +457,7 @@ public class BinderTest {
                 .foldStatic(BinderTest.class, "alwaysYahooStatic")
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class), handle.type());
         assertEquals("yahoofoo", (String)handle.invokeExact("foo"));
     }
 
@@ -469,20 +471,20 @@ public class BinderTest {
                 .drop(1)
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class), handle.type());
         assertEquals("yahoofoo", (String)handle.invokeExact("foo"));
     }
 
     @Test
     public void testFilter() throws Throwable {
         MethodHandle target = Subjects.concatHandle();
-        MethodHandle filter = LOOKUP.findStatic(BinderTest.class, "addBaz", MethodType.methodType(String.class, String.class));
+        MethodHandle filter = LOOKUP.findStatic(BinderTest.class, "addBaz", methodType(String.class, String.class));
         MethodHandle handle = Binder
                 .from(String.class, String.class, String.class)
                 .filter(0, filter, filter)
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class, String.class), handle.type());
         assertEquals("foobazbarbaz", (String)handle.invokeExact("foo", "bar"));
     }
 
@@ -493,7 +495,7 @@ public class BinderTest {
                 .from(String.class, String.class, String.class)
                 .invoke(target);
 
-        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
@@ -504,7 +506,7 @@ public class BinderTest {
                 .from(String.class, String.class, String.class)
                 .invoke(LOOKUP, target);
 
-        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
@@ -515,7 +517,7 @@ public class BinderTest {
                 .from(String.class, String.class, String.class)
                 .invokeQuiet(LOOKUP, target);
 
-        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
@@ -525,7 +527,7 @@ public class BinderTest {
                 .from(String.class, String.class, String.class)
                 .invokeStatic(LOOKUP, Subjects.class, "concatStatic");
 
-        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
@@ -535,7 +537,7 @@ public class BinderTest {
                 .from(String.class, String.class, String.class)
                 .invokeStaticQuiet(LOOKUP, Subjects.class, "concatStatic");
 
-        assertEquals(MethodType.methodType(String.class, String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact("Hello, ", "world"));
     }
 
@@ -545,7 +547,7 @@ public class BinderTest {
                 .from(String.class, BinderTest.class, String.class, String.class)
                 .invokeVirtual(LOOKUP, "concatVirtual");
 
-        assertEquals(MethodType.methodType(String.class, BinderTest.class, String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, BinderTest.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact(this, "Hello, ", "world"));
     }
 
@@ -555,7 +557,7 @@ public class BinderTest {
                 .from(String.class, BinderTest.class, String.class, String.class)
                 .invokeVirtualQuiet(LOOKUP, "concatVirtual");
 
-        assertEquals(MethodType.methodType(String.class, BinderTest.class, String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, BinderTest.class, String.class, String.class), handle.type());
         assertEquals("Hello, world", (String) handle.invokeExact(this, "Hello, ", "world"));
     }
 
@@ -565,7 +567,7 @@ public class BinderTest {
                 .from(Constructable.class, String.class, String.class)
                 .invokeConstructor(LOOKUP, Constructable.class);
 
-        assertEquals(MethodType.methodType(Constructable.class, String.class, String.class), handle.type());
+        assertEquals(methodType(Constructable.class, String.class, String.class), handle.type());
         assertEquals(new Constructable("foo", "bar"), (Constructable) handle.invokeExact("foo", "bar"));
     }
 
@@ -575,7 +577,7 @@ public class BinderTest {
                 .from(Constructable.class, String.class, String.class)
                 .invokeConstructorQuiet(LOOKUP, Constructable.class);
 
-        assertEquals(MethodType.methodType(Constructable.class, String.class, String.class), handle.type());
+        assertEquals(methodType(Constructable.class, String.class, String.class), handle.type());
         assertEquals(new Constructable("foo", "bar"), (Constructable) handle.invokeExact("foo", "bar"));
     }
 
@@ -586,7 +588,7 @@ public class BinderTest {
                 .from(String.class, Fields.class)
                 .getField(LOOKUP, "instanceField");
         
-        assertEquals(MethodType.methodType(String.class, Fields.class), handle.type());
+        assertEquals(methodType(String.class, Fields.class), handle.type());
         assertEquals("initial", (String)handle.invokeExact(fields));
     }
 
@@ -597,7 +599,7 @@ public class BinderTest {
                 .from(String.class, Fields.class)
                 .getFieldQuiet(LOOKUP, "instanceField");
 
-        assertEquals(MethodType.methodType(String.class, Fields.class), handle.type());
+        assertEquals(methodType(String.class, Fields.class), handle.type());
         assertEquals("initial", (String)handle.invokeExact(fields));
     }
 
@@ -607,7 +609,7 @@ public class BinderTest {
                 .from(String.class)
                 .getStatic(LOOKUP, Fields.class, "staticField");
 
-        assertEquals(MethodType.methodType(String.class), handle.type());
+        assertEquals(methodType(String.class), handle.type());
         assertEquals("initial", (String)handle.invokeExact());
     }
 
@@ -617,7 +619,7 @@ public class BinderTest {
                 .from(String.class)
                 .getStaticQuiet(LOOKUP, Fields.class, "staticField");
 
-        assertEquals(MethodType.methodType(String.class), handle.type());
+        assertEquals(methodType(String.class), handle.type());
         assertEquals("initial", (String)handle.invokeExact());
     }
 
@@ -628,7 +630,7 @@ public class BinderTest {
                 .from(void.class, Fields.class, String.class)
                 .setField(LOOKUP, "instanceField");
 
-        assertEquals(MethodType.methodType(void.class, Fields.class, String.class), handle.type());
+        assertEquals(methodType(void.class, Fields.class, String.class), handle.type());
         handle.invokeExact(fields, "modified");
         assertEquals("modified", fields.instanceField);
     }
@@ -640,7 +642,7 @@ public class BinderTest {
                 .from(void.class, Fields.class, String.class)
                 .setFieldQuiet(LOOKUP, "instanceField");
 
-        assertEquals(MethodType.methodType(void.class, Fields.class, String.class), handle.type());
+        assertEquals(methodType(void.class, Fields.class, String.class), handle.type());
         handle.invokeExact(fields, "modified");
         assertEquals("modified", fields.instanceField);
     }
@@ -652,7 +654,7 @@ public class BinderTest {
                     .from(void.class, String.class)
                     .setStatic(LOOKUP, Fields.class, "staticField");
 
-            assertEquals(MethodType.methodType(void.class, String.class), handle.type());
+            assertEquals(methodType(void.class, String.class), handle.type());
             handle.invokeExact("modified");
             assertEquals("modified", Fields.staticField);
         } finally {
@@ -667,7 +669,7 @@ public class BinderTest {
                     .from(void.class, String.class)
                     .setStaticQuiet(LOOKUP, Fields.class, "staticField");
 
-            assertEquals(MethodType.methodType(void.class, String.class), handle.type());
+            assertEquals(methodType(void.class, String.class), handle.type());
             handle.invokeExact("modified");
             assertEquals("modified", Fields.staticField);
         } finally {
@@ -681,7 +683,7 @@ public class BinderTest {
                 .from(void.class, int.class, String.class)
                 .nop();
         
-        assertEquals(MethodType.methodType(void.class, int.class, String.class), handle.type());
+        assertEquals(methodType(void.class, int.class, String.class), handle.type());
         try {
             handle.invokeExact(1, "foo");
         } catch (Throwable t) {
@@ -695,7 +697,7 @@ public class BinderTest {
                 .from(void.class, BlahException.class)
                 .throwException();
         
-        assertEquals(MethodType.methodType(void.class, BlahException.class), handle.type());
+        assertEquals(methodType(void.class, BlahException.class), handle.type());
         try {
             handle.invokeExact(new BlahException());
             assertTrue("should not reach here", false);
@@ -714,7 +716,7 @@ public class BinderTest {
                 .tryFinally(post)
                 .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFoo");
 
-        assertEquals(MethodType.methodType(void.class, String[].class), handle.type());
+        assertEquals(methodType(void.class, String[].class), handle.type());
         String[] stringAry = new String[1];
         handle.invokeExact(stringAry);
         assertEquals("foofinally", stringAry[0]);
@@ -731,7 +733,7 @@ public class BinderTest {
                 .tryFinally(post)
                 .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFooAndRaise");
 
-        assertEquals(MethodType.methodType(void.class, String[].class), handle.type());
+        assertEquals(methodType(void.class, String[].class), handle.type());
         String[] stringAry = new String[1];
         try {
             handle.invokeExact(stringAry);
@@ -757,7 +759,7 @@ public class BinderTest {
                 .catchException(BlahException.class, ignoreException)
                 .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFooAndRaise");
 
-        assertEquals(MethodType.methodType(void.class, String[].class), handle.type());
+        assertEquals(methodType(void.class, String[].class), handle.type());
         String[] stringAry = new String[1];
         try {
             handle.invokeExact(stringAry);
@@ -778,7 +780,7 @@ public class BinderTest {
                 .tryFinally(post)
                 .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFooReturnInt");
 
-        assertEquals(MethodType.methodType(int.class, String[].class), handle.type());
+        assertEquals(methodType(int.class, String[].class), handle.type());
         String[] stringAry = new String[1];
         assertEquals(1, (int)handle.invokeExact(stringAry));
         assertEquals("foofinally", stringAry[0]);
@@ -795,7 +797,7 @@ public class BinderTest {
                 .tryFinally(post)
                 .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFooReturnIntAndRaise");
 
-        assertEquals(MethodType.methodType(int.class, String[].class), handle.type());
+        assertEquals(methodType(int.class, String[].class), handle.type());
         String[] stringAry = new String[1];
         try {
             int x = (int)handle.invokeExact(stringAry);
@@ -822,7 +824,7 @@ public class BinderTest {
                 .catchException(BlahException.class, ignoreException)
                 .invokeStatic(LOOKUP, BinderTest.class, "setZeroToFooReturnIntAndRaise");
 
-        assertEquals(MethodType.methodType(int.class, String[].class), handle.type());
+        assertEquals(methodType(int.class, String[].class), handle.type());
         String[] stringAry = new String[1];
         try {
             assertEquals(1, (int)handle.invokeExact(stringAry));
@@ -838,7 +840,7 @@ public class BinderTest {
                 .from(void.class, Object[].class, int.class, Object.class)
                 .arraySet();
 
-        assertEquals(MethodType.methodType(void.class, Object[].class, int.class, Object.class), handle.type());
+        assertEquals(methodType(void.class, Object[].class, int.class, Object.class), handle.type());
         Object[] ary = new Object[1];
         handle.invokeExact(ary, 0, (Object)"foo");
         assertEquals(ary[0], "foo");
@@ -850,7 +852,7 @@ public class BinderTest {
                 .from(Object.class, Object[].class, int.class)
                 .arrayGet();
 
-        assertEquals(MethodType.methodType(Object.class, Object[].class, int.class), handle.type());
+        assertEquals(methodType(Object.class, Object[].class, int.class), handle.type());
         Object[] ary = new Object[] {"foo"};
         assertEquals(handle.invokeExact(ary, 0), "foo");
     }
@@ -874,7 +876,7 @@ public class BinderTest {
                     .from(Object.class, Object[].class, int.class)
                     .arrayAccess(mode);
 
-            assertEquals(MethodType.methodType(Object.class, Object[].class, int.class), handle.type());
+            assertEquals(methodType(Object.class, Object[].class, int.class), handle.type());
             Object[] ary = new Object[]{"foo"};
             assertEquals(handle.invokeExact(ary, 0), "foo");
         }
@@ -884,7 +886,7 @@ public class BinderTest {
                     .from(void.class, Object[].class, int.class, Object.class)
                     .arrayAccess(mode);
 
-            assertEquals(MethodType.methodType(void.class, Object[].class, int.class, Object.class), handle.type());
+            assertEquals(methodType(void.class, Object[].class, int.class, Object.class), handle.type());
             Object[] ary = new Object[1];
             handle.invokeExact(ary, 0, (Object) "foo");
             assertEquals(ary[0], "foo");
@@ -907,7 +909,7 @@ public class BinderTest {
                                 .invokeStatic(LOOKUP, BinderTest.class, "addBaz")
                 );
         
-        assertEquals(MethodType.methodType(String.class, String.class), handle.type());
+        assertEquals(methodType(String.class, String.class), handle.type());
         assertEquals("foobar", (String)handle.invokeExact("foo"));
         assertEquals("quuxbaz", (String)handle.invokeExact("quux"));
     }
@@ -915,7 +917,7 @@ public class BinderTest {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static MethodHandle intLongHandle() throws Exception {
-        return LOOKUP.findStatic(BinderTest.class, "intLong", MethodType.methodType(String.class, int.class, long.class));
+        return LOOKUP.findStatic(BinderTest.class, "intLong", methodType(String.class, int.class, long.class));
     }
 
     public String concatVirtual(String a, String b) {
@@ -995,7 +997,7 @@ public class BinderTest {
     }
 
     public static MethodHandle mixedHandle() throws Exception {
-        return LOOKUP.findStatic(BinderTest.class, "mixed", MethodType.methodType(void.class, String.class, int.class, float.class));
+        return LOOKUP.findStatic(BinderTest.class, "mixed", methodType(void.class, String.class, int.class, float.class));
     }
 
     public static void mixed(String a, int b, float c) {

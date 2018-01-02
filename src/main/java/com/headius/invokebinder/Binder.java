@@ -993,8 +993,12 @@ public class Binder {
     }
 
     /**
-     * Filter incoming arguments, starting at the given index, replacing each with the
-     * result of calling the associated function in the given list.
+     * Filter incoming arguments, from the given index, replacing each with the
+     * result of calling the associated function in the given list. Note that
+     * the order in which the filters are applied is undefined; OpenJDK produces
+     * handles that execute them in reverse order.
+     *
+     * @see #filterForward(int, MethodHandle...)
      *
      * @param index     the index of the first argument to filter
      * @param functions the array of functions to transform the arguments
@@ -1002,6 +1006,26 @@ public class Binder {
      */
     public Binder filter(int index, MethodHandle... functions) {
         return new Binder(this, new Filter(index, functions));
+    }
+
+    /**
+     * Filter incoming arguments, from the given index, replacing each with the
+     * result of calling the associated function in the given list. This version
+     * guarantees left-to-right evaluation of filter functions, potentially at
+     * the cost of a more complex handle tree.
+     *
+     * @param index     the index of the first argument to filter
+     * @param functions the array of functions to transform the arguments
+     * @return a new Binder
+     */
+    public Binder filterForward(int index, MethodHandle... functions) {
+        Binder filtered = this;
+
+        for (int i = 0; i < functions.length; i++) {
+            filtered = filtered.filter(index + i, functions[i]);
+        }
+
+        return filtered;
     }
 
     /**

@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by headius on 1/25/14.
@@ -80,5 +81,17 @@ public class Subjects {
     public static String upperCase(String x) {
         return x.toUpperCase();
     }
+
+    public static String twoIntsToString(int a, int b) {
+        return "(" + a + ", " + b + ")";
+    }
+
+    public static int nextInt(int ignored) {
+        return counter.getAndIncrement();
+    }
+
+    public static MethodHandle nextInt = Binder.from(int.class, int.class).invokeStaticQuiet(LOOKUP, Subjects.class, "nextInt");
+
+    public static final AtomicInteger counter = new AtomicInteger(0);
     
 }

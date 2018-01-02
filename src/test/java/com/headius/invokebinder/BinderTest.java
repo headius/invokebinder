@@ -489,6 +489,19 @@ public class BinderTest {
     }
 
     @Test
+    public void testFilterForward() throws Throwable {
+        MethodHandle target = LOOKUP.findStatic(Subjects.class, "twoIntsToString", methodType(String.class, int.class, int.class));
+        MethodHandle[] filters = {Subjects.nextInt, Subjects.nextInt};
+        MethodHandle handle = Binder.from(String.class, int.class, int.class)
+                .filterForward(0, filters)
+                .invoke(target);
+
+        int first = Subjects.counter.get();
+
+        assertEquals("(" + first + ", " + (first + 1) + ")", (String) handle.invokeExact(0, 0));
+    }
+
+    @Test
     public void testInvoke() throws Throwable {
         MethodHandle target = Subjects.concatHandle();
         MethodHandle handle = Binder

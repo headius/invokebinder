@@ -49,6 +49,7 @@ import java.util.regex.Pattern;
  */
 public class Signature {
     private final MethodType methodType;
+    private final String displayName;
     private final String[] argNames;
 
     /**
@@ -93,9 +94,14 @@ public class Signature {
      * @param argNames   the argument names for the new signature
      */
     Signature(MethodType methodType, String... argNames) {
+        this(methodType, null, argNames);
+    }
+
+    Signature(MethodType methodType, String displayName, String... argNames) {
         assert methodType.parameterCount() == argNames.length : "arg name count " + argNames.length + " does not match parameter count " + methodType.parameterCount();
         this.methodType = methodType;
         this.argNames = argNames;
+        this.displayName = displayName;
     }
 
 
@@ -103,15 +109,17 @@ public class Signature {
      * Construct a new signature with the given method type and argument names.
      *
      * @param methodType the method type for the new signature
+     * @param displayName used for toString and possibly for non-MH uses.
      * @param firstName  the first argument name for the new signature; for eventual instance methods, it can be "this"
      * @param restNames  the remaining argument names for the new signature
      */
-    Signature(MethodType methodType, String firstName, String... restNames) {
+    Signature(MethodType methodType, String displayName, String firstName, String... restNames) {
         assert methodType.parameterCount() == (restNames.length + 1) : "arg name count " + (restNames.length + 1) + " does not match parameter count " + methodType.parameterCount();
         this.methodType = methodType;
         this.argNames = new String[restNames.length + 1];
         this.argNames[0] = firstName;
         System.arraycopy(restNames, 0, this.argNames, 1, restNames.length);
+        this.displayName = displayName;
     }
 
     /**
@@ -121,7 +129,8 @@ public class Signature {
      * @return a human-readable representation of the signature
      */
     public String toString() {
-        StringBuilder sb = new StringBuilder("(");
+        StringBuilder sb = new StringBuilder(displayName == null ? "" : displayName);
+        sb.append("(");
         for (int i = 0; i < argNames.length; i++) {
             sb.append(methodType.parameterType(i).getSimpleName()).append(' ').append(argNames[i]);
             if (i + 1 < argNames.length) {
@@ -141,6 +150,16 @@ public class Signature {
     public static Signature returning(Class<?> retval) {
         Signature sig = new Signature(retval);
         return sig;
+    }
+
+    /**
+     * Add a new signature with the given displayName..
+     *
+     * @param displayName the return type for the new signature
+     * @return the new signature
+     */
+    public Signature displayName(String displayName) {
+        return new Signature(methodType, displayName, argNames);
     }
 
     /**
@@ -526,6 +545,15 @@ public class Signature {
      */
     public MethodType type() {
         return methodType;
+    }
+
+    /**
+     * The display name for this Signature.
+     *
+     * @return the current method type
+     */
+    public String displayName() {
+        return displayName;
     }
 
     /**

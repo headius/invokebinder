@@ -2,4 +2,8 @@ language: java
 matrix:
   include:
     - os: linux
+      arch: amd64
+      jdk: openjdk11
+    - os: linux
+      arch: ppc64le
       jdk: openjdk11

@@ -1,14 +1,23 @@
 package com.headius.invokebinder;
 
 /**
- * Created by headius on 6/27/17.
+ * Utilities used by InvokeBinder classes.
  */
 public class Util {
-    public static boolean isJava9() {
+    public static boolean IS_JAVA9;
+
+    static {
+        boolean isJava9;
         try {
-            return System.getProperty("java.specification.version", "").equals("9");
+            Class.forName("java.lang.Module");
+            isJava9 = true;
         } catch (Exception e) {
-            return false;
+            isJava9 = false;
         }
+        IS_JAVA9 = isJava9;
+    }
+
+    public static boolean isJava9() {
+        return IS_JAVA9;
     }
 }

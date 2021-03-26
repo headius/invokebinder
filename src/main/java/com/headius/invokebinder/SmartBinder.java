@@ -853,6 +853,30 @@ public class SmartBinder {
         return new SmartBinder(this, newSignature, binder.collect(index, signature().argCount() - (newSignature.argCount() - 1), Array.newInstance(signature().argType(index), 0).getClass()));
     }
 
+    /**
+     * Collect arguments matching namePattern into an trailing array argument
+     * named outName, using collector to construct the array object.
+     *
+     * The collector signature should match (T1, ..., Tn) where T is the type of the arguments being collected and n
+     * is the number of arguments being collected.
+     *
+     * The namePattern is a standard regular expression.
+     *
+     * @param outName     the name of the new array argument
+     * @param namePattern a pattern with which to match arguments for collecting
+     * @param collector a function to use for collecting the arguments
+     * @return a new SmartBinder with the collect applied
+     */
+    public SmartBinder collect(String outName, String namePattern, MethodHandle collector) {
+        int index = signature().argOffsets(namePattern);
+
+        assert index >= 0 : "no arguments matching " + namePattern + " found in signature " + signature();
+
+        Signature newSignature = signature().collect(outName, namePattern);
+
+        return new SmartBinder(this, newSignature, binder.collect(index, signature().argCount() - (newSignature.argCount() - 1), Array.newInstance(signature().argType(index), 0).getClass(), collector));
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // CASTS, based on MethodHandles.explicitCastArguments and MethodHandle.asType.
     ///////////////////////////////////////////////////////////////////////////

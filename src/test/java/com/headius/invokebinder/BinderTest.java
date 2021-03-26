@@ -381,6 +381,34 @@ public class BinderTest {
         assertEquals("[foo, [1, 2, 3], bar]", (String)handle2.invokeExact("foo", new Integer(1), new Integer(2), new Integer(3), "bar"));
     }
 
+    public static String[] newStringArray(String s1, String s2) {
+        return new String[] {s1, s2};
+    }
+
+    public static MethodHandle newStringArrayHandle() throws Exception {
+        return LOOKUP.findStatic(BinderTest.class, "newStringArray", methodType(String[].class, String.class, String.class));
+    }
+
+    @Test
+    public void testCollectWithCollector() throws Throwable {
+        Binder binder = Binder
+                .from(String[].class, String.class, String.class, String.class)
+                .collect(1, String[].class, newStringArrayHandle());
+
+        String toJava = binder.toJava(methodType(String[].class, String.class, String.class, String.class));
+
+        assertTrue(toJava.contains("collectArguments"));
+
+        MethodHandle handle = binder
+                .invokeStatic(LOOKUP, BinderTest.class, "varargs");
+
+        assertEquals(methodType(String[].class, String.class, String.class, String.class), handle.type());
+        String[] ary = (String[])handle.invokeExact("one", "two", "three");
+        assertEquals(2, ary.length);
+        assertEquals("two", ary[0]);
+        assertEquals("three", ary[1]);
+    }
+
     @Test
     public void testVarargs() throws Throwable {
         MethodHandle handle = Binder

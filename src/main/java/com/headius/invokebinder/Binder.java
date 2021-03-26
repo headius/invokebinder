@@ -881,6 +881,18 @@ public class Binder {
     }
 
     /**
+     * Box all incoming arguments from the given position onward into the given array type.
+     *
+     * @param index the index from which to start boxing args
+     * @param type  the array type into which the args will be boxed
+     * @param collector a function to use for collecting the arguments
+     * @return a new Binder
+     */
+    public Binder collect(int index, Class<?> type, MethodHandle collector) {
+        return new Binder(this, new Collect(type(), index, type, collector));
+    }
+
+    /**
      * Box a range of incoming arguments into the given array type.
      *
      * @param index the index from which to start boxing args
@@ -890,6 +902,22 @@ public class Binder {
      */
     public Binder collect(int index, int count, Class<?> type) {
         return new Binder(this, new Collect(type(), index, count, type));
+    }
+
+    /**
+     * Box a range of incoming arguments into the given array type using the given constructor to construct the array.
+     *
+     * The collector signature should match (T1, ..., Tn) where T is the type of the arguments being collected and n
+     * is the number of arguments being collected.
+     *
+     * @param index the index from which to start boxing args
+     * @param count the count of arguments to box
+     * @param type  the array type into which the args will be boxed
+     * @param collector a function to use for collecting the arguments
+     * @return a new Binder
+     */
+    public Binder collect(int index, int count, Class<?> type, MethodHandle collector) {
+        return new Binder(this, new Collect(type(), index, count, type, collector));
     }
 
     /**

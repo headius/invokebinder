@@ -18,12 +18,13 @@ package com.headius.invokebinder.transform;
 import com.headius.invokebinder.Binder;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 /**
  * An argument-boxing transform with a fixed incoming size.
  *
- * Equivalent call: MethodHandle.asCollector(Class, int)
+ * Equivalent call: MethodHandle.asCollector(Class, int) or MethodHandles.collectArguments
  */
 public class Collect extends Transform {
 
@@ -31,12 +32,22 @@ public class Collect extends Transform {
     private final int index;
     private final int count;
     private final Class<?> arrayType;
+    private final MethodHandle collector;
 
     public Collect(MethodType source, int index, Class<?> arrayType) {
         this.source = source;
         this.index = index;
         this.count = source.parameterCount() - index;
         this.arrayType = arrayType;
+        this.collector = null;
+    }
+
+    public Collect(MethodType source, int index, Class<?> arrayType, MethodHandle collector) {
+        this.source = source;
+        this.index = index;
+        this.count = source.parameterCount() - index;
+        this.arrayType = arrayType;
+        this.collector = collector;
     }
 
     public Collect(MethodType source, int index, int count, Class<?> arrayType) {
@@ -44,12 +55,25 @@ public class Collect extends Transform {
         this.index = index;
         this.count = count;
         this.arrayType = arrayType;
+        this.collector = null;
+    }
+
+    public Collect(MethodType source, int index, int count, Class<?> arrayType, MethodHandle collector) {
+        this.source = source;
+        this.index = index;
+        this.count = count;
+        this.arrayType = arrayType;
+        this.collector = collector;
     }
 
     public MethodHandle up(MethodHandle target) {
         if (onlyTail()) {
             // fast path for tail args
-            return target.asCollector(arrayType, count);
+            if (collector == null) {
+                return target.asCollector(arrayType, count);
+            }
+
+            return MethodHandles.collectArguments(target, index, collector);
         } else {
             Permutes permutes = buildPermutes(source, target.type());
 
@@ -61,7 +85,7 @@ public class Collect extends Transform {
     private Binder preparePermuteBinder(Permutes permutes) {
         return Binder.from(source)
                 .permute(permutes.movePermute)
-                .collect(source.parameterCount() - count, arrayType)
+                .collect(source.parameterCount() - count, arrayType, collector)
                 .permute(permutes.moveBackPermute);
     }
 
@@ -89,12 +113,25 @@ public class Collect extends Transform {
     public String toJava(MethodType incoming) {
         StringBuilder builder = new StringBuilder();
         if (onlyTail()) {
-            builder.append("handle = handle.asCollector(");
-            buildClassArgument(builder, arrayType);
-            builder
-                    .append(", ")
-                    .append(count)
-                    .append(");");
+            if (collector == null) {
+                builder.append("handle = handle.asCollector(");
+                buildClassArgument(builder, arrayType);
+                builder
+                        .append(", ")
+                        .append(count)
+                        .append(");");
+            } else {
+                builder.append("handle = MethodHandles.collectArguments(");
+
+                builder
+                        .append("handle, ")
+                        .append(count)
+                        .append(", ");
+
+                buildClassArgument(builder, arrayType);
+
+                builder.append(");");
+            }
         } else {
             Permutes permutes = buildPermutes(source, incoming);
 

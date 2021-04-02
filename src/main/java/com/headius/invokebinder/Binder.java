@@ -1953,11 +1953,21 @@ public class Binder {
 
 
     /**
-     * Construct a new array. The signature at the endpoint must return the array type and accept an integer size.
-     * @return
+     * Construct a new array. The signature at the endpoint must return the array type and accept an integer length.
+     *
+     * @return a handle that constructs an array
      */
     public MethodHandle newArray() {
         return invoke(MethodHandles.arrayConstructor(type().returnType()));
+    }
+
+    /**
+     * Get the length of an array. The signature must accept an array and return an integer length.
+     *
+     * @return a handle that gets the size of an array
+     */
+    public MethodHandle arrayLength() {
+        return invoke(MethodHandles.arrayLength(type().parameterType(0)));
     }
 
     /**

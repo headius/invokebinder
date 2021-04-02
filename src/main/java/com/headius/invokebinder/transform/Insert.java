@@ -19,6 +19,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * An argument insertion transform.
@@ -47,10 +48,24 @@ public class Insert extends Transform {
         this.types = new Class[]{boolean.class};
     }
 
+    public Insert(int position, boolean... values) {
+        this.position = position;
+        this.values = new Object[values.length];
+        for (int i = 0; i < values.length; i++) this.values[i] = values[i];
+        this.types = Collections.nCopies(values.length, boolean.class).stream().toArray(Class[]::new);
+    }
+
     public Insert(int position, byte value) {
         this.position = position;
         this.values = new Object[]{value};
         this.types = new Class[]{byte.class};
+    }
+
+    public Insert(int position, byte... values) {
+        this.position = position;
+        this.values = new Object[values.length];
+        for (int i = 0; i < values.length; i++) this.values[i] = values[i];
+        this.types = Collections.nCopies(values.length, byte.class).stream().toArray(Class[]::new);
     }
 
     public Insert(int position, short value) {
@@ -59,10 +74,24 @@ public class Insert extends Transform {
         this.types = new Class[]{short.class};
     }
 
+    public Insert(int position, short... values) {
+        this.position = position;
+        this.values = new Object[values.length];
+        for (int i = 0; i < values.length; i++) this.values[i] = values[i];
+        this.types = Collections.nCopies(values.length, short.class).stream().toArray(Class[]::new);
+    }
+
     public Insert(int position, char value) {
         this.position = position;
         this.values = new Object[]{value};
         this.types = new Class[]{char.class};
+    }
+
+    public Insert(int position, char... values) {
+        this.position = position;
+        this.values = new Object[values.length];
+        for (int i = 0; i < values.length; i++) this.values[i] = values[i];
+        this.types = Collections.nCopies(values.length, char.class).stream().toArray(Class[]::new);
     }
 
     public Insert(int position, int value) {
@@ -71,10 +100,24 @@ public class Insert extends Transform {
         this.types = new Class[]{int.class};
     }
 
+    public Insert(int position, int... values) {
+        this.position = position;
+        this.values = new Object[values.length];
+        for (int i = 0; i < values.length; i++) this.values[i] = values[i];
+        this.types = Collections.nCopies(values.length, int.class).stream().toArray(Class[]::new);
+    }
+
     public Insert(int position, long value) {
         this.position = position;
         this.values = new Object[]{value};
         this.types = new Class[]{long.class};
+    }
+
+    public Insert(int position, long... values) {
+        this.position = position;
+        this.values = new Object[values.length];
+        for (int i = 0; i < values.length; i++) this.values[i] = values[i];
+        this.types = Collections.nCopies(values.length, long.class).stream().toArray(Class[]::new);
     }
 
     public Insert(int position, float value) {
@@ -83,10 +126,24 @@ public class Insert extends Transform {
         this.types = new Class[]{float.class};
     }
 
+    public Insert(int position, float... values) {
+        this.position = position;
+        this.values = new Object[values.length];
+        for (int i = 0; i < values.length; i++) this.values[i] = values[i];
+        this.types = Collections.nCopies(values.length, float.class).stream().toArray(Class[]::new);
+    }
+
     public Insert(int position, double value) {
         this.position = position;
         this.values = new Object[]{value};
         this.types = new Class[]{double.class};
+    }
+
+    public Insert(int position, double... values) {
+        this.position = position;
+        this.values = new Object[values.length];
+        for (int i = 0; i < values.length; i++) this.values[i] = values[i];
+        this.types = Collections.nCopies(values.length, double.class).stream().toArray(Class[]::new);
     }
 
     public Insert(int position, Class<?>[] types, Object... values) {
@@ -104,7 +161,7 @@ public class Insert extends Transform {
     }
 
     public String toString() {
-        return "insert " + Arrays.toString(types()) + " at " + position;
+        return "insert " + Arrays.toString(types) + " at " + position;
     }
 
     public String toJava(MethodType incoming) {
@@ -129,13 +186,5 @@ public class Insert extends Transform {
         builder.append(");");
 
         return builder.toString();
-    }
-
-    private Class<?>[] types() {
-        Class<?>[] types = new Class<?>[values.length];
-        for (int i = 0; i < types.length; i++) {
-            types[i] = values[i].getClass();
-        }
-        return types;
     }
 }

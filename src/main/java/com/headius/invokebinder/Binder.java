@@ -489,6 +489,16 @@ public class Binder {
     }
 
     /**
+     * Append to the argument list the given boolean values.
+     *
+     * @param values the value to append
+     * @return a new Binder
+     */
+    public Binder appendBooleans(boolean... values) {
+        return new Binder(this, new Insert(type().parameterCount(), values));
+    }
+
+    /**
      * Append to the argument list the given byte value.
      *
      * @param value the value to append
@@ -496,6 +506,16 @@ public class Binder {
      */
     public Binder append(byte value) {
         return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given byte values.
+     *
+     * @param values the values to append
+     * @return a new Binder
+     */
+    public Binder appendBytes(byte... values) {
+        return new Binder(this, new Insert(type().parameterCount(), values));
     }
 
     /**
@@ -509,6 +529,16 @@ public class Binder {
     }
 
     /**
+     * Append to the argument list the given short values.
+     *
+     * @param values the values to append
+     * @return a new Binder
+     */
+    public Binder appendShorts(short... values) {
+        return new Binder(this, new Insert(type().parameterCount(), values));
+    }
+
+    /**
      * Append to the argument list the given char value.
      *
      * @param value the value to append
@@ -516,6 +546,16 @@ public class Binder {
      */
     public Binder append(char value) {
         return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given char values.
+     *
+     * @param values the values to append
+     * @return a new Binder
+     */
+    public Binder appendChars(char... values) {
+        return new Binder(this, new Insert(type().parameterCount(), values));
     }
 
     /**
@@ -529,6 +569,16 @@ public class Binder {
     }
 
     /**
+     * Append to the argument list the given int values.
+     *
+     * @param values the values to append
+     * @return a new Binder
+     */
+    public Binder appendInts(int... values) {
+        return new Binder(this, new Insert(type().parameterCount(), values));
+    }
+
+    /**
      * Append to the argument list the given long value.
      *
      * @param value the value to append
@@ -536,6 +586,16 @@ public class Binder {
      */
     public Binder append(long value) {
         return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given long values.
+     *
+     * @param values the values to append
+     * @return a new Binder
+     */
+    public Binder appendLongs(long... values) {
+        return new Binder(this, new Insert(type().parameterCount(), values));
     }
 
     /**
@@ -549,6 +609,16 @@ public class Binder {
     }
 
     /**
+     * Append to the argument list the given float values.
+     *
+     * @param values the values to append
+     * @return a new Binder
+     */
+    public Binder appendFloats(float... values) {
+        return new Binder(this, new Insert(type().parameterCount(), values));
+    }
+
+    /**
      * Append to the argument list the given double value.
      *
      * @param value the value to append
@@ -556,6 +626,16 @@ public class Binder {
      */
     public Binder append(double value) {
         return new Binder(this, new Insert(type().parameterCount(), value));
+    }
+
+    /**
+     * Append to the argument list the given double values.
+     *
+     * @param values the values to append
+     * @return a new Binder
+     */
+    public Binder appendDoubles(double... values) {
+        return new Binder(this, new Insert(type().parameterCount(), values));
     }
 
     /**
@@ -598,6 +678,16 @@ public class Binder {
     }
 
     /**
+     * Prepend to the argument list the given boolean values.
+     *
+     * @param values the values to prepend
+     * @return a new Binder
+     */
+    public Binder prependBooleans(boolean... values) {
+        return new Binder(this, new Insert(0, values));
+    }
+
+    /**
      * Prepend to the argument list the given byte value.
      *
      * @param value the value to prepend
@@ -605,6 +695,16 @@ public class Binder {
      */
     public Binder prepend(byte value) {
         return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given byte values.
+     *
+     * @param values the values to prepend
+     * @return a new Binder
+     */
+    public Binder prependBytes(byte... values) {
+        return new Binder(this, new Insert(0, values));
     }
 
     /**
@@ -618,6 +718,16 @@ public class Binder {
     }
 
     /**
+     * Prepend to the argument list the given short values.
+     *
+     * @param values the values to prepend
+     * @return a new Binder
+     */
+    public Binder prependShorts(short... values) {
+        return new Binder(this, new Insert(0, values));
+    }
+
+    /**
      * Prepend to the argument list the given char value.
      *
      * @param value the value to prepend
@@ -625,6 +735,16 @@ public class Binder {
      */
     public Binder prepend(char value) {
         return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given char values.
+     *
+     * @param values the values to prepend
+     * @return a new Binder
+     */
+    public Binder prependChars(char... values) {
+        return new Binder(this, new Insert(0, values));
     }
 
     /**
@@ -638,6 +758,16 @@ public class Binder {
     }
 
     /**
+     * Prepend to the argument list the given int values.
+     *
+     * @param values the values to prepend
+     * @return a new Binder
+     */
+    public Binder prependInts(int... values) {
+        return new Binder(this, new Insert(0, values));
+    }
+
+    /**
      * Prepend to the argument list the given long value.
      *
      * @param value the value to prepend
@@ -645,6 +775,16 @@ public class Binder {
      */
     public Binder prepend(long value) {
         return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given long values.
+     *
+     * @param values the values to prepend
+     * @return a new Binder
+     */
+    public Binder prependLongs(long... values) {
+        return new Binder(this, new Insert(0, values));
     }
 
     /**
@@ -658,6 +798,16 @@ public class Binder {
     }
 
     /**
+     * Prepend to the argument list the given float values.
+     *
+     * @param values the values to prepend
+     * @return a new Binder
+     */
+    public Binder prependFloats(float... values) {
+        return new Binder(this, new Insert(0, values));
+    }
+
+    /**
      * Prepend to the argument list the given double value.
      *
      * @param value the value to prepend
@@ -665,6 +815,16 @@ public class Binder {
      */
     public Binder prepend(double value) {
         return new Binder(this, new Insert(0, value));
+    }
+
+    /**
+     * Prepend to the argument list the given double values.
+     *
+     * @param values the values to prepend
+     * @return a new Binder
+     */
+    public Binder prependDoubles(double... values) {
+        return new Binder(this, new Insert(0, values));
     }
 
     /**

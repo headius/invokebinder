@@ -75,6 +75,12 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>default-testCompile</id>
+                        <configuration>
+                            <release>9</release>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>base-compile</id>
                         <goals>
                             <goal>compile</goal>
@@ -83,13 +89,11 @@
                             <excludes>
                                 <exclude>module-info.java</exclude>
                             </excludes>
+                            <source>8</source>
+                            <target>8</target>
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

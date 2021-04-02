@@ -20,6 +20,7 @@ import com.headius.invokebinder.Binder;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.Collections;
 
 /**
  * An argument-boxing transform with a fixed incoming size.
@@ -66,11 +67,39 @@ public class Collect extends Transform {
         this.collector = collector;
     }
 
+    private static final MethodHandle ARRAYCOPY =
+            Binder
+                    .from(void.class, Object.class, int.class, Object.class, int.class, int.class)
+                    .invokeStaticQuiet(System.class, "arraycopy");
+
     public MethodHandle up(MethodHandle target) {
         if (onlyTail()) {
             // fast path for tail args
             if (collector == null) {
-                return target.asCollector(arrayType, count);
+                if (arrayType.getComponentType().isPrimitive()) {
+                    return target.asCollector(arrayType, count);
+                }
+
+                // collect into Object[] and then filter into a new array of the appropriate type
+
+                MethodHandle constructArray = Binder.from(arrayType, Object[].class)
+                        .fold(MethodHandles.arrayLength(Object[].class))
+                        .dropLast()
+                        .newArray();
+
+                MethodHandle transmuteArray = Binder.from(arrayType, Object[].class)
+                        .fold(constructArray)
+                        .appendInts(0, 0, count)
+                        .permute(1, 2, 0, 3, 4)
+                        .cast(ARRAYCOPY.type().changeReturnType(arrayType))
+                        .fold(ARRAYCOPY)
+                        .permute(2)
+                        .cast(arrayType, arrayType)
+                        .identity();
+
+                MethodHandle collector = transmuteArray.asCollector(Object[].class, count).asType(source.dropParameterTypes(0, index).changeReturnType(arrayType));
+
+                return MethodHandles.collectArguments(target, index, collector);
             }
 
             return MethodHandles.collectArguments(target, index, collector);

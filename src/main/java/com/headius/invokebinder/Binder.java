@@ -1953,6 +1953,14 @@ public class Binder {
 
 
     /**
+     * Construct a new array. The signature at the endpoint must return the array type and accept an integer size.
+     * @return
+     */
+    public MethodHandle newArray() {
+        return invoke(MethodHandles.arrayConstructor(type().returnType()));
+    }
+
+    /**
      * Apply the chain of transforms and bind them to an array element set. The signature
      * at the endpoint must return void and receive the array type, int index, and array
      * element type.

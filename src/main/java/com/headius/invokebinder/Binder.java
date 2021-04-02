@@ -1196,6 +1196,14 @@ public class Binder {
     }
 
     /**
+     * Same as {@link #invoke(MethodHandles.Lookup, Method method)} but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle invoke(Method method) throws IllegalAccessException {
+        return invoke(lookup.unreflect(method));
+    }
+
+    /**
      * Apply the chain of transforms and bind them to a static method specified
      * using the end signature plus the given class and method. The method will
      * be retrieved using the given Lookup and must match the end signature
@@ -1220,6 +1228,18 @@ public class Binder {
     }
 
     /**
+     * Same as {@link #invokeQuiet(MethodHandles.Lookup, Method method)} but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle invokeQuiet(Method method) {
+        try {
+            return invoke(lookup, method);
+        } catch (IllegalAccessException iae) {
+            throw new InvalidTransformException(iae);
+        }
+    }
+
+    /**
      * Apply the chain of transforms and bind them to a static method specified
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
@@ -1236,6 +1256,14 @@ public class Binder {
      * @throws java.lang.IllegalAccessException if the method is not accessible
      */
     public MethodHandle invokeStatic(MethodHandles.Lookup lookup, Class<?> target, String name) throws NoSuchMethodException, IllegalAccessException {
+        return invoke(lookup.findStatic(target, name, type()));
+    }
+
+    /**
+     * Same as {@link #invokeStaticQuiet(MethodHandles.Lookup, Class, String)} but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle invokeStatic(Class<?> target, String name) throws NoSuchMethodException, IllegalAccessException {
         return invoke(lookup.findStatic(target, name, type()));
     }
 
@@ -1265,6 +1293,18 @@ public class Binder {
     }
 
     /**
+     * Same as {@link #invokeStaticQuiet(MethodHandles.Lookup, Class, String)} but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle invokeStaticQuiet(Class<?> target, String name) {
+        try {
+            return invokeStatic(lookup, target, name);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            throw new InvalidTransformException(e);
+        }
+    }
+
+    /**
      * Apply the chain of transforms and bind them to a virtual method specified
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
@@ -1280,6 +1320,14 @@ public class Binder {
      * @throws java.lang.IllegalAccessException if the method is not accessible
      */
     public MethodHandle invokeVirtual(MethodHandles.Lookup lookup, String name) throws NoSuchMethodException, IllegalAccessException {
+        return invoke(lookup.findVirtual(type().parameterType(0), name, type().dropParameterTypes(0, 1)));
+    }
+
+    /**
+     * Same as {@link #invokeVirtual(MethodHandles.Lookup, String)} but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle invokeVirtual(String name) throws NoSuchMethodException, IllegalAccessException {
         return invoke(lookup.findVirtual(type().parameterType(0), name, type().dropParameterTypes(0, 1)));
     }
 
@@ -1308,6 +1356,18 @@ public class Binder {
     }
 
     /**
+     * Same as {@link #invokeVirtualQuiet(MethodHandles.Lookup, String)} but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle invokeVirtualQuiet(String name) {
+        try {
+            return invokeVirtual(lookup, name);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            throw new InvalidTransformException(e);
+        }
+    }
+
+    /**
      * Apply the chain of transforms and bind them to a special method specified
      * using the end signature plus the given class and name. The method will
      * be retrieved using the given Lookup and must match the end signature
@@ -1324,6 +1384,14 @@ public class Binder {
      * @throws java.lang.IllegalAccessException if the method is not accessible
      */
     public MethodHandle invokeSpecial(MethodHandles.Lookup lookup, String name, Class<?> caller) throws NoSuchMethodException, IllegalAccessException {
+        return invoke(lookup.findSpecial(type().parameterType(0), name, type().dropParameterTypes(0, 1), caller));
+    }
+
+    /**
+     * Same as {@link #invokeSpecial(MethodHandles.Lookup, String, Class<?>)} but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle invokeSpecial(String name, Class<?> caller) throws NoSuchMethodException, IllegalAccessException {
         return invoke(lookup.findSpecial(type().parameterType(0), name, type().dropParameterTypes(0, 1), caller));
     }
 
@@ -1353,6 +1421,18 @@ public class Binder {
     }
 
     /**
+     * Same as {@link #invokeSpecialQuiet(MethodHandles.Lookup, String, Class)} but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle invokeSpecialQuiet(String name, Class<?> caller) {
+        try {
+            return invokeSpecial(lookup, name, caller);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            throw new InvalidTransformException(e);
+        }
+    }
+
+    /**
      * Apply the chain of transforms and bind them to a constructor specified
      * using the end signature plus the given class. The constructor will
      * be retrieved using the given Lookup and must match the end signature's
@@ -1368,6 +1448,14 @@ public class Binder {
      * @throws java.lang.IllegalAccessException if the constructor is not accessible
      */
     public MethodHandle invokeConstructor(MethodHandles.Lookup lookup, Class<?> target) throws NoSuchMethodException, IllegalAccessException {
+        return invoke(lookup.findConstructor(target, type().changeReturnType(void.class)));
+    }
+
+    /**
+     * Same as {@link #invokeConstructor(MethodHandles.Lookup, Class)} but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle invokeConstructor(Class<?> target) throws NoSuchMethodException, IllegalAccessException {
         return invoke(lookup.findConstructor(target, type().changeReturnType(void.class)));
     }
 
@@ -1388,6 +1476,18 @@ public class Binder {
      * @return the full handle chain, bound to the given constructor
      */
     public MethodHandle invokeConstructorQuiet(MethodHandles.Lookup lookup, Class<?> target) {
+        try {
+            return invokeConstructor(lookup, target);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            throw new InvalidTransformException(e);
+        }
+    }
+
+    /**
+     * Same as {@link #invokeConstructorQuiet(MethodHandles.Lookup, Class)} but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle invokeConstructorQuiet(Class<?> target) {
         try {
             return invokeConstructor(lookup, target);
         } catch (IllegalAccessException | NoSuchMethodException e) {
@@ -1417,6 +1517,14 @@ public class Binder {
     }
 
     /**
+     * Same as {@link #getField(MethodHandles.Lookup, String)}  but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle getField(String name) throws NoSuchFieldException, IllegalAccessException {
+        return invoke(lookup.findGetter(type().parameterType(0), name, type().returnType()));
+    }
+
+    /**
      * Apply the chain of transforms and bind them to an object field retrieval specified
      * using the end signature plus the given class and name. The field must
      * match the end signature's return value and the end signature must take
@@ -1441,6 +1549,18 @@ public class Binder {
     }
 
     /**
+     * Same as {@link #getFieldQuiet(MethodHandles.Lookup, String)}  but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle getFieldQuiet(String name) {
+        try {
+            return getField(lookup, name);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new InvalidTransformException(e);
+        }
+    }
+
+    /**
      * Apply the chain of transforms and bind them to a static field retrieval specified
      * using the end signature plus the given class and name. The field must
      * match the end signature's return value and the end signature must take
@@ -1457,6 +1577,14 @@ public class Binder {
      * @throws java.lang.IllegalAccessException if the field is not accessible or cannot be modified
      */
     public MethodHandle getStatic(MethodHandles.Lookup lookup, Class<?> target, String name) throws NoSuchFieldException, IllegalAccessException {
+        return invoke(lookup.findStaticGetter(target, name, type().returnType()));
+    }
+
+    /**
+     * Same as {@link #getStatic(MethodHandles.Lookup, Class, String)}  but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle getStatic(Class<?> target, String name) throws NoSuchFieldException, IllegalAccessException {
         return invoke(lookup.findStaticGetter(target, name, type().returnType()));
     }
 
@@ -1486,6 +1614,18 @@ public class Binder {
     }
 
     /**
+     * Same as {@link #getStaticQuiet(MethodHandles.Lookup, Class, String)}  but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle getStaticQuiet(Class<?> target, String name) {
+        try {
+            return getStatic(lookup, target, name);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new InvalidTransformException(e);
+        }
+    }
+
+    /**
      * Apply the chain of transforms and bind them to an object field assignment specified
      * using the end signature plus the given class and name. The end signature must take
      * the target class or a subclass and the field's type as its arguments, and its return
@@ -1501,6 +1641,14 @@ public class Binder {
      * @throws java.lang.IllegalAccessException if the field is not accessible or cannot be modified
      */
     public MethodHandle setField(MethodHandles.Lookup lookup, String name) throws NoSuchFieldException, IllegalAccessException {
+        return invoke(lookup.findSetter(type().parameterType(0), name, type().parameterType(1)));
+    }
+
+    /**
+     * Same as {@link #setField(MethodHandles.Lookup, String)}  but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle setField(String name) throws NoSuchFieldException, IllegalAccessException {
         return invoke(lookup.findSetter(type().parameterType(0), name, type().parameterType(1)));
     }
 
@@ -1529,6 +1677,18 @@ public class Binder {
     }
 
     /**
+     * Same as {@link #setFieldQuiet(MethodHandles.Lookup, String)}  but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle setFieldQuiet(String name) {
+        try {
+            return setField(lookup, name);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new InvalidTransformException(e);
+        }
+    }
+
+    /**
      * Apply the chain of transforms and bind them to an object field assignment specified
      * using the end signature plus the given class and name. The end signature must take
      * the target class or a subclass and the field's type as its arguments, and its return
@@ -1545,6 +1705,14 @@ public class Binder {
      * @throws java.lang.IllegalAccessException if the field is not accessible or cannot be modified
      */
     public MethodHandle setStatic(MethodHandles.Lookup lookup, Class<?> target, String name) throws NoSuchFieldException, IllegalAccessException {
+        return invoke(lookup.findStaticSetter(target, name, type().parameterType(0)));
+    }
+
+    /**
+     * Same as {@link #setStatic(MethodHandles.Lookup, Class, String)}  but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle setStatic(Class<?> target, String name) throws NoSuchFieldException, IllegalAccessException {
         return invoke(lookup.findStaticSetter(target, name, type().parameterType(0)));
     }
 
@@ -1566,6 +1734,18 @@ public class Binder {
      * @return the full handle chain, bound to the given field assignment
      */
     public MethodHandle setStaticQuiet(MethodHandles.Lookup lookup, Class<?> target, String name) {
+        try {
+            return setStatic(lookup, target, name);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            throw new InvalidTransformException(e);
+        }
+    }
+
+    /**
+     * Same as {@link #setStaticQuiet(MethodHandles.Lookup, Class, String)}  but using the default lookup for this
+     * binder.
+     */
+    public MethodHandle setStaticQuiet(Class<?> target, String name) {
         try {
             return setStatic(lookup, target, name);
         } catch (IllegalAccessException | NoSuchFieldException e) {

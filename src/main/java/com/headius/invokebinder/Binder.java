@@ -569,6 +569,25 @@ public class Binder {
     }
 
     /**
+     * Append to the argument list the given argument type(s) and value(s), provided as (Class, value) pairs of
+     * arguments.
+     *
+     * @param typesAndValues the value(s) to append
+     * @return a new Binder
+     */
+    public Binder appendWithTypes(Object... typesAndValues) {
+        Class[] types = new Class[typesAndValues.length / 2];
+        Object[] values = new Object[typesAndValues.length / 2];
+
+        for (int i = 0; i < typesAndValues.length; i++) {
+            if (i % 2 == 0) types[i / 2] = (Class) typesAndValues[i];
+            if (i % 2 == 1) values[i / 2] = typesAndValues[i];
+        }
+
+        return append(types, values);
+    }
+
+    /**
      * Prepend to the argument list the given boolean value.
      *
      * @param value the value to prepend
@@ -656,6 +675,25 @@ public class Binder {
      */
     public Binder prepend(Object... values) {
         return new Binder(this, new Insert(0, values));
+    }
+
+    /**
+     * Prepend to the argument list the given argument type(s) and value(s), provided as (Class, value) pairs of
+     * arguments.
+     *
+     * @param typesAndValues the value(s) to append
+     * @return a new Binder
+     */
+    public Binder prependWithTypes(Object... typesAndValues) {
+        Class[] types = new Class[typesAndValues.length / 2];
+        Object[] values = new Object[typesAndValues.length / 2];
+
+        for (int i = 0; i < typesAndValues.length; i++) {
+            if (i % 2 == 0) types[i / 2] = (Class) typesAndValues[i];
+            if (i % 2 == 1) values[i / 2] = typesAndValues[i];
+        }
+
+        return prepend(types, values);
     }
 
     /**

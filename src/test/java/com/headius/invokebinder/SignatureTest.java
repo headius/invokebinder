@@ -56,6 +56,7 @@ public class SignatureTest {
     @Test
     public void testToString() {
         assertEquals("(Object obj, int num)String", stringObjectInt.toString());
+        assertEquals("foo(Object obj, int num)String", namedStringObjectInt.toString());
     }
 
     /**
@@ -405,7 +406,13 @@ public class SignatureTest {
         assertEquals("bs", newSig.argName(1));
         assertEquals(2, newSig.argCount());
     }
-    
+
+    private static final Signature namedStringObjectInt = Signature
+            .returning(String.class)
+            .appendArg("obj", Object.class)
+            .appendArg("num", int.class)
+            .displayName("foo");
+
     private static final Signature stringObjectInt = Signature
             .returning(String.class)
             .appendArg("obj", Object.class)

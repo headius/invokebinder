@@ -68,7 +68,7 @@ import java.util.logging.Logger;
  */
 public class Binder {
 
-    private final Logger logger = Logger.getLogger("Invoke Binder");
+    private static final Logger logger = Logger.getLogger("Invoke Binder");
     private final List<Transform> transforms = new LinkedList<>();
     private final List<MethodType> types = new LinkedList<>();
     private final MethodType start;

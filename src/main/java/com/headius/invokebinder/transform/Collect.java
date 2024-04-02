@@ -16,13 +16,14 @@
 package com.headius.invokebinder.transform;
 
 import com.headius.invokebinder.Binder;
+import com.headius.invokebinder.Util;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 /**
- * An argument-boxing transform with a fixed incoming size.
+ * A filter that takes multiple arguments and replaces them with zero or one argument of a new type.
  *
  * Equivalent call: MethodHandle.asCollector(Class, int) or MethodHandles.collectArguments
  */
@@ -31,61 +32,68 @@ public class Collect extends Transform {
     private final MethodType source;
     private final int index;
     private final int count;
-    private final Class<?> arrayType;
+    private final Class<?> resultType;
     private final MethodHandle collector;
 
-    public Collect(MethodType source, int index, Class<?> arrayType) {
+    public Collect(MethodType source, int index, Class<?> resultType) {
         this.source = source;
         this.index = index;
         this.count = source.parameterCount() - index;
-        this.arrayType = arrayType;
+        this.resultType = resultType;
         this.collector = null;
     }
 
-    public Collect(MethodType source, int index, Class<?> arrayType, MethodHandle collector) {
+    public Collect(MethodType source, int index, Class<?> resultType, MethodHandle collector) {
         this.source = source;
         this.index = index;
         this.count = source.parameterCount() - index;
-        this.arrayType = arrayType;
+        this.resultType = resultType;
         this.collector = collector;
     }
 
-    public Collect(MethodType source, int index, int count, Class<?> arrayType) {
+    public Collect(MethodType source, int index, int count, Class<?> resultType) {
         this.source = source;
         this.index = index;
         this.count = count;
-        this.arrayType = arrayType;
+        this.resultType = resultType;
         this.collector = null;
     }
 
-    public Collect(MethodType source, int index, int count, Class<?> arrayType, MethodHandle collector) {
+    public Collect(MethodType source, int index, int count, Class<?> resultType, MethodHandle collector) {
         this.source = source;
         this.index = index;
         this.count = count;
-        this.arrayType = arrayType;
+        this.resultType = resultType;
         this.collector = collector;
     }
 
     public MethodHandle up(MethodHandle target) {
-        if (onlyTail()) {
-            // fast path for tail args
-            if (collector == null) {
-                return target.asCollector(arrayType, count);
+        if (collector == null) {
+            if (Util.isJava9()) {
+                // Java 9 can collect a subset of non-tail arguments
+                return target.asCollector(index, resultType, count);
+            } else {
+                if (onlyTail()) {
+                    // tail arguments can be array-collected on all Java versions
+                    return target.asCollector(resultType, count);
+                } else {
+                    // non-tail arguments must be permuted prior to Java 9
+                    Permutes permutes = buildPermutes(source, target.type());
+
+                    Binder binder = preparePermuteBinder(permutes);
+                    return binder.invoke(target);
+                }
             }
-
-            return MethodHandles.collectArguments(target, index, collector);
         } else {
-            Permutes permutes = buildPermutes(source, target.type());
-
-            Binder binder = preparePermuteBinder(permutes);
-            return binder.invoke(target);
+            // custom collector always collects only as many args as it accepts
+            return MethodHandles.collectArguments(target, index, collector);
         }
     }
 
     private Binder preparePermuteBinder(Permutes permutes) {
         return Binder.from(source)
                 .permute(permutes.movePermute)
-                .collect(source.parameterCount() - count, arrayType, collector)
+                .collect(source.parameterCount() - count, resultType)
                 .permute(permutes.moveBackPermute);
     }
 
@@ -94,20 +102,31 @@ public class Collect extends Transform {
 
         return type
                 .dropParameterTypes(index, index + count)
-                .insertParameterTypes(index, arrayType);
+                .insertParameterTypes(index, resultType);
     }
 
     private void assertTypesAreCompatible() {
-        Class<?> componentType = arrayType.getComponentType();
-        for (int i = index; i < index + count; i++) {
-            Class<?> in = source.parameterType(i);
-            assert in.isAssignableFrom(componentType)
-                    : "incoming type " + in.getName() + " not compatible with " + componentType.getName() + "[]";
+        if (collector == null) {
+            // default array collector
+            assert resultType.isArray() : "no collector provided but target type is not array";
+            Class<?> componentType = resultType.getComponentType();
+            for (int i = index; i < index + count; i++) {
+                Class<?> in = source.parameterType(i);
+                assert in.isAssignableFrom(componentType)
+                        : "incoming type " + in.getName() + " not compatible with " + componentType.getName() + "[]";
+            }
+        } else {
+            for (int i = 0; i < count; i++) {
+                Class<?> in = source.parameterType(index + i);
+                Class<?> out = collector.type().parameterType(i);
+                assert in.isAssignableFrom(out) : "incoming type " + in.getName() + " not compatible with " + out;
+            }
+            assert collector.type().returnType().isAssignableFrom(resultType);
         }
     }
 
     public String toString() {
-        return "collect at " + index + " into " + arrayType.getName();
+        return "collect at " + index + " into " + resultType.getName();
     }
 
     public String toJava(MethodType incoming) {
@@ -115,7 +134,7 @@ public class Collect extends Transform {
         if (onlyTail()) {
             if (collector == null) {
                 builder.append("handle = handle.asCollector(");
-                buildClassArgument(builder, arrayType);
+                buildClassArgument(builder, resultType);
                 builder
                         .append(", ")
                         .append(count)
@@ -128,7 +147,7 @@ public class Collect extends Transform {
                         .append(count)
                         .append(", ");
 
-                buildClassArgument(builder, arrayType);
+                buildClassArgument(builder, resultType);
 
                 builder.append(");");
             }

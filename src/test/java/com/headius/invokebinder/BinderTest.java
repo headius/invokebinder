@@ -378,7 +378,7 @@ public class BinderTest {
                 .invoke(Subjects.StringIntegersStringHandle);
 
         assertEquals(methodType(String.class, String.class, Integer.class, Integer.class, Integer.class, String.class), handle2.type());
-        assertEquals("[foo, [1, 2, 3], bar]", (String)handle2.invokeExact("foo", new Integer(1), new Integer(2), new Integer(3), "bar"));
+        assertEquals("[foo, [1, 2, 3], bar]", (String)handle2.invokeExact("foo", Integer.valueOf(1), Integer.valueOf(2), Integer.valueOf(3), "bar"));
     }
 
     public static String[] newStringArray(String s1, String s2) {

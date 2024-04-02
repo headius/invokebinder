@@ -1586,7 +1586,7 @@ public class Binder {
     }
 
     /**
-     * Same as {@link #invokeSpecial(MethodHandles.Lookup, String, Class<?>)} but using the default lookup for this
+     * Same as {@link #invokeSpecial(MethodHandles.Lookup, String, Class)} but using the default lookup for this
      * binder.
      */
     public MethodHandle invokeSpecial(String name, Class<?> caller) throws NoSuchMethodException, IllegalAccessException {

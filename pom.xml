@@ -5,6 +5,7 @@
     <packaging>bundle</packaging>
     <version>1.15</version>
     <name>invokebinder</name>
+    <description>The missing MethodHandle builder API</description>
     <url>http://maven.apache.org</url>
 
     <properties>

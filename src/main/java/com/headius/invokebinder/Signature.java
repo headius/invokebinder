@@ -158,6 +158,17 @@ public class Signature {
     }
 
     /**
+     * Create a new signature based on the given MethodType and argument names.
+     *
+     * @param methodType the method type for the new signature
+     * @param argNames the names of the arguments
+     * @return a new Signature
+     */
+    public static Signature from(MethodType methodType, String... argNames) {
+        return new Signature(methodType, argNames);
+    }
+
+    /**
      * Create a new signature based on this one with a different return type.
      *
      * @param retval the class for the new signature's return type

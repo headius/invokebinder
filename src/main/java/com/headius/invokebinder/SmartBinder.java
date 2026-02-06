@@ -102,6 +102,16 @@ public class SmartBinder {
     }
 
     /**
+     * Create a new SmartBinder with from the given return type.
+     *
+     * @param retType the type of the return value to start with
+     * @return a new SmartBinder
+     */
+    public static SmartBinder from(Class<?> retType) {
+        return from(Signature.returning(retType));
+    }
+
+    /**
      * Create a new SmartBinder with from the given types and argument name.
      *
      * @param retType the type of the return value to start with

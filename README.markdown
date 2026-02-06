@@ -27,3 +27,9 @@ This is currently under development. Not all transformations from the MethodHand
 API are yet supported.
 
 Contributors are welcome :)
+
+Releasing
+=========
+
+Use a Java 9+ JVM and run `mvn deploy -Prelease` to build and upload all necessary artifacts.
+

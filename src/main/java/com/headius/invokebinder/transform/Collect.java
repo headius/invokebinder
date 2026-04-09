@@ -112,14 +112,14 @@ public class Collect extends Transform {
             Class<?> componentType = resultType.getComponentType();
             for (int i = index; i < index + count; i++) {
                 Class<?> in = source.parameterType(i);
-                assert in.isAssignableFrom(componentType)
+                assert componentType.isAssignableFrom(in)
                         : "incoming type " + in.getName() + " not compatible with " + componentType.getName() + "[]";
             }
         } else {
             for (int i = 0; i < count; i++) {
                 Class<?> in = source.parameterType(index + i);
                 Class<?> out = collector.type().parameterType(i);
-                assert in.isAssignableFrom(out) : "incoming type " + in.getName() + " not compatible with " + out;
+                assert out.isAssignableFrom(in) : "incoming type " + in.getName() + " not compatible with " + out;
             }
             assert collector.type().returnType().isAssignableFrom(resultType);
         }

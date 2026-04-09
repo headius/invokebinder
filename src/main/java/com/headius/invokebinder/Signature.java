@@ -144,6 +144,16 @@ public class Signature {
     }
 
     /**
+     * Create a new signature based on the given return value
+     *
+     * @param retval the type of the return value
+     * @return a new Signature
+     */
+    public static Signature from(Class<?> retval) {
+        return new Signature(retval);
+    }
+
+    /**
      * Create a new signature based on the given return value, argument types, and argument names
      *
      * @param retval the type of the return value

@@ -3,7 +3,7 @@
     <groupId>com.headius</groupId>
     <artifactId>invokebinder</artifactId>
     <packaging>bundle</packaging>
-    <version>1.16-SNAPSHOT</version>
+    <version>1.16</version>
     <name>invokebinder</name>
     <description>The missing MethodHandle builder API</description>
     <url>http://maven.apache.org</url>
@@ -24,7 +24,8 @@
         <connection>scm:git:https://github.com/headius/invokebinder.git</connection>
         <developerConnection>scm:git:git@github.com:headius/invokebinder.git</developerConnection>
         <url>https://github.com/headius/invokebinder</url>
-    </scm>
+      <tag>invokebinder-1.16</tag>
+  </scm>
 
     <developers>
         <developer>
